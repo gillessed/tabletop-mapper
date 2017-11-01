@@ -1,0 +1,65 @@
+.create-tag-container {
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    h1.title {
+        padding-top: 40px;
+        padding-bottom: 80px;
+        color: #FFFFFF;
+    }
+    
+    .create-tag-form-container {
+        width: 600px;
+        padding-bottom: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .create-tag-label {
+            font-size: 18px;
+            font-family: redline;
+            color: #FFFFFF;
+        }
+
+        .create-tag-name-input, .create-tag-type-select {
+            width: 600px;
+        }
+
+        .pt-file-upload {
+            margin-top: 12px;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        .pt-button {
+            width: 100%;
+        }
+    }
+
+    .create-tag-preview-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background-color: #30404D;
+
+        .cover-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 600px;
+            height: 800px;
+            background-color: #394B59;
+            margin: 5px;
+
+            .preview-image {
+                width: 600px;
+                height: 800px;
+                object-fit: cover;
+            }
+        }
+    }
+}

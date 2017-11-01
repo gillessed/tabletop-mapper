@@ -1,0 +1,146 @@
+.open-import-panel-button {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background-color: #A66321;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    span.pt-icon {
+        color: #FFFFFF;
+        font-size: 32px;
+    }
+
+    &:hover {
+        background-color: #D9822B;
+    }
+}
+
+
+@title-size: 80px;
+
+.import-panel-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 350px;
+    background-color: #394B59;
+    border-left: 3px solid #182026;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .title-container {
+        padding-left: 20px;
+        width: 100%;
+        height: @title-size;
+        background-color: #293742;
+        color: white;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .title-text {
+        font-family: redline;
+        font-size: 32px;
+    }
+
+    .close-import-panel-button {
+        width: @title-size;
+        height: @title-size;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        background-color: #293742;
+
+        &:hover {
+            background-color: #30404D;
+        }
+
+        span.pt-icon {
+            color: #FFFFFF;
+            font-size: 32px;
+        }
+    }
+
+    .imports-container {
+        width: 100%;
+        height: 100%;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+
+        .import-container {
+            padding: 10px;
+            width: 100%;
+            background-color: #5642A6;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+
+            .import-control-panel {
+                margin-bottom: 10px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+
+                .import-name-link {
+                    width: 120px;
+                    color: #FFFFFF;
+                    font-family: redlinecond;
+                    font-size: 32px;
+                    cursor: pointer;
+
+                    &.completed {
+                        text-decoration: underline;
+                    }
+
+                    &.active {
+                        color: #62D96B;
+                    }
+                }
+
+                .remove-import-button {
+                    &.disabled {
+                        visibility: hidden;
+                    }
+                    margin-left: 20px;
+                    width: 50px;
+                    height: 50px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: pointer;
+
+                    span {
+                        cursor: pointer;
+                        font-size: 32px;
+                        color: #FFFFFF;
+                    }
+
+                    &:hover {
+                        background-color: rgba(48,64,77, 0.4);
+                    }
+                }
+            }
+
+            .import-progress-bar {
+                width: 300px;
+                height: 10px;
+                margin-bottom: 0px;
+            }
+        }
+        .import-container:not(:last-child) {
+            margin-bottom: 10px;
+        }
+    }
+}

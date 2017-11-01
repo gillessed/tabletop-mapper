@@ -1,0 +1,81 @@
+@import './fonts.less';
+@import './Scrollbar.less';
+
+@import './Loading.less';
+@import './Home.less';
+@import './CreateTag.less';
+@import './Tag.less';
+@import './Import.less';
+@import './Menu.less';
+@import './GlobalSpinner.less';
+@import './ImportPanel.less';
+@import './Search.less';
+@import './SearchBar.less';
+@import './Gallery.less';
+@import './ObjectList.less';
+@import './PhotoView.less';
+
+body {
+    overflow-x: hidden;
+}
+
+.container {
+    background-color: #293742;
+    width: 100vw;
+    min-height: 100vh;
+}
+
+h1 {
+    font-family: arkitechBold;
+}
+
+h1.title {
+    font-size: 64px;
+}
+
+h3.subtitle {
+    font-family: redlineital;
+    font-size: 28px;
+}
+
+p, span.text {
+    font-family: redline;
+    font-size: 24px;
+    color: #F5F8FA;
+}
+
+.unselectable {
+    -webkit-user-select: none;
+    cursor: default;
+}
+
+.pt-dialog {
+    width: 1000px;
+}
+
+.pt-multi-select {
+    width: 900px;
+}
+
+.root-navigator-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+.spinner-overlay {
+    background-color: rgba(24, 32, 38, 0.75);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

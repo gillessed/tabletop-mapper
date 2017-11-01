@@ -1,0 +1,127 @@
+.gallery-container {
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .gallery-header {
+        width: 1400px;
+        background-color: #202B33;
+        padding: 20px;
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 40px;
+        
+        .cover-image-container {
+            width: 600px;
+            height: 800px;
+            background-color: #5C7080;
+
+            .cover-image {
+                width: 600px;
+                height: 800px;
+                object-fit: cover;
+            }
+        }
+        
+        .tag-list-container {
+            margin-left: 10px;
+            display: flex;
+            flex-direction: column;
+
+            .tag-type-row-element {
+                padding-bottom: 50px;
+            }
+
+            .tag-type-row {
+                padding-left: 10px;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+
+                .tag-pill {
+                    display: flex;
+                    flex-direction: row;
+                    cursor: pointer;
+                    span {
+                        cursor: pointer;
+                    }
+                    span.pt-icon {
+                        font-size: 20px;
+                        color: #FFFFFF;
+                    }
+                    margin-right: 10px;
+                    margin-bottom: 10px;
+                    padding: 5px;
+                    border-radius: 5px;
+                    background-color: #DB2C6F;
+                    
+                    &:hover {
+                        background-color: #F5498B;
+                    }
+                    &:active {
+                        background-color: #C22762;
+                    }
+                }
+            }
+
+            .gallery-button {
+                font-family: redline;
+                color: #FFFFFF;
+                font-size: 20px;
+                padding: 10px;
+                border-radius: 10px;
+                cursor: pointer;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 200px;
+                margin-bottom: 20px;
+
+                &.add-tag-button {
+                    background-color: #238C2C;
+                    &:hover {
+                        background-color: #29A634;
+                    }
+                    &:active {
+                        background-color: #1D7324;
+                    }
+                }
+
+                &.delete-gallery-button {
+                    background-color: #C23030;
+                    &:hover {
+                        background-color: #DB3737;
+                    }
+                    &:active {
+                        background-color: #A82A2A;
+                    }
+                }
+            }
+        }
+    }
+
+    .gallery-content-container {
+        width: 1400px;
+        background-color: #202B33;
+        padding: 20px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        .gallery-image-container {
+            width: 200px;
+            height: 200px;
+            background-color: #394B59;
+            margin: 5px;
+            cursor:pointer;
+
+            .gallery-image {
+                width: 200px;
+                height: 200px;
+                object-fit: cover;
+            }
+        }
+    }
+}

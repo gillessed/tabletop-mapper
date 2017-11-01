@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Electron-React app</title>
+    <link href="./node_modules/normalize.css/normalize.css" rel="stylesheet" />
+    <link href="./node_modules/@blueprintjs/core/dist/blueprint.css" rel="stylesheet" />
+    <link href="./node_modules/@blueprintjs/labs/dist/blueprint-labs.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="content"></div>
+</body>
+<script type="text/javascript">
+    var _electronReq = require('electron');
+    var _etn = {
+        path: require('path'),
+        fs: require('fs'),
+        dialog: _electronReq.remote.dialog,
+        app: _electronReq.remote.app,
+        window: _electronReq.remote.getCurrentWindow(),
+    };
+</script>
+
+<script>window.$ = window.jQuery = require('./node_modules/jquery/dist/jquery.min');</script>
+
+<script src="http://localhost:8080/webpack-dev-server.js"></script>
+<script src="http://localhost:8080/built/bundle.js"></script>
+
+</html>
