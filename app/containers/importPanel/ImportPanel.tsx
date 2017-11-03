@@ -73,7 +73,6 @@ class Internal extends React.PureComponent<Props, {}> {
 
     private renderImport = (runningImport: RunningImport): JSX.Element => {
         const id = runningImport.id;
-        console.log(id);
         const progressValue = runningImport.progress / runningImport.images.length || 0;
         let displayId = runningImport.id;
         if (displayId.length > 8) {

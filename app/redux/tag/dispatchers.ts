@@ -13,8 +13,4 @@ export class TagDispatcher {
     public deleteTag(tagId: string) {
         this.store.dispatch(deleteTagAndSave.create(tagId));
     }
-
-    public removeTag(tagId: string, galleryId: string) {
-        this.store.dispatch(removeTagAndSave.create({ tagId, galleryId }));
-    }
 }

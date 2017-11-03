@@ -42,7 +42,7 @@ class Internal extends React.PureComponent<Props, {}> {
                 {this.renderMenu()}
                 {this.renderOpenImportPanelButton()}
                 {this.renderImportPanel()}
-                {this.renderGlobalSpinner()}
+                {this.renderLock()}
                 <PhotoView/>
             </div>
         );
@@ -135,11 +135,11 @@ class Internal extends React.PureComponent<Props, {}> {
         return <ImportPanel/>;
     }
 
-    private renderGlobalSpinner() {
+    private renderLock() {
         if (this.props.janna.locked) {
             return (
                 <div className='global-spinner-container'>
-                    <Spinner className='pt-large' intent={Intent.PRIMARY}/>
+                    <p><span className='pt-icon pt-icon-lock pt-icon-large' /></p>
                 </div>
             );
         }

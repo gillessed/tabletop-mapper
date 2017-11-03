@@ -5,7 +5,7 @@ import { DispatchersContextType } from '../../dispatcherProvider';
 import { Dispatchers } from '../../redux/dispatchers';
 import { generateRandomString } from '../../utils/randomId';
 import { NavRoutes, Navigation } from '../../redux/navigation/types';
-import { TagTypes, JannaState, JannaTag, JannaGallery, TagTypeDisplays } from '../../redux/model/types';
+import { TagTypes, JannaState, JannaTag, JannaGallery, TagTypeDisplays, JannaPhotoset } from '../../redux/model/types';
 import { ReduxState } from '../../redux/rootReducer';
 import { connect } from 'react-redux';
 import { etn } from '../../etn';
@@ -16,7 +16,8 @@ import { MultiSelect, ISelectItemRendererProps } from '@blueprintjs/labs';
 import { OpenPhotoViewPayload } from '../../redux/photoView/types';
 import { GalleryTag } from './GalleryTag';
 import { scrollListeners } from '../../scrollListener';
-import { GalleryCacheState } from '../../redux/galleryCache/types';
+import { GalleryCacheState, getCacheId } from '../../redux/galleryCache/types';
+import { PhotosetTab } from './PhotosetTab';
 
 const TagMultiSelect = MultiSelect.ofType<JannaTag>();
 
@@ -41,6 +42,7 @@ interface State {
     isDeleteDialogOpen: boolean;
     tagsToAdd: JannaTag[],
     loadedImages: number;
+    photoset: number;
 }
 class GalleryViewInternal extends React.PureComponent<Props, State> {
     public static contextTypes = DispatchersContextType;
@@ -61,6 +63,7 @@ class GalleryViewInternal extends React.PureComponent<Props, State> {
             isAddTagDialogOpen: false,
             isDeleteDialogOpen: false,
             tagsToAdd: [],
+            photoset: 0,
         };
     }
 
@@ -70,6 +73,16 @@ class GalleryViewInternal extends React.PureComponent<Props, State> {
 
     public componentWillUnmount() {
         scrollListeners.delete(this.scrollListener);
+    }
+
+    private getGalleryId = (): string | undefined => {
+        if (this.props.params) {
+            return this.props.params.id;
+        }
+    }
+
+    private getGallery = (galleryId: string): JannaGallery | undefined => {
+        return this.props.janna.galleries.get(galleryId);
     }
 
     public render() {
@@ -83,54 +96,30 @@ class GalleryViewInternal extends React.PureComponent<Props, State> {
             return <h3>No such gallery: {gallery}</h3>;
         }
 
-        const galleryContents = this.props.galleryCache.get(galleryId);
-        if (!galleryContents) {
-            setTimeout(() => {
-                this.dispatchers.galleryCache.read(galleryId);
-            }, 0);
-            return (
-                <div className='container gallery-container'>
-                    <div className='spinner-overlay'>
-                        <Spinner
-                            className='pt-large'
-                            intent={Intent.PRIMARY}
-                        />
-                    </div>
-                </div>
-            );
-        }
-
         return (
             <div className='container gallery-container'>
-                {this.renderHeader(gallery, galleryContents)}
-                <p>{galleryContents.length} images </p>
-                {this.renderContent(gallery, galleryContents)}
+                {this.renderHeader(gallery)}
+                {this.renderGalleryBody(gallery)}
                 {this.renderAddTagsDialog()}
                 {this.renderConfirmDeleteDialog()}
             </div>
         );
     }
 
-    private getGalleryId = (): string | undefined => {
-        if (this.props.params) {
-            return this.props.params.id;
+    private renderHeader = (gallery: JannaGallery) => {
+        const galleryCover = this.getGallery(this.getGalleryId()).cover || { photoset: 0, index: 0 };
+        const galleryContents = this.props.galleryCache.get(getCacheId(gallery.id, galleryCover.photoset));
+        if (!galleryContents) {
+            setTimeout(() => {
+                this.dispatchers.galleryCache.read(gallery.id, this.state.photoset);
+            }, 0);
+            return;
         }
-    }
-
-    private getGallery = (galleryId: string): JannaGallery | undefined => {
-        return this.props.janna.galleries.get(galleryId);
-    }
-
-    private renderHeader = (gallery: JannaGallery, galleryContents: string[]) => {
-        let galleryCover: string | undefined = undefined;
+        let galleryCoverImage: string | undefined = undefined;
         if (galleryContents.length) {
-            if (gallery.cover) {
-                galleryCover = galleryContents[gallery.cover];
-            } else {
-                galleryCover = galleryContents[0];
-            }
+            galleryCoverImage = galleryContents[galleryCover.index];
         }
-        const imageSource = etn.path.join(ConfigPaths.subDir(gallery.id, this.props.rootDirectory), galleryCover || 'foo');
+        const imageSource = etn.path.join(ConfigPaths.subDir(gallery.id, this.props.rootDirectory), galleryCoverImage || 'foo');
         return (
             <div className='gallery-header'>
                 <div className='cover-image-container'>
@@ -153,7 +142,9 @@ class GalleryViewInternal extends React.PureComponent<Props, State> {
                 <table className='tag-list'>
                     <tbody>
                         {TagTypes.map((tagType) => {
-                            return this.renderTagRow(tagSets[tagType], tagType, gallery);
+                            if (tagSets[tagType].length > 0) {
+                                return this.renderTagRow(tagSets[tagType], tagType, gallery);
+                            }
                         })}
                     </tbody>
                 </table>
@@ -161,6 +152,68 @@ class GalleryViewInternal extends React.PureComponent<Props, State> {
                 <div className='gallery-button delete-gallery-button unselectable' onClick={this.toggleDeleteDialog}>Delete Gallery</div>
             </div>
         )
+    }
+
+    private renderGalleryBody(gallery: JannaGallery) {
+        const galleryContents = this.props.galleryCache.get(getCacheId(gallery.id, this.state.photoset));
+        if (!galleryContents) {
+            setTimeout(() => {
+                this.dispatchers.galleryCache.read(gallery.id, this.state.photoset);
+            }, 0);
+            return (
+                <div className='container gallery-container'>
+                    <div className='spinner-overlay'>
+                        <Spinner
+                            className='pt-large'
+                            intent={Intent.PRIMARY}
+                        />
+                    </div>
+                </div>
+            );
+        }
+        return (
+            <div>
+                <div className='gallery-body-tabs'>
+                    {gallery.photosets.map(this.renderPhotosetTab)}
+                    <div className='gallery-body-tab not-active' onClick={this.importPhotosetPressed}>
+                        <p><span className='pt-icon-large pt-icon-add' /></p>
+                    </div>
+                </div>
+                {this.renderContent(gallery, galleryContents)}
+            </div>
+        );
+    }
+
+    private importPhotosetPressed = () => {
+        etn.dialog.showOpenDialog({
+            properties: [
+                'openDirectory',
+            ],
+        }, (fileList: string[]) => {
+            if (fileList && fileList.length > 0) {
+                this.dispatchers.import.importPhotoset({
+                    galleryId: this.getGalleryId(),
+                    folder: fileList[0],
+                })
+            }
+        });
+    }
+
+    private renderPhotosetTab = (_: JannaPhotoset, index: number) => {
+        return (
+            <PhotosetTab
+                key={_.id}
+                gallery={this.getGallery(this.getGalleryId())}
+                activeIndex={this.state.photoset}
+                index={index}
+                setPhotosetIndex={this.setPhotosetIndex}
+                dispatchers={this.dispatchers}
+            />
+        );
+    }
+
+    private setPhotosetIndex = (index: number) => {
+        this.setState({ photoset: index });
     }
 
     private renderTagRow = (tags: JannaTag[], tagType: string, gallery: JannaGallery) => {
@@ -203,7 +256,8 @@ class GalleryViewInternal extends React.PureComponent<Props, State> {
     private renderContent(gallery: JannaGallery, galleryContents: string[]) {
         const cutContent = galleryContents.slice(0, this.state.loadedImages);
         const allImages = galleryContents.map((image) => {
-            return  etn.path.join(ConfigPaths.subDir(gallery.id, this.props.rootDirectory), image);
+            const subdir = ConfigPaths.subDir(gallery.photosets[this.state.photoset].id, this.props.rootDirectory);
+            return etn.path.join(subdir, image);
         });
         return (
             <div className='gallery-content-container'>
@@ -216,7 +270,8 @@ class GalleryViewInternal extends React.PureComponent<Props, State> {
 
     private renderImage = (image: string, index: number, allImages: string[]) => {
         const gallery = this.getGallery(this.getGalleryId());
-        const imageSource = etn.path.join(ConfigPaths.subDir(gallery.id, this.props.rootDirectory), image);
+        const photoset = gallery.photosets[this.state.photoset];
+        const imageSource = etn.path.join(ConfigPaths.subDir(photoset.id, this.props.rootDirectory), image);
         const onClick = () => {
             const openPhotoViewPayload: OpenPhotoViewPayload = {
                 images: allImages,
@@ -355,7 +410,7 @@ class GalleryViewInternal extends React.PureComponent<Props, State> {
             isAddTagDialogOpen: !this.state.isAddTagDialogOpen,
             tagsToAdd: [],
         }, () => {
-            this.dispatchers.import.addTagsToGallery({
+            this.dispatchers.model.addTagsToGallery({
                 galleryId: this.getGalleryId(),
                 tags: tagsToAdd.map((tag) => tag.id),
             });

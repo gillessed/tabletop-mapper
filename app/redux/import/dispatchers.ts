@@ -1,7 +1,8 @@
 import { Store } from 'redux';
 import { ReduxState } from '../rootReducer';
-import { AddTagsToGalleryPayload, ImportGalleriesPayload } from './types';
-import { importGalleries, addTagsToGalleryAndSave, deleteImport, deleteGalleryAndSave } from './actions';
+import { AddTagsToGalleryPayload, ImportGalleriesPayload, ImportPhotosetPayload } from './types';
+import { importGalleries, addTagsToGalleryAndSave, deleteImport, deleteGalleryAndSave, importPhotoset } from './actions';
+import { RenamePhotosetPayload, DeletePhotosetPayload } from '../model/types';
 
 export class ImportDispatcher {
     constructor(public readonly store: Store<ReduxState>) { }
@@ -10,12 +11,12 @@ export class ImportDispatcher {
         this.store.dispatch(importGalleries.create(payload));
     }
 
-    public deleteImport(importId: string) {
-        this.store.dispatch(deleteImport.create(importId));
+    public importPhotoset(payload: ImportPhotosetPayload) {
+        this.store.dispatch(importPhotoset.create(payload));
     }
 
-    public addTagsToGallery(payload: AddTagsToGalleryPayload) {
-        this.store.dispatch(addTagsToGalleryAndSave.create(payload));
+    public deleteImport(importId: string) {
+        this.store.dispatch(deleteImport.create(importId));
     }
 
     public deleteGallery(payload: string) {

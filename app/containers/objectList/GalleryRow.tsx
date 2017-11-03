@@ -5,7 +5,7 @@ import { ConfigPaths } from '../../redux/config/types';
 import { etn } from '../../etn';
 import { NavRoutes } from '../../redux/navigation/types';
 import * as classNames from 'classnames';
-import { GalleryCacheState } from '../../redux/galleryCache/types';
+import { GalleryCacheState, getCacheId } from '../../redux/galleryCache/types';
 import { Spinner, Intent } from '@blueprintjs/core';
 
 interface Props {
@@ -19,23 +19,24 @@ interface Props {
 
 export class GalleryRow extends React.PureComponent<Props, {}> {
     public render() {
-        const galleryContents = this.props.galleryCache.get(this.props.gallery.id);
+        const coverPhotoset = this.props.gallery.cover ? this.props.gallery.cover.photoset : 0;
+        const galleryContents = this.props.galleryCache.get(getCacheId(this.props.gallery.id, coverPhotoset));
         if (galleryContents) {
             return this.renderRow(galleryContents);
         } else {
             setTimeout(() => {
-                this.props.dispatchers.galleryCache.read(this.props.gallery.id);
+                this.props.dispatchers.galleryCache.read(this.props.gallery.id, 0);
             }, 0);
             return this.renderLoader();
         }
     }
 
-    private renderRow( galleryContents: string[]) {
+    private renderRow(galleryContents: string[]) {
         const galleryDir = ConfigPaths.subDir(this.props.gallery.id, this.props.rootDirectory);
         let coverSourceFile = undefined;
         if (galleryContents.length) {
             if (this.props.gallery.cover !== undefined) {
-                coverSourceFile = galleryContents[this.props.gallery.cover];
+                coverSourceFile = galleryContents[this.props.gallery.cover.index];
             } else {
                 coverSourceFile = galleryContents[0];
             }

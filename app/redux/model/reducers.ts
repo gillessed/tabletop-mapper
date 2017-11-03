@@ -1,9 +1,9 @@
-import { JannaTag, JannaGallery, JannaState, CreateGalleryPayload, JannaLoadPayload } from './types';
+import { JannaTag, JannaGallery, JannaState, CreateGalleryPayload, JannaLoadPayload, CreatePhotosetPayload, RenamePhotosetPayload, DeletePhotosetPayload } from './types';
 import { Map, Set } from 'immutable';
 import { Reducer } from 'redux';
 import { newTypedReducer } from '../utils/typedReducer';
 import { TypedAction } from '../utils/typedAction';
-import { setLocked, createGallery, createTag, jannaLoad, addTagsToGallery, deleteTag, removeTag, deleteGallery } from './actions';
+import { setLocked, createGallery, createTag, jannaLoad, addTagsToGallery, deleteTag, removeTag, deleteGallery, createPhotoset, renamePhotoset, deletePhotoset } from './actions';
 import { UpsertTagPayload, RemoveTagPayload } from '../tag/types';
 import { AddTagsToGalleryPayload } from '../import/types';
 
@@ -37,7 +37,11 @@ const createGalleryReducer = (state: JannaState, action: TypedAction<CreateGalle
             id: action.payload.id,
             value: action.payload.id,
             tags: [],
-            imageCount: action.payload.imageCount,
+            photosets: [{
+                id: action.payload.id,
+                name: 'Photoset',
+                imageCount: action.payload.imageCount,
+            }],
         });
     });
     return {
@@ -45,6 +49,71 @@ const createGalleryReducer = (state: JannaState, action: TypedAction<CreateGalle
         galleries: newGalleries
     };
 }
+
+const createPhotosetReducer = (state: JannaState, action: TypedAction<CreatePhotosetPayload>) => {
+    const newGalleries = state.galleries.withMutations((mutable) => {
+        const gallery = state.galleries.get(action.payload.galleryId);
+        const newGallery = {
+            ...gallery,
+            photosets: [
+                ...gallery.photosets,
+                {
+                    id: action.payload.id,
+                    name: `Images ${gallery.photosets.length + 1}`,
+                    imageCount: action.payload.imageCount,
+                },
+            ],
+        };
+        mutable.set(action.payload.galleryId, newGallery);
+    });
+    return {
+        ...state,
+        galleries: newGalleries
+    };
+}
+
+const renamePhotosetReducer = (state: JannaState, action: TypedAction<RenamePhotosetPayload>) => {
+    const newGalleries = state.galleries.withMutations((mutable) => {
+        const gallery = state.galleries.get(action.payload.galleryId);
+        const newPhotosets = gallery.photosets.map((photoset, index) => {
+            if (index !== action.payload.index) {
+                return photoset;
+            }
+            return {
+                ...photoset,
+                name: action.payload.name,
+            };
+        })
+        const newGallery = {
+            ...gallery,
+            photosets: newPhotosets,
+        };
+        mutable.set(action.payload.galleryId, newGallery);
+    });
+    return {
+        ...state,
+        galleries: newGalleries
+    };
+}
+
+const deletePhotosetReducer = (state: JannaState, action: TypedAction<DeletePhotosetPayload>) => {
+    const newGalleries = state.galleries.withMutations((mutable) => {
+        const gallery = state.galleries.get(action.payload.galleryId);
+        const newPhotosets = gallery.photosets.filter((photoset, index) => {
+            return index !== action.payload.index;
+        })
+        const newGallery = {
+            ...gallery,
+            photosets: newPhotosets,
+        };
+        mutable.set(action.payload.galleryId, newGallery);
+    });
+    return {
+        ...state,
+        galleries: newGalleries
+    };
+}
+
 
 const createTagReducer = (state: JannaState, action: TypedAction<UpsertTagPayload>) => {
     const id = action.payload.id;
@@ -166,6 +235,9 @@ export const jannaReducer: Reducer<JannaState> = newTypedReducer<JannaState>()
     .handle(jannaLoad.type, jannaLoadReducer)
     .handle(setLocked.type, setLockedReducer)
     .handle(createGallery.type, createGalleryReducer)
+    .handle(createPhotoset.type, createPhotosetReducer)
+    .handle(renamePhotoset.type, renamePhotosetReducer)
+    .handle(deletePhotoset.type, deletePhotosetReducer)
     .handle(createTag.type, createTagReducer)
     .handle(deleteTag.type, deleteTagReducer)
     .handle(removeTag.type, removeTagReducer)

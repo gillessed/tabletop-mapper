@@ -1,8 +1,10 @@
 import { createActionWrapper } from '../utils/typedAction';
-import { RunningImport, SetImportProgressPayload, AddTagsToGalleryPayload, ImportGalleriesPayload } from './types';
+import { RunningImport, SetImportProgressPayload, AddTagsToGalleryPayload, ImportGalleriesPayload, ImportPhotosetPayload } from './types';
+import { RenamePhotosetPayload, DeletePhotosetPayload } from '../model/types';
 
 export const importGalleries = createActionWrapper<ImportGalleriesPayload>('IMPORT - IMPORT_GALLERIES');
 export const deleteGalleryAndSave = createActionWrapper<string>('IMPORT - DELETE_GALLERY');
+export const importPhotoset = createActionWrapper<ImportPhotosetPayload>('IMPORT - IMPORT PHOTOSET');
 export const createImport = createActionWrapper<RunningImport>('IMPORT - CREATE_IMPORT');
 export const setImportProgress = createActionWrapper<SetImportProgressPayload>('IMPORT - SET_PROGRESS');
 export const pauseImport = createActionWrapper<string>('IMPORT - PAUSE_IMPORT');

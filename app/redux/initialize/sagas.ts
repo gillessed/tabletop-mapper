@@ -1,6 +1,6 @@
 import { etn } from '../../etn';
-import { Config, ConfigPaths } from '../config/types';
-import { put } from 'redux-saga/effects';
+import { Config, ConfigPaths, JANNA_COVER_DIRNAME } from '../config/types';
+import { put, fork, call } from 'redux-saga/effects';
 import { setConfig } from '../config/actions';
 import { setRoute } from '../navigation/actions';
 import { NavRoutes } from '../../redux/navigation/types';
@@ -8,6 +8,7 @@ import { JannaSerializable } from '../model/types';
 import { Map, Set } from 'immutable';
 import { collectionToMap } from '../../utils/map';
 import { jannaLoad } from '../model/actions';
+import { readDir, deleteFile, deleteDirectory } from '../../utils/promiseFiles';
 
 export function* initialize() {
     const appDataPath = etn.path.join(etn.app.getPath('appData'), 'janna');
@@ -41,6 +42,14 @@ export function* initialize() {
     }
 
     yield put(setConfig.create(config));
+
+    if (!etn.fs.existsSync(ConfigPaths.dbFile(config.rootDirectory))) {
+        const emptyJanna: JannaSerializable = {
+            galleries: [],
+            tags: [],
+        };
+        etn.fs.writeFileSync(ConfigPaths.dbFile(config.rootDirectory), JSON.stringify(emptyJanna));
+    }
  
     try {
         const rawDbContents = etn.fs.readFileSync(ConfigPaths.dbFile(config.rootDirectory), 'utf-8');
@@ -68,6 +77,7 @@ export function* initialize() {
             galleries: galleryMap,
             tagToGalleryIndex: tagToGalleryIndex,
         }));
+        yield fork(cleanDir, config, jannaDb);
     } catch (e) {
         console.error('Error loading janna data: ' + e.message, e);
         etn.app.quit();
@@ -79,4 +89,31 @@ export function* initialize() {
         resetStack: true,
     }
     yield put(setRoute.create(route));
+}
+
+export function* cleanDir(config: Config, jannaDb: JannaSerializable) {
+    const galleryAndPhotosetIds = Set<string>().withMutations((mutable) => {
+        jannaDb.galleries.forEach((gallery) => {
+            mutable.add(gallery.id);
+            gallery.photosets.forEach((photoset) => {
+                mutable.add(photoset.id);
+            })
+        });
+    });
+    const dirContents = yield call(readDir, config.rootDirectory);
+    for (const dir of dirContents) {
+        const path = etn.path.join(config.rootDirectory, dir);
+        if (dir !== JANNA_COVER_DIRNAME && etn.fs.statSync(path).isDirectory() && !galleryAndPhotosetIds.has(dir)) {
+            yield call(deleteDirectoryWorker, dir, config.rootDirectory);
+        }
+    }
+}
+
+export function *deleteDirectoryWorker(id: string, rootDirectory: string) {
+    const galleryDirectory = ConfigPaths.subDir(id, rootDirectory);
+    const images: string[] = yield call(readDir, galleryDirectory);
+    for (const image of images) {
+        yield call(deleteFile, etn.path.join(galleryDirectory, image));
+    }
+    yield call(deleteDirectory, galleryDirectory);
 }

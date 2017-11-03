@@ -54,13 +54,13 @@
                     margin-bottom: 10px;
                     padding: 5px;
                     border-radius: 5px;
-                    background-color: #DB2C6F;
+                    background-color: #2965CC;
                     
                     &:hover {
-                        background-color: #F5498B;
+                        background-color: #4580E6;
                     }
                     &:active {
-                        background-color: #C22762;
+                        background-color: #669EFF;
                     }
                 }
             }
@@ -96,6 +96,34 @@
                     &:active {
                         background-color: #A82A2A;
                     }
+                }
+            }
+        }
+    }
+    
+    .gallery-body-tabs {
+        display: flex;
+        flex-direction: row;
+
+        .gallery-body-tab {
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 20px;
+            margin-right: 5px;
+            background-color: #182026;
+            cursor: pointer;
+
+            &.active {
+                cursor: default;
+                background-color: #202B33;
+            }
+            &.not-active {
+                &:hover {
+                    background-color: #30404D;
+                }
+                
+                &:active {
+                    background-color: #394B59;
                 }
             }
         }

@@ -7,17 +7,23 @@ import { Map, Set } from 'immutable';
 export const TAG_TYPE_TAG = 'Tag';
 export const TAG_TYPE_MODEL = 'Model';
 export const TAG_TYPE_SOURCE = 'Source';
+export const TAG_TYPE_AUTHOR = 'Author';
+export const TAG_TYPE_LANGUAGE = 'Language';
 
 export const TagTypes = [
     TAG_TYPE_MODEL,
     TAG_TYPE_SOURCE,
     TAG_TYPE_TAG,
+    TAG_TYPE_AUTHOR,
+    TAG_TYPE_LANGUAGE,
 ];
 
 export const TagTypeDisplays: { [key: string]: string } = {
     [TAG_TYPE_TAG]: 'Tags',
     [TAG_TYPE_MODEL]: 'Models',
     [TAG_TYPE_SOURCE]: 'Sources',
+    [TAG_TYPE_AUTHOR]: 'Authors',
+    [TAG_TYPE_LANGUAGE]: 'Languages',
 }
 
 export interface JannaState {
@@ -45,8 +51,17 @@ export interface JannaTag extends JannaObject {
 }
 
 export interface JannaGallery extends JannaObject {
-    cover?: number;
+    cover?: {
+        photoset: number,
+        index: number,   
+    };
     tags: string[];
+    photosets: JannaPhotoset[];
+}
+
+export interface JannaPhotoset {
+    id: string;
+    name: string;
     imageCount: number;
 }
 
@@ -65,6 +80,23 @@ export function isGallery(object: JannaObject): object is JannaGallery {
 export interface CreateGalleryPayload {
     id: string;
     imageCount: number;
+}
+
+export interface CreatePhotosetPayload {
+    galleryId: string;
+    id: string;
+    imageCount: number;
+}
+
+export interface RenamePhotosetPayload {
+    galleryId: string;
+    index: number;
+    name: string;
+}
+
+export interface DeletePhotosetPayload {
+    galleryId: string;
+    index: number;
 }
 
 export interface JannaLoadPayload {

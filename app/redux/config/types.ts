@@ -3,8 +3,8 @@ export interface Config {
     rootDirectory?: string;
 }
 
-const JANNA_DB_FILENAME = 'janna-db.json';
-const JANNA_COVER_DIRNAME = 'covers';
+export const JANNA_DB_FILENAME = 'janna-db.json';
+export const JANNA_COVER_DIRNAME = 'covers';
 
 export const ConfigPaths = {
     tagCoverDir: (rootDirectory?: string) => {
