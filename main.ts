@@ -1,7 +1,9 @@
 import * as Electron from 'electron';
 import * as path from 'path';
 import * as url from 'url';
+import * as process from 'process';
 
+process.setMaxListeners(0);
 const app = Electron.app;
 const globalShortcut = Electron.globalShortcut;
 let mainWindow: Electron.BrowserWindow;
@@ -16,13 +18,11 @@ function createWindow() {
     });
 
     mainWindow = new Electron.BrowserWindow({
-        width: 800,
-        height: 600,
-        title: 'Janna',
+        title: 'Tabletop Mapper',
         show: false,
-        fullscreen: true,
     });
     mainWindow.setMenu(null);
+    mainWindow.maximize();
 
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, '../index.html'),

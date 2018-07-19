@@ -1,25 +1,19 @@
 import { etn } from '../etn';
+import { copyQueue } from './fileCopier';
 
 export function copyFile(source: string, target: string): Promise<void> {
-    let done = false;
     return new Promise((resolve: () => void, reject: (reason: any) => void) => {
-        let readStream = etn.fs.createReadStream(source);
-        readStream.on('error', (error: any) => {
-            reject(error);
+        copyQueue.enqueue({
+            from: source,
+            to: target,
+            callback: (error?: any) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            },
         });
-
-        let writeStream = etn.fs.createWriteStream(target);
-        writeStream.on('error', (error: any) => {
-            reject(error);
-        });
-        writeStream.on('close', () => {
-            if (!done) {
-                done = true;
-                resolve();
-            }
-        });
-
-        readStream.pipe(writeStream);
     });
 }
 

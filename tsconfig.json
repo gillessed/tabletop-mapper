@@ -6,13 +6,16 @@
         "module": "commonjs",
         "noImplicitAny": true,
         "removeComments": true,
+        "outDir": "build",
         "preserveConstEnums": true,
         "sourceMap": true,
-        "outDir": "build/",
         "jsx": "react"
     },
     "exclude": [
         "node_modules",
         "semantic"
+    ],
+    "include": [
+        "main.ts"
     ]
 }

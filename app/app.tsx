@@ -1,4 +1,3 @@
-import '../../less/main.less';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { applyMiddleware, createStore } from 'redux';
@@ -11,11 +10,7 @@ import { SagaListener } from './redux/sagaListener';
 import { dispatcherCreators } from './redux/dispatchers';
 import createSagaMiddleware from 'redux-saga';
 import { rootSaga } from './redux/rootSaga';
-import { Navigator } from './containers/navigation/Navigator';
-import { Loading } from './containers/loading/Loading';
-import { Home } from './containers/home/home';
-import { setRoute } from './redux/navigation/actions';
-import { RootContainer } from './RootContainer';
+import { Root } from './containers/Root';
 import { etn } from './etn';
 import { applyMouseNavigationListener, applyKeyboardNavigationListener } from './navigationListeners';
 
@@ -38,7 +33,7 @@ const providers = (
     <Provider store={store}>
         <DispatcherProvider dispatchers={dispatcherCreators}>
             <SagaProvider listeners={sagaListeners}>
-                <RootContainer/>
+                <Root/>
             </SagaProvider>
         </DispatcherProvider>
     </Provider>
