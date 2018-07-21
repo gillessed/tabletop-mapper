@@ -5,7 +5,18 @@ import { TypedAction } from '../utils/typedAction';
 import { ModelState } from './types';
 
 const INITIAL_STATE: ModelState = {
-    map: 'hi',
+    layers: {
+        byId: {},
+        all: [],
+    },
+    assets: {
+        byId: {},
+        all: [],
+    },
+    features: {
+        byId: {},
+        all: [],
+    },
 };
 
 export const modelReducer: Reducer<ModelState> = newTypedReducer<ModelState>()

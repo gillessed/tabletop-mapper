@@ -2,13 +2,14 @@ import * as React from 'react';
 import { Store } from 'redux';
 import { ReduxState } from './redux/rootReducer';
 import { Dispatchers } from './redux/dispatchers';
+import * as PropTypes from 'prop-types';
 
 interface Props {
   dispatchers: (store: Store<ReduxState>) => Dispatchers;
 }
 
 export const DispatchersContextType: React.ValidationMap<any> = {
-  dispatchers: React.PropTypes.object.isRequired,
+  dispatchers: PropTypes.object.isRequired,
 };
 
 export interface DispatchContext {
@@ -34,5 +35,5 @@ export class DispatcherProvider extends React.Component<Props, {}> {
   }
 
   public static childContextTypes = DispatchersContextType;
-  public static contextTypes = { store: React.PropTypes.object.isRequired };
+  public static contextTypes = { store: PropTypes.object.isRequired };
 }

@@ -40,6 +40,6 @@ const providers = (
 )
 
 ReactDOM.render(
-    providers,
+    providers as any,
     document.getElementById("content")
 );
