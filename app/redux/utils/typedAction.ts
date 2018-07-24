@@ -46,7 +46,7 @@ export function createActionCreator<T>(type: ActionType<T>): (payload: T, meta?:
     return function (payload, meta) { return createAction(type, payload, meta); };
 }
 
-export function createActionWrapper<T>(type: string) {
+export function createActionWrapper<T>(type: string): ActionWrapper<T> {
     const actionType = createActionType<T>(type);
     return {
         type: actionType,

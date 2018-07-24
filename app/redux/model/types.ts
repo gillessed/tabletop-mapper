@@ -1,36 +1,64 @@
 import { Map, Set } from 'immutable';
+import { IconName } from '@blueprintjs/core';
 
-type Indexable<T> = {
+export const ROOT_LAYER = 'root-layer';
+
+export type Indexable<T> = {
     byId: { [key: string]: T};
-    all: T[];
+    all: string[];
 }
 
 export interface ModelState {
     layers: Indexable<Layer>;
     assets: Indexable<Asset>;
     features: Indexable<Feature<any>>;
+    selectedNode: string;
+    expandedNodes: { [key: string]: boolean };
 }
 
-export interface Layer {
+export interface ModelObject {
     id: string;
     name: string;
+}
+
+export interface Layer extends ModelObject {
     visible: boolean;
     children: string[];
-    backgroundColor: string;
+    features: string[];
+    parent: string | null;
 }
 
-export interface Asset {
-    id: string;
+export interface Asset extends String {
     path: string;
-    name: string;
     type: 'svg' | 'jpg' | 'png';
 }
 
-export interface Feature<T extends Geometry> {
+export interface GeometryType {
     id: string;
-    type: 'point' | 'rectangle';
+    name: string;
+    icon: IconName;
+}
+
+export const GeometryTypes: {[key: string]: GeometryType} = {
+    point: {
+        id: 'point',
+        name: 'Point',
+        icon: 'dot',
+    },
+    rectangle: {
+        id: 'rectangle',
+        name: 'Rectangle',
+        icon: 'widget',
+    }
+};
+
+export interface Feature<T extends Geometry> extends String {
+    id: string;
+    name: string;
+    layer: string;
+    type: string;
     asset?: Asset;
-    geometry: T;
+    geometry?: T;
 }
 
 export interface Geometry {}
@@ -47,4 +75,13 @@ export interface Rectangle extends Geometry {
     bottom: number;
     right: number;
     grid: boolean;
+}
+
+//////////////
+// Payloads //
+//////////////
+
+export interface SetFeatureTypePayload {
+    featureId: string;
+    type: string;
 }

@@ -1,10 +1,10 @@
 {
-    "name": "electron-quick-start",
+    "name": "tabletop-mapper",
     "version": "1.0.0",
-    "description": "A minimal Electron application",
+    "description": "An Electron desktop application for creating gridded tabletop maps.",
     "main": "main.js",
     "scripts": {
-        "start": "electron build/main.js",
+        "start": "./node_modules/electron/cli.js build/main.js",
         "watch": "./node_modules/.bin/webpack-dev-server",
         "electron-rebuild": "./node_modules/.bin/electron-rebuild"
     },
@@ -15,7 +15,7 @@
         "babel-core": "^6.25.0",
         "babel-loader": "^7.1.5",
         "css-loader": "^0.28.4",
-        "electron": "~1.6.2",
+        "electron": "2.0.4",
         "electron-packager": "^8.7.2",
         "electron-rebuild": "^1.5.11",
         "file-loader": "^1.1.11",
@@ -44,6 +44,7 @@
         "@types/redux-logger": "^3.0.0",
         "@types/reselect": "^2.2.0",
         "classnames": "^2.2.5",
+        "dot-prop-immutable": "^1.4.0",
         "immutable": "^3.8.1",
         "jquery": "^3.2.1",
         "prop-types": "^15.6.2",

@@ -16,6 +16,7 @@
         "semantic"
     ],
     "include": [
-        "main.ts"
+        "main.ts",
+        "declarations.d.ts"
     ]
 }

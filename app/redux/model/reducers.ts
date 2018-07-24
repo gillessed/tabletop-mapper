@@ -1,13 +1,23 @@
-import { Map, Set } from 'immutable';
 import { Reducer } from 'redux';
 import { newTypedReducer } from '../utils/typedReducer';
-import { TypedAction } from '../utils/typedAction';
-import { ModelState } from './types';
+import { ModelState, Layer, ROOT_LAYER, Feature, Indexable, ModelObject, SetFeatureTypePayload } from './types';
+import { createLayer, createFeature, expandNode, collapseNode, selectNode, setFeatureType } from './actions';
+import { generateRandomString } from '../../utils/randomId';
+import * as DotProp from 'dot-prop-immutable';
 
 const INITIAL_STATE: ModelState = {
     layers: {
-        byId: {},
-        all: [],
+        byId: {
+            'root-layer': {
+                id: 'root-layer',
+                name: 'Root',
+                parent: null,
+                visible: true,
+                children: [],
+                features: [],
+            }
+        },
+        all: ['root-layer'],
     },
     assets: {
         byId: {},
@@ -17,8 +27,163 @@ const INITIAL_STATE: ModelState = {
         byId: {},
         all: [],
     },
+    expandedNodes: {
+        [ROOT_LAYER]: true,
+    },
+    selectedNode: ROOT_LAYER,
 };
 
+const INITIAL_STATE2: ModelState = {
+    layers: {
+        byId: {
+            [ROOT_LAYER]: {
+                id: ROOT_LAYER,
+                name: 'Root',
+                parent: null,
+                visible: true,
+                children: ['1', '2'],
+                features: [],
+            },
+            '1': {
+                id: '1',
+                name: 'Layer 1',
+                parent: ROOT_LAYER,
+                visible: true,
+                children: [],
+                features: [],
+            },
+            '2': {
+                id: '2',
+                name: 'Layer 2',
+                parent: ROOT_LAYER,
+                visible: true,
+                children: [],
+                features: [],
+            }
+        },
+        all: ['root-layer', '1', '2'],
+    },
+    assets: {
+        byId: {},
+        all: [],
+    },
+    features: {
+        byId: {},
+        all: [],
+    },
+    expandedNodes: {
+        [ROOT_LAYER]: true,
+    },
+    selectedNode: ROOT_LAYER,
+};
+
+const createLayerHandler = (state: ModelState, parent: string) => {
+    let index = 1;
+    while (findByName(state.layers, `Layer ${index}`)) {
+        index++;
+    }
+    const newLayer: Layer = {
+        id: generateRandomString(),
+        visible: true,
+        parent,
+        name: `Layer ${index}`,
+        children: [],
+        features: [],
+    };
+
+    let newState = state;
+    newState = expandNodeReducer(newState, parent);
+    newState = selectNodeReducer(newState, newLayer.id);
+    newState = DotProp.merge(newState, `layers.byId.${parent}.children`, [newLayer.id]);
+    newState = DotProp.set(newState, `layers.byId.${newLayer.id}`, newLayer);
+    newState = DotProp.merge(newState, `layers.all`, [newLayer.id]);
+
+    return newState;
+}
+
+export const createFeatureReducer = (state: ModelState, layerId: string) => {
+    let index = 1;
+    while (findByName(state.features, `Feature ${index}`)) {
+        index++;
+    }
+
+    const newFeature = {
+        id: generateRandomString(),
+        layer: layerId,
+        name: `Feature ${index}`,
+        type: 'point',
+    };
+
+    let newState = state;
+    newState = expandNodeReducer(newState, layerId);
+    newState = selectNodeReducer(newState, newFeature.id);
+    newState = DotProp.merge(newState, `layers.byId.${layerId}.features`, [newFeature.id]);
+    newState = DotProp.set(newState, `features.byId.${newFeature.id}`, newFeature);
+    newState = DotProp.merge(newState, `features.all`, [newFeature.id]);
+
+    return newState;
+}
+
+const setFeatureTypeReducer = (state: ModelState, payload: SetFeatureTypePayload) => {
+    let newState = state;
+    newState = DotProp.set(state, `features.byId.${payload.featureId}.type`, payload.type);
+    newState = DotProp.delete(state, `features.byId.${payload.featureId}.geometry`);
+    return newState;
+}
+
+const expandNodeReducer = (state: ModelState, layerId: string) => {
+    let expandedNodes: { [key:string]: boolean } = {
+        [layerId]: true,
+    };
+    let node = state.layers.byId[layerId];
+    while (node.parent !== null) {
+        node = state.layers.byId[node.parent];
+        expandedNodes = {
+            ...expandedNodes,
+            [node.id]: true,
+        };
+    }
+    return {
+        ...state,
+        expandedNodes: {
+            ...state.expandedNodes,
+            ...expandedNodes,
+        }
+    };
+}
+
+const collapseNodeReducer = (state: ModelState, layerId: string) => {
+    return {
+        ...state,
+        expandedNodes: {
+            ...state.expandedNodes,
+            [layerId]: false,
+        }
+    };
+}
+
+const selectNodeReducer = (state: ModelState, layerId: string) => {
+    return {
+        ...state,
+        selectedNode: layerId,
+    };
+}
+
 export const modelReducer: Reducer<ModelState> = newTypedReducer<ModelState>()
-    .handleDefault((state = INITIAL_STATE) => state)
+    .handlePayload(createLayer.type, createLayerHandler)
+    .handlePayload(createFeature.type, createFeatureReducer)
+    .handlePayload(setFeatureType.type, setFeatureTypeReducer)
+    .handlePayload(expandNode.type, expandNodeReducer)
+    .handlePayload(collapseNode.type, collapseNodeReducer)
+    .handlePayload(selectNode.type, selectNodeReducer)
+    .handleDefault((state = INITIAL_STATE2) => state)
     .build();
+
+const findByName = <T extends ModelObject>(index: Indexable<T>, name: string) => {
+    return index.all.find((id: string) => {
+        if (index.byId[id].name === name) {
+            return true;
+        }
+        return false;
+    });
+}

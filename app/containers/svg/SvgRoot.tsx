@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Grid } from './grid/Grid';
 import { Transform, Vector } from '../../math/transform';
+import { ROOT_LAYER } from '../../redux/model/types';
 
 interface Props {
     width: number;
@@ -16,10 +17,13 @@ interface State {
     transform: Transform;
     mouseMode: MouseMode;
     mousePosition?: Vector;
+    selectedLayer: string;
 }
 
 const INITIAL_SCALE = 50;
-const ZOOM_CONSTANT = 1.25;
+const ZOOM_CONSTANT = 1.1;
+const MAX_SCALE = 400;
+const MIN_SCALE = 2;
 
 export class SvgRoot extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -27,6 +31,7 @@ export class SvgRoot extends React.Component<Props, State> {
         this.state = {
             mouseMode: MouseMode.NONE,
             transform: new Transform(new Vector(props.width / (2 * INITIAL_SCALE), props.height / (2 * INITIAL_SCALE)), INITIAL_SCALE),
+            selectedLayer: ROOT_LAYER,
         };
     }
 
@@ -79,15 +84,28 @@ export class SvgRoot extends React.Component<Props, State> {
     }
 
     private onWheel = (e: React.WheelEvent<SVGElement>) => {
+        if ((this.state.transform.scale === MIN_SCALE && e.nativeEvent.deltaY > 0) ||
+            (this.state.transform.scale === MAX_SCALE && e.nativeEvent.deltaY < 0)) {
+            return;
+        }
         const mousePosition = new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-        const newScale = this.state.transform.scale * Math.pow(ZOOM_CONSTANT, -Math.sign(e.nativeEvent.deltaY));
+        let newScale = this.state.transform.scale * Math.pow(ZOOM_CONSTANT, -Math.sign(e.nativeEvent.deltaY));
+        if (newScale > MAX_SCALE) {
+            newScale = MAX_SCALE;
+        } else if (newScale < MIN_SCALE) {
+            newScale = MIN_SCALE;
+        }
         const newTranslation = this.state.transform.translation
             .subtract(mousePosition.scalarMultiply(1 / this.state.transform.scale))
             .add(mousePosition.scalarMultiply(1 / newScale));
-        console.log(this.state.transform.translation);
-        console.log(newTranslation);
-            this.setState({
-                transform: this.state.transform.setTranslation(newTranslation).setScale(newScale),
-            });
+        this.setState({
+            transform: this.state.transform.setTranslation(newTranslation).setScale(newScale),
+        });
+    }
+    
+    private onSelectLayer = (layerId: string) => {
+        this.setState({
+            selectedLayer: layerId,
+        });
     }
 }
