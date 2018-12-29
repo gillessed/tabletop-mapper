@@ -1,5 +1,5 @@
 import { createActionWrapper } from '../utils/typedAction';
-import { SetFeatureTypePayload, UIState } from './types';
+import { SetFeatureTypePayload, GridState } from './types';
 import { Vector } from '../../math/transform';
 
 // Layers
@@ -15,5 +15,4 @@ export const collapseNode = createActionWrapper<string>('SELECTION - COLLAPSE NO
 export const selectNode = createActionWrapper<string>('SELECTION - SELECT LAYER');
 
 // UI
-export const updateUIState = createActionWrapper<Partial<UIState>>('UI - UPDATE STATE');
-export const updateMousePosition = createActionWrapper<Vector>('UI - UPDATE MOUSE POSITION');
+export const updateGridState = createActionWrapper<Partial<GridState>>('UI - UPDATE STATE');

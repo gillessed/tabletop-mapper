@@ -15,8 +15,7 @@ export interface ModelState {
     features: Indexable<Feature<any>>;
     selectedNode: string;
     expandedNodes: { [key: string]: boolean };
-    ui: UIState;
-    mousePosition?: Vector;
+    grid: GridState;
 }
 
 export enum MouseMode {
@@ -24,9 +23,10 @@ export enum MouseMode {
     DRAG,
 }
 
-export interface UIState {
+export interface GridState {
     transform: Transform;
     mouseMode: MouseMode;
+    mousePosition?: Vector;
 }
 
 export interface ModelObject {

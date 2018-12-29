@@ -37,7 +37,7 @@ class SvgRootComponent extends React.Component<Props, {}> {
     }
 
     public componentWillMount() {
-        this.dispatchers.ui.updateUIState({
+        this.dispatchers.grid.updateGridState({
             mouseMode: MouseMode.NONE,
             transform: new Transform(new Vector(this.props.width / (2 * INITIAL_SCALE), this.props.height / (2 * INITIAL_SCALE)), INITIAL_SCALE),
         });
@@ -63,8 +63,8 @@ class SvgRootComponent extends React.Component<Props, {}> {
     }
 
     private onMouseDown = (e: React.MouseEvent<SVGElement>) => {
-        this.dispatchers.ui.updateMousePosition(new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY));
-        this.dispatchers.ui.updateUIState({
+        this.dispatchers.grid.updateGridState({
+            mousePosition: new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY),
             mouseMode: MouseMode.DRAG,
         });
     }
@@ -76,8 +76,8 @@ class SvgRootComponent extends React.Component<Props, {}> {
                 .subtract(this.props.mousePosition)
                 .scalarMultiply(1 / this.props.transform.scale)
                 .add(this.props.transform.translation);
-            this.dispatchers.ui.updateMousePosition(new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY));
-            this.dispatchers.ui.updateUIState({
+            this.dispatchers.grid.updateGridState({
+                mousePosition: new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY),
                 transform: this.props.transform.setTranslation(newTranslation),
             });
         }
@@ -85,7 +85,7 @@ class SvgRootComponent extends React.Component<Props, {}> {
     
     private onMouseUp = (e: React.MouseEvent<SVGElement>) => {
         if (this.props.mouseMode == MouseMode.DRAG) {
-            this.dispatchers.ui.updateUIState({
+            this.dispatchers.grid.updateGridState({
                 mouseMode: MouseMode.NONE,
             });
         }
@@ -106,7 +106,7 @@ class SvgRootComponent extends React.Component<Props, {}> {
         const newTranslation = this.props.transform.translation
             .subtract(mousePosition.scalarMultiply(1 / this.props.transform.scale))
             .add(mousePosition.scalarMultiply(1 / newScale));
-        this.dispatchers.ui.updateUIState({
+        this.dispatchers.grid.updateGridState({
             transform: this.props.transform.setTranslation(newTranslation).setScale(newScale),
         });
     }
@@ -115,9 +115,9 @@ class SvgRootComponent extends React.Component<Props, {}> {
 const mapStateToProps = (redux: ReduxState) => {
     return {
         model: redux.model,
-        transform: redux.model.ui.transform,
-        mouseMode: redux.model.ui.mouseMode,
-        mousePosition: redux.model.mousePosition,
+        transform: redux.model.grid.transform,
+        mouseMode: redux.model.grid.mouseMode,
+        mousePosition: redux.model.grid.mousePosition,
     };
 };
 

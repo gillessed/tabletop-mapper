@@ -1,7 +1,7 @@
 import { Reducer } from 'redux';
 import { newTypedReducer } from '../utils/typedReducer';
-import { ModelState, Layer, ROOT_LAYER, Feature, Indexable, ModelObject, SetFeatureTypePayload, UIState, MouseMode } from './types';
-import { createLayer, createFeature, expandNode, collapseNode, selectNode, setFeatureType, updateUIState, updateMousePosition } from './actions';
+import { ModelState, Layer, ROOT_LAYER, Feature, Indexable, ModelObject, SetFeatureTypePayload, GridState, MouseMode } from './types';
+import { createLayer, createFeature, expandNode, collapseNode, selectNode, setFeatureType, updateGridState } from './actions';
 import { generateRandomString } from '../../utils/randomId';
 import * as DotProp from 'dot-prop-immutable';
 import { Transform, Vector } from '../../math/transform';
@@ -32,7 +32,7 @@ const INITIAL_STATE: ModelState = {
         [ROOT_LAYER]: true,
     },
     selectedNode: ROOT_LAYER,
-    ui: {
+    grid: {
         mouseMode: MouseMode.NONE,
         transform: new Transform(new Vector(1, 1), 1),
     },
@@ -163,10 +163,10 @@ const selectNodeReducer = (state: ModelState, layerId: string) => {
     };
 }
 
-const uiStateReducer = (state: ModelState, payload: Partial<UIState>) => {
+const gridStateReducer = (state: ModelState, payload: Partial<GridState>) => {
     return {
         ...state,
-        ui: { ...state.ui, ...payload },
+        grid: { ...state.grid, ...payload },
     };
 }
 
@@ -181,8 +181,7 @@ export const modelReducer: Reducer<ModelState> = newTypedReducer<ModelState>()
     .handlePayload(expandNode.type, expandNodeReducer)
     .handlePayload(collapseNode.type, collapseNodeReducer)
     .handlePayload(selectNode.type, selectNodeReducer)
-    .handlePayload(updateUIState.type, uiStateReducer)
-    .handlePayload(updateMousePosition.type, mousePositionReducer)
+    .handlePayload(updateGridState.type, gridStateReducer)
     .handleDefault((state = INITIAL_STATE2) => state)
     .build();
 

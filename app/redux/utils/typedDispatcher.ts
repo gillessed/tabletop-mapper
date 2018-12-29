@@ -1,7 +1,6 @@
 import { Store } from 'redux';
 import { ReduxState } from '../rootReducer';
 import { ActionWrapper } from './typedAction';
-import { updateUIState, updateMousePosition } from '../model/actions';
 
 type Actions = {
     [key: string]: ActionWrapper<any>
