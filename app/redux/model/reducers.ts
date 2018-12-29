@@ -1,9 +1,10 @@
 import { Reducer } from 'redux';
 import { newTypedReducer } from '../utils/typedReducer';
-import { ModelState, Layer, ROOT_LAYER, Feature, Indexable, ModelObject, SetFeatureTypePayload } from './types';
-import { createLayer, createFeature, expandNode, collapseNode, selectNode, setFeatureType } from './actions';
+import { ModelState, Layer, ROOT_LAYER, Feature, Indexable, ModelObject, SetFeatureTypePayload, UIState, MouseMode } from './types';
+import { createLayer, createFeature, expandNode, collapseNode, selectNode, setFeatureType, updateUIState, updateMousePosition } from './actions';
 import { generateRandomString } from '../../utils/randomId';
 import * as DotProp from 'dot-prop-immutable';
+import { Transform, Vector } from '../../math/transform';
 
 const INITIAL_STATE: ModelState = {
     layers: {
@@ -31,9 +32,14 @@ const INITIAL_STATE: ModelState = {
         [ROOT_LAYER]: true,
     },
     selectedNode: ROOT_LAYER,
+    ui: {
+        mouseMode: MouseMode.NONE,
+        transform: new Transform(new Vector(1, 1), 1),
+    },
 };
 
 const INITIAL_STATE2: ModelState = {
+    ...INITIAL_STATE,
     layers: {
         byId: {
             [ROOT_LAYER]: {
@@ -63,18 +69,6 @@ const INITIAL_STATE2: ModelState = {
         },
         all: ['root-layer', '1', '2'],
     },
-    assets: {
-        byId: {},
-        all: [],
-    },
-    features: {
-        byId: {},
-        all: [],
-    },
-    expandedNodes: {
-        [ROOT_LAYER]: true,
-    },
-    selectedNode: ROOT_LAYER,
 };
 
 const createLayerHandler = (state: ModelState, parent: string) => {
@@ -169,6 +163,17 @@ const selectNodeReducer = (state: ModelState, layerId: string) => {
     };
 }
 
+const uiStateReducer = (state: ModelState, payload: Partial<UIState>) => {
+    return {
+        ...state,
+        ui: { ...state.ui, ...payload },
+    };
+}
+
+const mousePositionReducer = (state: ModelState, payload: Vector) => {
+    return { ...state, mousePosition: payload };
+}
+
 export const modelReducer: Reducer<ModelState> = newTypedReducer<ModelState>()
     .handlePayload(createLayer.type, createLayerHandler)
     .handlePayload(createFeature.type, createFeatureReducer)
@@ -176,6 +181,8 @@ export const modelReducer: Reducer<ModelState> = newTypedReducer<ModelState>()
     .handlePayload(expandNode.type, expandNodeReducer)
     .handlePayload(collapseNode.type, collapseNodeReducer)
     .handlePayload(selectNode.type, selectNodeReducer)
+    .handlePayload(updateUIState.type, uiStateReducer)
+    .handlePayload(updateMousePosition.type, mousePositionReducer)
     .handleDefault((state = INITIAL_STATE2) => state)
     .build();
 

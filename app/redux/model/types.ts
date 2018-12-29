@@ -1,5 +1,6 @@
 import { Map, Set } from 'immutable';
 import { IconName } from '@blueprintjs/core';
+import { Transform, Vector } from '../../math/transform';
 
 export const ROOT_LAYER = 'root-layer';
 
@@ -14,6 +15,18 @@ export interface ModelState {
     features: Indexable<Feature<any>>;
     selectedNode: string;
     expandedNodes: { [key: string]: boolean };
+    ui: UIState;
+    mousePosition?: Vector;
+}
+
+export enum MouseMode {
+    NONE,
+    DRAG,
+}
+
+export interface UIState {
+    transform: Transform;
+    mouseMode: MouseMode;
 }
 
 export interface ModelObject {
@@ -28,9 +41,13 @@ export interface Layer extends ModelObject {
     parent: string | null;
 }
 
-export interface Asset extends String {
+export interface Asset {
     path: string;
     type: 'svg' | 'jpg' | 'png';
+}
+
+export interface Style {
+
 }
 
 export interface GeometryType {
@@ -39,7 +56,13 @@ export interface GeometryType {
     icon: IconName;
 }
 
-export const GeometryTypes: {[key: string]: GeometryType} = {
+interface GeometryTypeMap {
+    point: GeometryType;
+    rectangle: GeometryType;
+    polyline: GeometryType;
+}
+
+export const GeometryTypes: GeometryTypeMap & {[key: string]: GeometryType} = {
     point: {
         id: 'point',
         name: 'Point',
@@ -49,12 +72,15 @@ export const GeometryTypes: {[key: string]: GeometryType} = {
         id: 'rectangle',
         name: 'Rectangle',
         icon: 'widget',
-    }
+    },
+    polyline: {
+        id: 'polyline',
+        name: 'Polyline',
+        icon: 'trending-up',
+    },
 };
 
-export interface Feature<T extends Geometry> extends String {
-    id: string;
-    name: string;
+export interface Feature<T extends Geometry> extends ModelObject {
     layer: string;
     type: string;
     asset?: Asset;
