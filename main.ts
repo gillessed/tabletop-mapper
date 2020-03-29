@@ -5,6 +5,7 @@ import * as url from 'url';
 
 process.setMaxListeners(0);
 const app = Electron.app;
+app.allowRendererProcessReuse = true;
 const globalShortcut = Electron.globalShortcut;
 let mainWindow: Electron.BrowserWindow;
 
