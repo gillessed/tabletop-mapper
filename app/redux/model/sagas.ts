@@ -1,6 +1,7 @@
-import { select, put, call, takeLatest, all } from 'redux-saga/effects';
+import { all } from 'redux-saga/effects';
+import { SagaContext } from '../rootSaga';
 
-export function *modelSaga() {
+export function *modelSaga(context: SagaContext) {
     yield all([
         
     ]);

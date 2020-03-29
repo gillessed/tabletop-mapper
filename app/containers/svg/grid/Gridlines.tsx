@@ -1,5 +1,5 @@
 import * as React from 'react';
-import './Grid.scss';
+import './Gridlines.scss';
 import { Transform } from '../../../math/transform';
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
     transform: Transform;
 }
 
-export class Grid extends React.Component<Props, {}> {
+export class Gridlines extends React.Component<Props, {}> {
     public render() {
         return (
             <g fill="transparent" stroke="#394B59" opacity={0.5}>

@@ -2,15 +2,17 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import './Layers.scss';
 import { ReduxState } from '../../redux/rootReducer';
-import { ModelState, ROOT_LAYER } from '../../redux/model/types';
-import { Tree, ITreeNode, ContextMenu, Menu, MenuItem, IconName } from '@blueprintjs/core';
+import { Tree, ITreeNode, ContextMenu, Menu } from '@blueprintjs/core';
 import { Dispatchers } from '../../redux/dispatchers';
 import { DispatchersContextType } from '../../dispatcherProvider';
 import { AppContext } from '../../redux/appContext';
 import { LayerMenuItems } from './LayerMenuItem';
+import { Model } from '../../redux/model/types';
+import { LayerTree } from '../../redux/layertree/types';
 
 interface Props {
-    model: ModelState;
+    model: Model.Types.State;
+    layerTree: LayerTree.Types.State;
 }
 
 class LayersComponent extends React.Component<Props, {}> {
@@ -24,7 +26,7 @@ class LayersComponent extends React.Component<Props, {}> {
 
     public render() {
         const nodes: ITreeNode[] = [
-            this.getTreeNode(this.props.model, ROOT_LAYER),
+            this.getTreeNode(this.props.model, Model.ROOT_LAYER),
         ];
         return (
             <div className='layers-container'>
@@ -42,7 +44,7 @@ class LayersComponent extends React.Component<Props, {}> {
         );
     }
 
-    private getTreeNode = (model: ModelState, layerId: string) => {
+    private getTreeNode = (model: Model.Types.State, layerId: string) => {
         const layer = model.layers.byId[layerId];
         const children: ITreeNode[] = [];
         layer.children.forEach((childId: string) => {
@@ -57,42 +59,36 @@ class LayersComponent extends React.Component<Props, {}> {
             label: layer.name,
             childNodes: children,
             hasCaret: children.length > 0,
-            isExpanded: !!this.props.model.expandedNodes[layer.id],
-            isSelected: layer.id === this.props.model.selectedNode,
+            isExpanded: !!this.props.layerTree.expandedNodes[layer.id],
+            isSelected: layer.id === this.props.layerTree.selectedNode,
         };
         return node;
     }
 
-    private getFeatureNode = (model: ModelState, featureId: string) => {
+    private getFeatureNode = (model: Model.Types.State, featureId: string) => {
         const feature = model.features.byId[featureId];
-        let icon: IconName = 'warning-sign';
-        if (feature.type === 'point') {
-            icon = 'dot';
-        } else if (feature.type === 'rectangle') {
-            icon = 'widget';
-        }
-
+        const icon = Model.Types.Geometries[feature.type].icon;
         const node: ITreeNode = {
             id: feature.id,
             hasCaret: false,
-            icon: icon,
+            icon,
             label: feature.name,
-            isExpanded: !!this.props.model.expandedNodes[feature.id],
-            isSelected: feature.id === this.props.model.selectedNode,
+            isExpanded: !!this.props.layerTree.expandedNodes[feature.id],
+            isSelected: feature.id === this.props.layerTree.selectedNode,
         };
         return node;
     }
 
     private onNodeClick = (node: ITreeNode, _: number[]) => {
-        this.dispatchers.model.selectNode(`${node.id}`);
+        this.dispatchers.layerTree.selectNode(`${node.id}`);
     };
 
     private onNodeExpand = (node: ITreeNode) => {
-        this.dispatchers.model.expandNode(`${node.id}`);
+        this.dispatchers.layerTree.expandNode(`${node.id}`);
     };
 
     private onNodeCollapse = (node: ITreeNode) => {
-        this.dispatchers.model.collapseNode(`${node.id}`);
+        this.dispatchers.layerTree.collapseNode(`${node.id}`);
     };
 
     private onNodeContextMenu = (
@@ -117,9 +113,10 @@ class LayersComponent extends React.Component<Props, {}> {
     }
 }
 
-const mapStateToProps = (redux: ReduxState) => {
+const mapStateToProps = (state: ReduxState) => {
     return {
-        model: redux.model,
+        model: Model.Selectors.get(state),
+        layerTree: LayerTree.Selectors.get(state),
     };
 };
 

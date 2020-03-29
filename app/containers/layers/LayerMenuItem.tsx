@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Dispatchers } from '../../redux/dispatchers';
 import { MenuItem } from '@blueprintjs/core';
+import { generateRandomString } from '../../utils/randomId';
 
 interface Props {
     parent: string;
@@ -33,10 +34,18 @@ export class LayerMenuItems extends React.PureComponent<Props, {}> {
     }
 
     private onClickNewObject = () => {
-        this.props.dispatchers.model.createFeature(this.props.parent);
+        const featureId = generateRandomString();
+        this.props.dispatchers.model.createFeature({
+            featureId,
+            layerId: this.props.parent,
+        });
     }
 
     private onClickCreateLayer = () => {
-        this.props.dispatchers.model.createLayer(this.props.parent);
+        const layerId = generateRandomString();
+        this.props.dispatchers.model.createLayer({
+            layerId,
+            parentId: this.props.parent,
+        });
     }
 }

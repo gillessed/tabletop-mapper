@@ -1,15 +1,19 @@
 import * as React from 'react';
-import { Grid } from './grid/Grid';
+import { Gridlines } from './grid/Gridlines';
 import { Transform, Vector } from '../../math/transform';
-import { ROOT_LAYER, ModelState, MouseMode } from '../../redux/model/types';
 import { ReduxState } from '../../redux/rootReducer';
 import { connect } from 'react-redux';
 import { AppContext } from '../../redux/appContext';
 import { Dispatchers } from '../../redux/dispatchers';
 import { DispatchersContextType } from '../../dispatcherProvider';
+import { Model } from '../../redux/model/types';
+import { Grid } from '../../redux/grid/types';
+
+type MouseMode = Grid.Types.MouseMode;
+const MouseMode = Grid.Types.MouseMode;
 
 interface StateProps {
-    model: ModelState;
+    model: Model.Types.State;
     transform: Transform;
     mouseMode: MouseMode;
     mousePosition?: Vector;
@@ -56,7 +60,7 @@ class SvgRootComponent extends React.Component<Props, {}> {
             >
                 <rect x={0} y={0} width={this.props.width} height={this.props.height} fill='#E1E8ED' />
                 <g transform={this.props.transform.toSvg()}>
-                    <Grid transform={this.props.transform} width={this.props.width} height={this.props.height}/>
+                    <Gridlines transform={this.props.transform} width={this.props.width} height={this.props.height}/>
                 </g>
             </svg>
         );
@@ -112,12 +116,12 @@ class SvgRootComponent extends React.Component<Props, {}> {
     }
 }
 
-const mapStateToProps = (redux: ReduxState) => {
+const mapStateToProps = (state: ReduxState) => {
     return {
-        model: redux.model,
-        transform: redux.model.grid.transform,
-        mouseMode: redux.model.grid.mouseMode,
-        mousePosition: redux.model.grid.mousePosition,
+        model: Model.Selectors.get(state),
+        transform: state.grid.transform,
+        mouseMode: state.grid.mouseMode,
+        mousePosition: state.grid.mousePosition,
     };
 };
 

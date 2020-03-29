@@ -27,7 +27,7 @@ applyMouseNavigationListener(store);
 applyKeyboardNavigationListener(store);
 
 const sagaListeners: Set<SagaListener<any>> = new Set();
-sagaMiddleware.run(rootSaga, sagaListeners);
+sagaMiddleware.run(rootSaga, {}, sagaListeners);
 
 const providers = (
     <Provider store={store}>

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import './LayerView.scss';
-import { Layer, ModelState } from '../../redux/model/types';
 import { Button, Intent } from '@blueprintjs/core';
 import { Dispatchers } from '../../redux/dispatchers';
+import { Model } from '../../redux/model/types';
+import { generateRandomString } from '../../utils/randomId';
 
 interface Props {
-    model: ModelState;
-    layer: Layer;
+    model: Model.Types.State;
+    layer: Model.Types.Layer;
     dispatchers: Dispatchers;
 }
 
@@ -43,6 +44,10 @@ export class LayerView extends React.PureComponent<Props, {}> {
     }
 
     private onClickCreateFeature = () => {
-        this.props.dispatchers.model.createFeature(this.props.layer.id);
+        const featureId = generateRandomString();
+        this.props.dispatchers.model.createFeature({
+            featureId,
+            layerId: this.props.layer.id,
+        });
     }
 }

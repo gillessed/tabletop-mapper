@@ -1,20 +1,22 @@
 import * as React from 'react';
-import './FeaturePanel.scss'; 
-import { ModelState } from '../../redux/model/types';
+import './InfoPanel.scss'; 
+import { Model } from '../../redux/model/types';
 import { connect } from 'react-redux';
 import { ReduxState } from '../../redux/rootReducer';
 import { NonIdealState } from '@blueprintjs/core';
 import { LayerView } from './LayerView';
-import { FeatureView } from './FeatureView';
+import { FeatureView } from './feature/FeatureView';
 import { DispatchersContextType } from '../../dispatcherProvider';
 import { Dispatchers } from '../../redux/dispatchers';
 import { AppContext } from '../../redux/appContext';
+import { LayerTree } from '../../redux/layertree/types';
 
 interface Props {
-    model: ModelState;
+    layerTree: LayerTree.Types.State;
+    model: Model.Types.State;
 }
 
-class FeaturePanelComponent extends React.PureComponent<Props, {}> {
+class InfoPanelComponent extends React.PureComponent<Props, {}> {
     public static contextTypes = DispatchersContextType;
     private dispatchers: Dispatchers;
 
@@ -25,7 +27,7 @@ class FeaturePanelComponent extends React.PureComponent<Props, {}> {
 
     public render() {
         let view;
-        const { selectedNode } = this.props.model;
+        const { selectedNode } = this.props.layerTree;
         if (this.props.model.features.all.indexOf(selectedNode) >= 0) {
             view = (
                 <FeatureView
@@ -61,8 +63,9 @@ class FeaturePanelComponent extends React.PureComponent<Props, {}> {
 
 const mapStateToProps = (state: ReduxState) => {
     return {
-        model: state.model,
+        layerTree: LayerTree.Selectors.get(state),
+        model: Model.Selectors.get(state),
     }
 };
 
-export const FeaturePanel = connect(mapStateToProps)(FeaturePanelComponent as any);
+export const InfoPanel = connect(mapStateToProps)(InfoPanelComponent as any);

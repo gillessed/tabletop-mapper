@@ -1,113 +1,125 @@
-import { Map, Set } from 'immutable';
-import { IconName } from '@blueprintjs/core';
-import { Transform, Vector } from '../../math/transform';
+import { Indexable } from "../utils/indexable";
+import { IconName } from "@blueprintjs/core";
+import { createActionWrapper } from "../utils/typedAction";
+import { ReduxState } from "../rootReducer";
 
-export const ROOT_LAYER = 'root-layer';
+export namespace Model {
+  export const ROOT_LAYER = 'root-layer';
+  export namespace Types {
 
-export type Indexable<T> = {
-    byId: { [key: string]: T};
-    all: string[];
-}
+    export interface State {
+      layers: Indexable<Layer>;
+      assets: Indexable<Asset>;
+      features: Indexable<Feature<any>>;
+    }
 
-export interface ModelState {
-    layers: Indexable<Layer>;
-    assets: Indexable<Asset>;
-    features: Indexable<Feature<any>>;
-    selectedNode: string;
-    expandedNodes: { [key: string]: boolean };
-    grid: GridState;
-}
+    export interface Object {
+      id: string;
+      name: string;
+    }
 
-export enum MouseMode {
-    NONE,
-    DRAG,
-}
+    export interface Layer extends Object {
+      visible: boolean;
+      children: string[];
+      features: string[];
+      parent: string | null;
+    }
 
-export interface GridState {
-    transform: Transform;
-    mouseMode: MouseMode;
-    mousePosition?: Vector;
-}
+    export interface Asset {
+      path: string;
+      type: 'svg' | 'jpg' | 'png';
+    }
 
-export interface ModelObject {
-    id: string;
-    name: string;
-}
+    export interface Style extends Object { }
 
-export interface Layer extends ModelObject {
-    visible: boolean;
-    children: string[];
-    features: string[];
-    parent: string | null;
-}
+    export interface GeometryType {
+      id: string;
+      name: string;
+      icon: IconName;
+    }
 
-export interface Asset {
-    path: string;
-    type: 'svg' | 'jpg' | 'png';
-}
+    interface GeometryTypeMap {
+      point: GeometryType;
+      rectangle: GeometryType;
+      polyline: GeometryType;
+      circle: GeometryType;
+    }
 
-export interface Style {
-
-}
-
-export interface GeometryType {
-    id: string;
-    name: string;
-    icon: IconName;
-}
-
-interface GeometryTypeMap {
-    point: GeometryType;
-    rectangle: GeometryType;
-    polyline: GeometryType;
-}
-
-export const GeometryTypes: GeometryTypeMap & {[key: string]: GeometryType} = {
-    point: {
+    export const Geometries: GeometryTypeMap & { [key: string]: GeometryType } = {
+      point: {
         id: 'point',
         name: 'Point',
         icon: 'dot',
-    },
-    rectangle: {
+      },
+      rectangle: {
         id: 'rectangle',
         name: 'Rectangle',
         icon: 'widget',
-    },
-    polyline: {
+      },
+      polyline: {
         id: 'polyline',
         name: 'Polyline',
         icon: 'trending-up',
-    },
-};
+      },
+      circle: {
+        id: 'circle',
+        name: 'Circle',
+        icon: 'circle'
+      }
+    };
 
-export interface Feature<T extends Geometry> extends ModelObject {
-    layer: string;
-    type: string;
-    asset?: Asset;
-    geometry?: T;
-}
+    export interface Feature<T extends Geometry> extends Object {
+      layer: string;
+      type: string;
+      geometry?: T;
+    }
 
-export interface Geometry {}
+    export interface Geometry { }
 
-export interface Point extends Geometry {
-    x: number;
-    y: number;
-    grid: boolean;
-}
+    export interface Point extends Geometry {
+      x: number;
+      y: number;
+      grid: boolean;
+    }
 
-export interface Rectangle extends Geometry {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
-    grid: boolean;
-}
+    export interface Rectangle extends Geometry {
+      top: number;
+      left: number;
+      bottom: number;
+      right: number;
+      grid: boolean;
+    }
+  }
 
-//////////////
-// Payloads //
-//////////////
+  export namespace Payloads {
+    export interface CreateLayer {
+      parentId: string;
+      layerId: string;
+    }
 
-export interface SetFeatureTypePayload {
-    featureId: string;
-    type: string;
+    export interface CreateFeature {
+      layerId: string;
+      featureId: string;
+    }
+
+    export interface SetFeatureType {
+      featureId: string;
+      type: string;
+    }
+  }
+
+  export const DispatchActions = {
+    createLayer: createActionWrapper<Payloads.CreateLayer>('model::createLayer'),
+    createFeature: createActionWrapper<Payloads.CreateFeature>('model::createFeature'),
+    setFeatureType: createActionWrapper<Payloads.SetFeatureType>('model::changeFeatureType'),
+  }
+  
+  export const Actions = {
+    ...DispatchActions,
+  }
+
+  export namespace Selectors  {
+    export const get = (state: ReduxState) => state.model;
+    export const getLayers = (state: ReduxState) => state.model.layers;  
+  }
 }
