@@ -1,8 +1,8 @@
 import { Reducer } from 'redux';
 import { newTypedReducer } from '../utils/typedReducer';
 import * as DotProp from 'dot-prop-immutable';
-import { findByName } from "./utils";
-import { Model } from './types';
+import { findByName } from "./ModelUtils";
+import { Model } from './ModelTypes';
 
 const INITIAL_STATE: Model.Types.State = {
     layers: {

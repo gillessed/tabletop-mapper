@@ -1,7 +1,7 @@
 import { Reducer } from 'redux';
+import { Transform, Vector } from '../../math/Vector';
 import { newTypedReducer } from '../utils/typedReducer';
-import { Transform, Vector } from '../../math/transform';
-import { Grid } from './types';
+import { Grid } from './GridTypes';
 
 const INITIAL_STATE: Grid.Types.State = {
   mouseMode: Grid.Types.MouseMode.NONE,

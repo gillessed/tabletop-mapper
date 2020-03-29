@@ -1,5 +1,5 @@
+import { ReduxState } from "../RootReducer";
 import { createActionWrapper } from "../utils/typedAction";
-import { ReduxState } from "../rootReducer";
 
 export namespace LayerTree {
   export namespace Types {

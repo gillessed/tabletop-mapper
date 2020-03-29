@@ -1,5 +1,5 @@
 import { Store } from 'redux';
-import { ReduxState } from '../rootReducer';
+import { ReduxState } from '../RootReducer';
 import { ActionWrapper } from './typedAction';
 
 type Actions = {

@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as PropTypes from 'prop-types'
 import { Store } from 'redux';
 import { SagaListener, resetListeners } from './redux/sagaListener';
-import { ReduxState } from './redux/rootReducer';
+import { ReduxState } from './redux/RootReducer';
 
 interface Props {
   listeners: Set<SagaListener<any>>;

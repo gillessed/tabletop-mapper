@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Store } from 'redux';
-import { ReduxState } from './redux/rootReducer';
+import { ReduxState } from './redux/RootReducer';
 import { Dispatchers } from './redux/dispatchers';
 import * as PropTypes from 'prop-types';
 

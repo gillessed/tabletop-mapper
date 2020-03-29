@@ -1,20 +1,21 @@
 .feature-view-container {
-    padding: 16px;
+  padding: 16px;
 
-    .section {
-        padding-top: 20px;
-    }
+  .section {
+    padding-top: 20px;
+  }
 
-    .label {
-        padding-top: 20px;
-        padding-bottom: 10px;
-    }
+  .label {
+    padding-top   : 20px;
+    padding-bottom: 10px;
+  }
 
-    span.label {
-        padding-right: 10px;
-    }
+  span.label {
+    padding-right: 10px;
+  }
 
-    #geometry-type-buttons, #draw-button {
-        width: 100%;
-    }
+  #geometry-type-buttons,
+  #draw-button {
+    width: 100%;
+  }
 }

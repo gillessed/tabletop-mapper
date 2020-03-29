@@ -1,7 +1,7 @@
-import { Indexable } from "../utils/indexable";
 import { IconName } from "@blueprintjs/core";
+import { ReduxState } from "../RootReducer";
+import { Indexable } from "../utils/indexable";
 import { createActionWrapper } from "../utils/typedAction";
-import { ReduxState } from "../rootReducer";
 
 export namespace Model {
   export const ROOT_LAYER = 'root-layer';
@@ -72,22 +72,28 @@ export namespace Model {
       layer: string;
       type: string;
       geometry?: T;
+      snapToGrid?: boolean;
     }
 
-    export interface Geometry { }
+    export type Geometry = Point | Rectangle | Polygon;
 
-    export interface Point extends Geometry {
+    export interface Point {
       x: number;
       y: number;
-      grid: boolean;
     }
 
-    export interface Rectangle extends Geometry {
+    export interface Rectangle {
       top: number;
       left: number;
       bottom: number;
       right: number;
-      grid: boolean;
+    }
+
+    export interface Polygon {
+      top: number;
+      left: number;
+      bottom: number;
+      right: number;
     }
   }
 
@@ -113,13 +119,13 @@ export namespace Model {
     createFeature: createActionWrapper<Payloads.CreateFeature>('model::createFeature'),
     setFeatureType: createActionWrapper<Payloads.SetFeatureType>('model::changeFeatureType'),
   }
-  
+
   export const Actions = {
     ...DispatchActions,
   }
 
-  export namespace Selectors  {
+  export namespace Selectors {
     export const get = (state: ReduxState) => state.model;
-    export const getLayers = (state: ReduxState) => state.model.layers;  
+    export const getLayers = (state: ReduxState) => state.model.layers;
   }
 }

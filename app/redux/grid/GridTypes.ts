@@ -1,6 +1,6 @@
-import { Transform, Vector } from "../../math/transform";
+import { Transform, Vector } from "../../math/Vector";
+import { ReduxState } from "../RootReducer";
 import { createActionWrapper } from "../utils/typedAction";
-import { ReduxState } from "../rootReducer";
 
 export namespace Grid {
   export namespace Types {

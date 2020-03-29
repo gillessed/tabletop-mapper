@@ -1,9 +1,9 @@
-import { SagaContext } from "../rootSaga";
-import { takeEvery, all, select, put } from "redux-saga/effects";
-import { LayerTree } from "./types";
-import { TypedAction } from "../utils/typedAction";
-import { Model } from "../model/types";
+import { all, put, select, takeEvery } from "redux-saga/effects";
+import { Model } from "../model/ModelTypes";
+import { SagaContext } from "../RootSaga";
 import { Indexable } from "../utils/indexable";
+import { TypedAction } from "../utils/typedAction";
+import { LayerTree } from "./LayerTreeTypes";
 
 export function* layerTreeSaga(context: SagaContext) {
   yield all([

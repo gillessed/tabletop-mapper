@@ -1,8 +1,8 @@
 import { listenerLoop, SagaListener } from './sagaListener';
 import { fork, all } from 'redux-saga/effects';
-import { initialize } from './initialize/sagas';
-import { modelSaga } from './model/sagas';
-import { layerTreeSaga } from './layertree/sagas';
+import { initialize } from './initialize/InitializationSaga';
+import { modelSaga } from './model/ModelSagas';
+import { layerTreeSaga } from './layertree/LayerTreeSagas';
 
 export interface SagaContext {
 

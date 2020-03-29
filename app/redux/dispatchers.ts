@@ -1,20 +1,20 @@
 import { Store } from 'redux';
-import { ReduxState } from './rootReducer';
+import { Grid } from './grid/GridTypes';
+import { LayerTree } from './layertree/LayerTreeTypes';
+import { Model } from './model/ModelTypes';
+import { ReduxState } from './RootReducer';
 import { createDispatcher, TypedDispatcher } from './utils/typedDispatcher';
-import { Model } from './model/types';
-import { Grid } from './grid/types';
-import { LayerTree } from './layertree/types';
 
 export interface Dispatchers {
-    model: TypedDispatcher<typeof Model.DispatchActions>;
-    grid: TypedDispatcher<typeof Grid.DispatchActions>;
-    layerTree: TypedDispatcher<typeof LayerTree.DispatchActions>;
+  model: TypedDispatcher<typeof Model.DispatchActions>;
+  grid: TypedDispatcher<typeof Grid.DispatchActions>;
+  layerTree: TypedDispatcher<typeof LayerTree.DispatchActions>;
 }
 
 export const dispatcherCreators = (store: Store<ReduxState>): Dispatchers => {
-    return {
-        model: createDispatcher(store, Model.DispatchActions),
-        grid: createDispatcher(store, Grid.DispatchActions),
-        layerTree: createDispatcher(store, LayerTree.DispatchActions),
-    };
+  return {
+    model: createDispatcher(store, Model.DispatchActions),
+    grid: createDispatcher(store, Grid.DispatchActions),
+    layerTree: createDispatcher(store, LayerTree.DispatchActions),
+  };
 };
