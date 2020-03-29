@@ -1,45 +1,47 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { applyMiddleware, createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { rootReducer } from './redux/rootReducer';
+import { applyMiddleware, createStore } from 'redux';
 import logger from 'redux-logger';
-import { DispatcherProvider } from './dispatcherProvider';
-import { SagaProvider } from './sagaProvider';
-import { SagaListener } from './redux/sagaListener';
-import { dispatcherCreators } from './redux/dispatchers';
 import createSagaMiddleware from 'redux-saga';
-import { rootSaga } from './redux/rootSaga';
+import { AppContext, AppContextProvider } from './AppContextProvider';
 import { Root } from './containers/Root';
-import { etn } from './etn';
-import { applyMouseNavigationListener, applyKeyboardNavigationListener } from './navigationListeners';
+import { applyKeyboardNavigationListener, applyMouseNavigationListener } from './navigationListeners';
+import { dispatcherCreators } from './redux/dispatchers';
+import { rootReducer } from './redux/rootReducer';
+import { rootSaga } from './redux/rootSaga';
+import { createRegister, SagaListener } from './redux/SagaListener';
 
 const sagaMiddleware = createSagaMiddleware();
 
 const store = createStore(
-    rootReducer,
-    applyMiddleware(
-        logger,
-        sagaMiddleware,
-    ),
+  rootReducer,
+  applyMiddleware(
+    logger,
+    sagaMiddleware,
+  ),
 );
 applyMouseNavigationListener(store);
 applyKeyboardNavigationListener(store);
 
 const sagaListeners: Set<SagaListener<any>> = new Set();
+const sagaRegister = createRegister(store.dispatch);
+const dispatchers = dispatcherCreators(store);
 sagaMiddleware.run(rootSaga, {}, sagaListeners);
+const appContext: AppContext = {
+  dispatchers,
+  sagaRegister,
+};
 
 const providers = (
-    <Provider store={store}>
-        <DispatcherProvider dispatchers={dispatcherCreators}>
-            <SagaProvider listeners={sagaListeners}>
-                <Root/>
-            </SagaProvider>
-        </DispatcherProvider>
-    </Provider>
+  <Provider store={store}>
+    <AppContextProvider value={appContext}>
+      <Root />
+    </AppContextProvider>
+  </Provider>
 )
 
 ReactDOM.render(
-    providers as any,
-    document.getElementById("content")
+  providers as any,
+  document.getElementById("content")
 );

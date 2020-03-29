@@ -1,8 +1,7 @@
 import { NonIdealState } from '@blueprintjs/core';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { DispatchersContextType } from '../../dispatcherProvider';
-import { AppContext } from '../../redux/appContext';
+import { AppContext, withAppContext } from '../../AppContextProvider';
 import { Dispatchers } from '../../redux/dispatchers';
 import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
 import { Model } from '../../redux/model/ModelTypes';
@@ -12,17 +11,17 @@ import './InfoPanel.scss';
 import { LayerView } from './LayerView';
 
 interface Props {
+  appContext: AppContext;
   layerTree: LayerTree.Types.State;
   model: Model.Types.State;
 }
 
 class InfoPanelComponent extends React.PureComponent<Props, {}> {
-  public static contextTypes = DispatchersContextType;
   private dispatchers: Dispatchers;
 
-  constructor(props: Props, context: AppContext) {
+  constructor(props: Props) {
     super(props);
-    this.dispatchers = context.dispatchers;
+    this.dispatchers = props.appContext.dispatchers;
   }
 
   public render() {
@@ -68,4 +67,4 @@ const mapStateToProps = (state: ReduxState) => {
   }
 };
 
-export const InfoPanel = connect(mapStateToProps)(InfoPanelComponent as any);
+export const InfoPanel = connect(mapStateToProps)(withAppContext(InfoPanelComponent));

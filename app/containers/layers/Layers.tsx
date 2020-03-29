@@ -1,8 +1,7 @@
 import { ContextMenu, ITreeNode, Menu, Tree } from '@blueprintjs/core';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { DispatchersContextType } from '../../dispatcherProvider';
-import { AppContext } from '../../redux/appContext';
+import { AppContext, withAppContext } from '../../AppContextProvider';
 import { Dispatchers } from '../../redux/dispatchers';
 import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
 import { Model } from '../../redux/model/ModelTypes';
@@ -11,17 +10,17 @@ import { LayerMenuItems } from './LayerMenuItem';
 import './Layers.scss';
 
 interface Props {
+  appContext: AppContext;
   model: Model.Types.State;
   layerTree: LayerTree.Types.State;
 }
 
-class LayersComponent extends React.Component<Props, {}> {
-  public static contextTypes = DispatchersContextType;
+class LayersComponent extends React.Component<Props> {
   private dispatchers: Dispatchers;
 
-  constructor(props: Props, context: AppContext) {
+  constructor(props: Props) {
     super(props);
-    this.dispatchers = context.dispatchers;
+    this.dispatchers = props.appContext.dispatchers;
   }
 
   public render() {
@@ -120,4 +119,4 @@ const mapStateToProps = (state: ReduxState) => {
   };
 };
 
-export const Layers = connect<Props, {}, {}>(mapStateToProps)(LayersComponent as any);
+export const Layers = connect(mapStateToProps)(withAppContext(LayersComponent));

@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { DispatchersContextType } from '../../dispatcherProvider';
+import { AppContext, withAppContext } from '../../AppContextProvider';
 import { Transform, Vector } from '../../math/Vector';
-import { AppContext } from '../../redux/appContext';
 import { Dispatchers } from '../../redux/dispatchers';
 import { Grid } from '../../redux/grid/GridTypes';
 import { Model } from '../../redux/model/ModelTypes';
@@ -13,6 +12,7 @@ type MouseMode = Grid.Types.MouseMode;
 const MouseMode = Grid.Types.MouseMode;
 
 interface StateProps {
+  appContext: AppContext;
   model: Model.Types.State;
   transform: Transform;
   mouseMode: MouseMode;
@@ -32,12 +32,11 @@ const MAX_SCALE = 400;
 const MIN_SCALE = 2;
 
 class SvgRootComponent extends React.Component<Props, {}> {
-  public static contextTypes = DispatchersContextType;
   private dispatchers: Dispatchers;
 
-  constructor(props: Props, context: AppContext) {
+  constructor(props: Props) {
     super(props);
-    this.dispatchers = context.dispatchers;
+    this.dispatchers = props.appContext.dispatchers;
   }
 
   public componentWillMount() {
@@ -125,4 +124,4 @@ const mapStateToProps = (state: ReduxState) => {
   };
 };
 
-export const SvgRoot = connect<StateProps, {}, OwnProps>(mapStateToProps)(SvgRootComponent as any);
+export const SvgRoot = connect(mapStateToProps)(withAppContext(SvgRootComponent));

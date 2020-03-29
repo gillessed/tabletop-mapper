@@ -1,6 +1,7 @@
-import { ActionType, createActionType, createActionCreator } from './utils/typedAction';
-import { call, take, fork, cancel } from 'redux-saga/effects';
+import { Dispatch } from 'react';
 import { Task } from 'redux-saga';
+import { call, cancel, fork, take } from 'redux-saga/effects';
+import { ActionType, createActionCreator, createActionType } from './utils/typedAction';
 
 export interface SagaListener<PAYLOAD> {
   actionType: ActionType<PAYLOAD>;
@@ -37,3 +38,23 @@ export const listenerLoop = function*(listeners: Set<SagaListener<any>>) {
 
 export const LISTENER_RESET = createActionType<void>('LISTENERS // RESET');
 export const resetListeners = createActionCreator<void>(LISTENER_RESET);
+
+export interface SagaRegistration {
+  register(listener: SagaListener<any>): void;
+  unregister(listener: SagaListener<any>): void;
+}
+
+export function createRegister(dispatch: Dispatch<any>) {
+  const listeners = new Set<SagaListener<any>>();
+  const sagaRegister: SagaRegistration = {
+    register: (listener: SagaListener<any>) => {
+      listeners.add(listener);
+      dispatch(resetListeners(undefined));
+    },
+    unregister: (listener: SagaListener<any>) => {
+      listeners.delete(listener);
+      dispatch(resetListeners(undefined));
+    },
+  };
+  return sagaRegister;
+}

@@ -1,4 +1,4 @@
-import { listenerLoop, SagaListener } from './sagaListener';
+import { listenerLoop, SagaListener } from './SagaListener';
 import { fork, all } from 'redux-saga/effects';
 import { initialize } from './initialize/InitializationSaga';
 import { modelSaga } from './model/ModelSagas';
