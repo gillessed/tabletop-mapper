@@ -39,7 +39,7 @@ class SvgRootComponent extends React.Component<Props, {}> {
     this.dispatchers = props.appContext.dispatchers;
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     this.dispatchers.grid.updateGridState({
       mouseMode: MouseMode.NONE,
       transform: new Transform(new Vector(this.props.width / (2 * INITIAL_SCALE), this.props.height / (2 * INITIAL_SCALE)), INITIAL_SCALE),
