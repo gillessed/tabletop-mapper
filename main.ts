@@ -15,7 +15,7 @@ function createWindow() {
   });
 
   globalShortcut.register('CommandOrControl+D', () => {
-    mainWindow.webContents.toggleDevTools();
+    mainWindow.webContents.openDevTools();
   });
 
   mainWindow = new Electron.BrowserWindow({
@@ -40,7 +40,6 @@ function createWindow() {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
-    mainWindow.webContents.openDevTools();
   });
 }
 
