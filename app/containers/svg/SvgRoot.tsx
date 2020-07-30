@@ -2,10 +2,10 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { AppContext, withAppContext } from '../../AppContextProvider';
 import { Transform, Vector } from '../../math/Vector';
-import { Dispatchers } from '../../redux/dispatchers';
+import { Dispatchers } from '../../redux/Dispatchers';
 import { Grid } from '../../redux/grid/GridTypes';
 import { Model } from '../../redux/model/ModelTypes';
-import { ReduxState } from '../../redux/RootReducer';
+import { ReduxState } from '../../redux/AppReducer';
 import { Gridlines } from './grid/Gridlines';
 
 type MouseMode = Grid.Types.MouseMode;

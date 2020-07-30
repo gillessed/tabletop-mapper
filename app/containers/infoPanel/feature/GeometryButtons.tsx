@@ -19,7 +19,7 @@ export class GeometryButtons extends React.PureComponent<Props, {}> {
           onClick={this.onClick}
         >
           Draw Feature
-                </Button>
+        </Button>
       );
     } else {
       return (

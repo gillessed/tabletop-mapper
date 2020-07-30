@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dispatchers } from '../../redux/dispatchers';
+import { Dispatchers } from '../../redux/Dispatchers';
 import { MenuItem } from '@blueprintjs/core';
 import { generateRandomString } from '../../utils/randomId';
 

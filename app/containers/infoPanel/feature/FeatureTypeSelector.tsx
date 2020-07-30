@@ -1,6 +1,6 @@
 import { ButtonGroup } from '@blueprintjs/core';
 import * as React from 'react';
-import { Dispatchers } from '../../../redux/dispatchers';
+import { Dispatchers } from '../../../redux/Dispatchers';
 import { Model } from '../../../redux/model/ModelTypes';
 import { FeatureTypeSelectorButton } from './FeatureTypeSelectorButton';
 

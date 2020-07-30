@@ -1,5 +1,5 @@
 import { IconName } from "@blueprintjs/core";
-import { ReduxState } from "../RootReducer";
+import { ReduxState } from "../AppReducer";
 import { Indexable } from "../utils/indexable";
 import { createActionWrapper } from "../utils/typedAction";
 

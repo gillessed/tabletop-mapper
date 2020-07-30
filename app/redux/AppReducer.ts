@@ -12,7 +12,7 @@ export interface ReduxState {
     layerTree: LayerTree.Types.State;
 }
 
-export const rootReducer = combineReducers<ReduxState>({
+export const AppReducer = combineReducers<ReduxState>({
     model: modelReducer,
     grid: gridReducer,
     layerTree: layerTreeReducer,

@@ -2,7 +2,7 @@ import { Store } from 'redux';
 import { Grid } from './grid/GridTypes';
 import { LayerTree } from './layertree/LayerTreeTypes';
 import { Model } from './model/ModelTypes';
-import { ReduxState } from './RootReducer';
+import { ReduxState } from './AppReducer';
 import { createDispatcher, TypedDispatcher } from './utils/typedDispatcher';
 
 export interface Dispatchers {

@@ -5,16 +5,17 @@ module.exports = {
   mode: 'development',
   target: 'node',
   entry: {
-    app: ['webpack/hot/dev-server', './app/app.tsx'],
+    app: ['webpack/hot/dev-server', './app/App.tsx'],
   },
   output: {
     path: path.join(__dirname, './devServer/built'),
     filename: 'bundle.js',
-    publicPath: 'http://localhost:8080/built/'
+    publicPath: 'http://localhost:9010/built/'
   },
   devServer: {
     contentBase: './devServer',
-    publicPath: 'http://localhost:8080/built/'
+    publicPath: 'http://localhost:9010/built/',
+    port: 9010,
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', 'jsx']

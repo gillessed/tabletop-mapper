@@ -1,6 +1,6 @@
 import { all, put, select, takeEvery } from "redux-saga/effects";
 import { Model } from "../model/ModelTypes";
-import { SagaContext } from "../RootSaga";
+import { SagaContext } from "../AppSaga";
 import { Indexable } from "../utils/indexable";
 import { TypedAction } from "../utils/typedAction";
 import { LayerTree } from "./LayerTreeTypes";

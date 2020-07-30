@@ -2,10 +2,10 @@ import { ContextMenu, ITreeNode, Menu, Tree } from '@blueprintjs/core';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { AppContext, withAppContext } from '../../AppContextProvider';
-import { Dispatchers } from '../../redux/dispatchers';
+import { Dispatchers } from '../../redux/Dispatchers';
 import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
 import { Model } from '../../redux/model/ModelTypes';
-import { ReduxState } from '../../redux/RootReducer';
+import { ReduxState } from '../../redux/AppReducer';
 import { LayerMenuItems } from './LayerMenuItem';
 import './Layers.scss';
 

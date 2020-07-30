@@ -1,4 +1,4 @@
-import { ReduxState } from "../RootReducer";
+import { ReduxState } from "../AppReducer";
 import { createActionWrapper } from "../utils/typedAction";
 
 export namespace LayerTree {

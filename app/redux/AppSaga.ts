@@ -8,14 +8,14 @@ export interface SagaContext {
 
 }
 
-export function* rootSaga(context: SagaContext, listeners: Set<SagaListener<any>>) {
-    yield all([
-        // Saga Listeners
-        fork(listenerLoop, listeners),
+export function* appSaga(context: SagaContext, listeners: Set<SagaListener<any>>) {
+  yield all([
+    // Saga Listeners
+    fork(listenerLoop, listeners),
 
-        // App Sagas
-        fork(initialize),
-        fork(modelSaga, context),
-        fork(layerTreeSaga, context),
-    ]);
+    // App Sagas
+    fork(initialize),
+    fork(modelSaga, context),
+    fork(layerTreeSaga, context),
+  ]);
 }

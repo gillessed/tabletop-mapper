@@ -8,7 +8,7 @@ export interface SagaListener<PAYLOAD> {
   callback: (payload: PAYLOAD) => void;
 }
 
-export const ListenerLoop = function*(listeners: Set<SagaListener<any>>) {
+export const listenerLoop = function*(listeners: Set<SagaListener<any>>) {
   while (true) {
 
     const handlers: any[] = [];

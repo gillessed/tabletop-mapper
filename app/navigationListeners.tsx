@@ -1,6 +1,6 @@
 import { Store } from 'redux';
 import { etn } from './etn';
-import { ReduxState } from './redux/rootReducer';
+import { ReduxState } from './redux/AppReducer';
 
 export function applyMouseNavigationListener(store: Store<ReduxState>) {
   const window = etn.window;
