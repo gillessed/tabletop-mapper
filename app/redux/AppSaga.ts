@@ -1,8 +1,8 @@
-import { listenerLoop, SagaListener } from './SagaListener';
-import { fork, all } from 'redux-saga/effects';
+import { all, fork } from 'redux-saga/effects';
 import { initialize } from './initialize/InitializationSaga';
-import { modelSaga } from './model/ModelSagas';
 import { layerTreeSaga } from './layertree/LayerTreeSagas';
+import { modelSaga } from './model/ModelSagas';
+import { ListenerLoop, SagaListener } from './SagaListener';
 
 export interface SagaContext {
 
@@ -11,7 +11,7 @@ export interface SagaContext {
 export function* appSaga(context: SagaContext, listeners: Set<SagaListener<any>>) {
   yield all([
     // Saga Listeners
-    fork(listenerLoop, listeners),
+    fork(ListenerLoop, listeners),
 
     // App Sagas
     fork(initialize),

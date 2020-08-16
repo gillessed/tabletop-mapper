@@ -1,4 +1,7 @@
 import * as React from 'react';
+import { connect } from 'react-redux';
+import { ReduxState } from '../../redux/AppReducer';
+import { FeatureToolbar } from '../featureToolbar/FeatureToolbar';
 import { SvgRoot } from '../svg/SvgRoot';
 import './CanvasContainer.scss';
 
@@ -9,19 +12,37 @@ interface State {
   }
 }
 
-export class CanvasContainer extends React.Component<{}, State> {
+interface Props {
+  state: ReduxState;
+}
+
+class CanvasContainerInternal extends React.Component<Props, State> {
   private containerDiv: HTMLDivElement;
 
-  constructor(props: {}) {
+  constructor(props: Props) {
     super(props);
     this.state = {}
+  }
+
+  public componentWillReceiveProps() {
+    if (this.containerDiv) {
+      setTimeout(() => {
+        this.setState({
+          dimensions: {
+            width: this.containerDiv.clientWidth,
+            height: this.containerDiv.clientHeight,
+          },
+        });
+      });
+    }
   }
 
   public render() {
     return (
       <div className='canvas-container' ref={this.setContainerRef}>
         {this.renderCanvasElement()}
-      </div>
+        <FeatureToolbar />
+      </div> 
     );
   }
 
@@ -59,3 +80,9 @@ export class CanvasContainer extends React.Component<{}, State> {
     });
   }
 }
+
+const mapStateToProps = (state: ReduxState) => {
+  return { state };
+}
+
+export const CanvasContainer = connect(mapStateToProps)(CanvasContainerInternal);

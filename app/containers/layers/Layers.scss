@@ -1,7 +1,10 @@
+@import '../../../node_modules/@blueprintjs/core/lib/scss/variables.scss';
+@import '../../scss/Scrollbar.scss';
+
 .layers-container {
   width         : 300px;
   height        : 100%;
-  border-right  : 1px solid #8A9BA8;
+  border-right  : 1px solid #8a9ba8;
   flex-direction: column;
 
   .side-panel-header {
@@ -9,12 +12,17 @@
     display        : flex;
     align-items    : center;
     justify-content: center;
+    background-color: $dark-gray3;
+    color: $white;
   }
 
   .tree-container {
-    display : flex;
-    flex    : 1;
-    overflow: scroll;
+    display         : flex;
+    flex            : 1;
+    height          : 100%;
+    overflow-y      : auto;
+    background-color: $dark-gray1;
+    @include scrollbars(10px, pink, $dark-gray1);
 
     .bp3-tree {
       height        : 100%;

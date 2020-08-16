@@ -1,11 +1,10 @@
-import { NonIdealState } from '@blueprintjs/core';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { AppContext, withAppContext } from '../../AppContextProvider';
+import { ReduxState } from '../../redux/AppReducer';
 import { Dispatchers } from '../../redux/Dispatchers';
 import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
 import { Model } from '../../redux/model/ModelTypes';
-import { ReduxState } from '../../redux/AppReducer';
 import { FeatureView } from './feature/FeatureView';
 import './InfoPanel.scss';
 import { LayerView } from './LayerView';
@@ -35,7 +34,7 @@ class InfoPanelComponent extends React.PureComponent<Props, {}> {
           dispatchers={this.dispatchers}
         />
       );
-    } else if (this.props.model.layers.all.indexOf(selectedNode) >= 0) {
+    } else if (this.props.model.layers.all.indexOf(selectedNode) >= 0 && selectedNode !== Model.RootLayerId) {
       view = (
         <LayerView
           layer={this.props.model.layers.byId[selectedNode]}
@@ -43,14 +42,9 @@ class InfoPanelComponent extends React.PureComponent<Props, {}> {
           dispatchers={this.dispatchers}
         />
       );
-    } else {
-      view = (
-        <NonIdealState
-          icon='warning-sign'
-          title='Error'
-          description={`Selected node "${selectedNode}" does not exist.`}
-        />
-      )
+    }
+    if (view == null) {
+      return null;
     }
     return (
       <div className='feature-panel-container'>

@@ -4,8 +4,8 @@ import { Dispatchers } from '../../../redux/Dispatchers';
 import { Model } from '../../../redux/model/ModelTypes';
 
 interface Props {
-  feature: Model.Types.Feature<any>;
-  type: Model.Types.GeometryType;
+  feature: Model.Types.Feature;
+  type: Model.Types.GeometryInfo;
   active: boolean;
   dispatchers: Dispatchers;
 }
@@ -16,18 +16,7 @@ export class FeatureTypeSelectorButton extends React.PureComponent<Props> {
       <Button
         icon={this.props.type.icon}
         active={this.props.active}
-        onClick={this.onClick}
       />
     );
-  }
-
-  private onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (this.props.feature.geometry) {
-      // TODO: show warning
-    }
-    this.props.dispatchers.model.setFeatureType({
-      featureId: this.props.feature.id,
-      type: this.props.type.id,
-    });
   }
 }

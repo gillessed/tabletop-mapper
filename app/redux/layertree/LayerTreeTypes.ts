@@ -1,4 +1,5 @@
 import { ReduxState } from "../AppReducer";
+import { Model } from "../model/ModelTypes";
 import { createActionWrapper } from "../utils/typedAction";
 
 export namespace LayerTree {
@@ -26,5 +27,14 @@ export namespace LayerTree {
 
   export namespace Selectors {
     export const get = (state: ReduxState) => state.layerTree;
+    export const getCurrentLayer = (state: ReduxState) => {
+      const layerTree = get(state);
+      const model = Model.Selectors.get(state);
+      let selectedId = layerTree.selectedNode;
+      if (model.features.byId[selectedId]) {
+        selectedId = model.features.byId[selectedId].layerId;
+      }
+      return selectedId;
+    }
   }
 }

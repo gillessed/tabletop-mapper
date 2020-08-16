@@ -7,13 +7,13 @@ import { GeometryButtons } from './GeometryButtons';
 
 interface Props {
   model: Model.Types.State;
-  feature: Model.Types.Feature<any>;
+  feature: Model.Types.Feature;
   dispatchers: Dispatchers;
 }
 
 export class FeatureView extends React.PureComponent<Props, {}> {
   public render() {
-    const geometryType = Model.Types.Geometries[this.props.feature.type].name;
+    const geometryType = Model.Types.Geometries[this.props.feature.geometry.type].name;
     return (
       <div className='feature-view-container'>
         <div className='title'> {this.props.feature.name} </div>

@@ -1,0 +1,11 @@
+@import '../../../node_modules/@blueprintjs/core/lib/scss/variables.scss';
+
+.feature-toolbar {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  
+  .feature-button {
+    width: 50px;
+  }
+}

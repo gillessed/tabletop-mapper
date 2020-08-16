@@ -1,15 +1,16 @@
-import { ContextMenu, ITreeNode, Menu, Tree } from '@blueprintjs/core';
+import { Classes, ContextMenu, ITreeNode, Menu, Tree } from '@blueprintjs/core';
+import * as classNames from 'classnames';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { AppContext, withAppContext } from '../../AppContextProvider';
+import { ReduxState } from '../../redux/AppReducer';
 import { Dispatchers } from '../../redux/Dispatchers';
 import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
 import { Model } from '../../redux/model/ModelTypes';
-import { ReduxState } from '../../redux/AppReducer';
 import { LayerMenuItems } from './LayerMenuItem';
 import './Layers.scss';
 
-interface Props {
+;interface Props {
   appContext: AppContext;
   model: Model.Types.State;
   layerTree: LayerTree.Types.State;
@@ -24,14 +25,13 @@ class LayersComponent extends React.Component<Props> {
   }
 
   public render() {
-    const nodes: ITreeNode[] = [
-      this.getTreeNode(this.props.model, Model.ROOT_LAYER),
-    ];
+    const nodes: ITreeNode[] = this.getTreeNode(this.props.model, Model.RootLayerId).childNodes ?? [];
     return (
       <div className='layers-container'>
         <div className='side-panel-header unselectable title'>Layers</div>
-        <div className='tree-container'>
+        <div className='tree-container' onClick={this.onClick}>
           <Tree
+            className={classNames('layer-tree-container', Classes.DARK)}
             contents={nodes}
             onNodeClick={this.onNodeClick}
             onNodeCollapse={this.onNodeCollapse}
@@ -41,6 +41,13 @@ class LayersComponent extends React.Component<Props> {
         </div>
       </div>
     );
+  }
+
+  private onClick = (e: any) => {
+    const classes: string = e.target.className;
+    if (classes.indexOf('layer-tree-container') >= 0) {
+      this.dispatchers.layerTree.selectNode(Model.RootLayerId);
+    }
   }
 
   private getTreeNode = (model: Model.Types.State, layerId: string) => {
@@ -66,7 +73,7 @@ class LayersComponent extends React.Component<Props> {
 
   private getFeatureNode = (model: Model.Types.State, featureId: string) => {
     const feature = model.features.byId[featureId];
-    const icon = Model.Types.Geometries[feature.type].icon;
+    const icon = Model.Types.Geometries[feature.geometry.type].icon;
     const node: ITreeNode = {
       id: feature.id,
       hasCaret: false,

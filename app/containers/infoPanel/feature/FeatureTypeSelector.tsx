@@ -5,7 +5,7 @@ import { Model } from '../../../redux/model/ModelTypes';
 import { FeatureTypeSelectorButton } from './FeatureTypeSelectorButton';
 
 interface Props {
-  feature: Model.Types.Feature<any>;
+  feature: Model.Types.Feature;
   dispatchers: Dispatchers;
 }
 
@@ -21,7 +21,7 @@ export class FeatureTypeSelector extends React.PureComponent<Props, {}> {
   private renderButton = (key: string) => {
     const type = Model.Types.Geometries[key];
     let active = false;
-    if (type.id === this.props.feature.type) {
+    if (type.id === this.props.feature.geometry.type) {
       active = true;
     }
     return (

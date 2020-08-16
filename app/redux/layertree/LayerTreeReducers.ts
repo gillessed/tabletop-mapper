@@ -5,9 +5,9 @@ import { Model } from '../model/ModelTypes';
 
 const INITIAL_STATE: LayerTree.Types.State = {
   expandedNodes: {
-    [Model.ROOT_LAYER]: true,
+    [Model.RootLayerId]: true,
   },
-  selectedNode: Model.ROOT_LAYER,
+  selectedNode: Model.RootLayerId,
 };
 
 const setNodesExpandedReducer = (state: LayerTree.Types.State, layerIds: string[]) => {

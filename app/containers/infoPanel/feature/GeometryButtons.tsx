@@ -1,10 +1,10 @@
+import { Button, Intent } from '@blueprintjs/core';
 import * as React from 'react';
 import { Dispatchers } from '../../../redux/Dispatchers';
-import { Button, Intent } from '@blueprintjs/core';
 import { Model } from '../../../redux/model/ModelTypes';
 
 interface Props {
-  feature: Model.Types.Feature<any>;
+  feature: Model.Types.Feature;
   dispatchers: Dispatchers;
 }
 

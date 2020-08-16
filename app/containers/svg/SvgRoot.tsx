@@ -2,29 +2,29 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { AppContext, withAppContext } from '../../AppContextProvider';
 import { Transform, Vector } from '../../math/Vector';
+import { ReduxState } from '../../redux/AppReducer';
 import { Dispatchers } from '../../redux/Dispatchers';
 import { Grid } from '../../redux/grid/GridTypes';
+import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
 import { Model } from '../../redux/model/ModelTypes';
-import { ReduxState } from '../../redux/AppReducer';
+import { addCoordinateToPartialGeometry } from '../../redux/model/PartialGeometry';
+import { treeWalk } from '../../redux/model/TreeWalk';
+import { generateRandomString } from '../../utils/randomId';
+import { SvgRectangleFeature } from './features/SvgRectangleFeature';
 import { Gridlines } from './grid/Gridlines';
 
 type MouseMode = Grid.Types.MouseMode;
 const MouseMode = Grid.Types.MouseMode;
 
-interface StateProps {
-  appContext: AppContext;
-  model: Model.Types.State;
-  transform: Transform;
-  mouseMode: MouseMode;
-  mousePosition?: Vector;
-}
+type StoreProps = ReturnType<typeof mapStateToProps>;
 
 interface OwnProps {
+  appContext: AppContext;
   width: number;
   height: number;
 }
 
-type Props = StateProps & OwnProps;
+type Props = StoreProps & OwnProps;
 
 const INITIAL_SCALE = 50;
 const ZOOM_CONSTANT = 1.1;
@@ -40,10 +40,8 @@ class SvgRootComponent extends React.Component<Props, {}> {
   }
 
   public UNSAFE_componentWillMount() {
-    this.dispatchers.grid.updateGridState({
-      mouseMode: MouseMode.NONE,
-      transform: new Transform(new Vector(this.props.width / (2 * INITIAL_SCALE), this.props.height / (2 * INITIAL_SCALE)), INITIAL_SCALE),
-    });
+    this.dispatchers.grid.setMouseMode(MouseMode.None);
+    this.dispatchers.grid.setTransform(new Transform(new Vector(this.props.width / (2 * INITIAL_SCALE), this.props.height / (2 * INITIAL_SCALE)), INITIAL_SCALE));
   }
 
   public render() {
@@ -59,38 +57,77 @@ class SvgRootComponent extends React.Component<Props, {}> {
       >
         <rect x={0} y={0} width={this.props.width} height={this.props.height} fill='#E1E8ED' />
         <g transform={this.props.transform.toSvg()}>
+          {this.renderFeatures()}
           <Gridlines transform={this.props.transform} width={this.props.width} height={this.props.height} />
         </g>
       </svg>
     );
   }
 
-  private onMouseDown = (e: React.MouseEvent<SVGElement>) => {
-    this.dispatchers.grid.updateGridState({
-      mousePosition: new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY),
-      mouseMode: MouseMode.DRAG,
+  private renderFeatures() {
+    const features: React.ReactNode[] = [];
+    treeWalk(this.props.model, (feature) => {
+      features.push(this.renderFeature(feature));
     });
+    return features;
+  }
+
+  private renderFeature = (feature: Model.Types.Feature) => {
+    switch(feature.geometry.type) {
+      case 'rectangle':
+        return <SvgRectangleFeature key={feature.id} feature={feature as Model.Types.Feature<Model.Types.Rectangle>} />;
+    }
+    return null;
+  }
+
+  private onMouseDown = (e: React.MouseEvent<SVGElement>) => {
+    const { mouseMode, partialGeometry, mousePosition, transform, currentLayer } = this.props;
+    this.dispatchers.grid.setMousePosition(new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY));
+    switch (mouseMode) {
+      case MouseMode.None:
+        this.dispatchers.grid.setMouseMode(MouseMode.Drag);
+        break;
+      case MouseMode.DrawPoint:
+      case MouseMode.DrawRectangle:
+        const coordinate = transform.applyV(mousePosition).getCoordinate();
+        const rounded = transform.applyV(mousePosition).round().getCoordinate();
+        const { complete, geometry } = addCoordinateToPartialGeometry(partialGeometry, partialGeometry.snapToGrid ? rounded : coordinate);
+        if (complete) {
+          this.dispatchers.grid.setMouseMode(MouseMode.None);
+          const featureId = generateRandomString();
+          this.dispatchers.model.createFeature({
+            id: featureId,
+            name: 'New ' + Model.Types.Geometries[geometry.type].name,
+            layerId: currentLayer,
+            geometry: geometry as Model.Types.Geometry,
+          });
+          this.dispatchers.layerTree.expandNode(currentLayer);
+          this.dispatchers.layerTree.selectNode(featureId);
+        } else {
+          this.dispatchers.grid.updatePartialGeometry(geometry);
+        }
+        break;
+    }
   }
 
   private onMouseMove = (e: React.MouseEvent<SVGElement>) => {
+    const { mousePosition, mouseMode, transform } = this.props;
     const newMousePosition = new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    if (this.props.mouseMode == MouseMode.DRAG && this.props.mousePosition) {
+    if (mouseMode !== MouseMode.None) {
+      this.dispatchers.grid.setMousePosition(new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY));
+    }
+    if (this.props.mouseMode == MouseMode.Drag && mousePosition) {
       const newTranslation = newMousePosition
-        .subtract(this.props.mousePosition)
-        .scalarMultiply(1 / this.props.transform.scale)
-        .add(this.props.transform.translation);
-      this.dispatchers.grid.updateGridState({
-        mousePosition: new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY),
-        transform: this.props.transform.setTranslation(newTranslation),
-      });
+        .subtract(mousePosition)
+        .scalarMultiply(1 / transform.scale)
+        .add(transform.translation);
+      this.dispatchers.grid.setTransform(transform.setTranslation(newTranslation));
     }
   }
 
   private onMouseUp = (e: React.MouseEvent<SVGElement>) => {
-    if (this.props.mouseMode == MouseMode.DRAG) {
-      this.dispatchers.grid.updateGridState({
-        mouseMode: MouseMode.NONE,
-      });
+    if (this.props.mouseMode === MouseMode.Drag) {
+      this.dispatchers.grid.setMouseMode(MouseMode.None);
     }
   }
 
@@ -109,18 +146,19 @@ class SvgRootComponent extends React.Component<Props, {}> {
     const newTranslation = this.props.transform.translation
       .subtract(mousePosition.scalarMultiply(1 / this.props.transform.scale))
       .add(mousePosition.scalarMultiply(1 / newScale));
-    this.dispatchers.grid.updateGridState({
-      transform: this.props.transform.setTranslation(newTranslation).setScale(newScale),
-    });
+    this.dispatchers.grid.setTransform(this.props.transform.setTranslation(newTranslation).setScale(newScale));
   }
 }
 
 const mapStateToProps = (state: ReduxState) => {
+  const grid = Grid.Selectors.get(state);
   return {
     model: Model.Selectors.get(state),
-    transform: state.grid.transform,
-    mouseMode: state.grid.mouseMode,
-    mousePosition: state.grid.mousePosition,
+    transform: grid.transform,
+    mouseMode: grid.mouseMode,
+    mousePosition: grid.mousePosition,
+    partialGeometry: grid.partialGeometry,
+    currentLayer: LayerTree.Selectors.getCurrentLayer(state),
   };
 };
 

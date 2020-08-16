@@ -1,3 +1,8 @@
+export class Coordinate {
+  x: number;
+  y: number;
+}
+
 export class Vector {
   constructor(
     public readonly x: number,
@@ -23,6 +28,17 @@ export class Vector {
       this.x * s,
       this.y * s,
     );
+  }
+  
+  public round() {
+    return new Vector(
+      Math.round(this.x),
+      Math.round(this.y),
+    );
+  }
+
+  public getCoordinate() {
+    return { x: this.x, y: this.y };
   }
 }
 

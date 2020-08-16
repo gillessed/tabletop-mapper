@@ -10,13 +10,6 @@ const globalShortcut = Electron.globalShortcut;
 let mainWindow: Electron.BrowserWindow;
 
 function createWindow() {
-  globalShortcut.register('CommandOrControl+Q', () => {
-    app.quit();
-  });
-
-  globalShortcut.register('CommandOrControl+D', () => {
-    mainWindow.webContents.openDevTools();
-  });
 
   mainWindow = new Electron.BrowserWindow({
     title: 'Tabletop Mapper',
@@ -41,18 +34,22 @@ function createWindow() {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
   });
+  
+  globalShortcut.register('CommandOrControl+0', () => {
+    app.quit();
+  });
+
+  globalShortcut.register('CommandOrControl+Shift+D', () => {
+    for (const window of Electron.BrowserWindow.getAllWindows()) {
+      window.webContents.openDevTools();
+    }
+  });
 }
 
-app.on('ready', createWindow)
+app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow();
   }
 });

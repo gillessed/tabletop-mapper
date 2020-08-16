@@ -1,5 +1,8 @@
+@import '../../../../node_modules/@blueprintjs/core/lib/scss/variables.scss';
+
 .feature-view-container {
   padding: 16px;
+  background: $dark-gray3;
 
   .section {
     padding-top: 20px;
