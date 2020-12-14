@@ -39,5 +39,9 @@ export namespace Grid {
 
   export namespace Selectors {
     export const get = (state: ReduxState) => state.grid;
+    export const getPartialGeometry = (state: ReduxState) => get(state).partialGeometry;
+    export const getMousePosition = (state: ReduxState) => get(state).mousePosition;
+    export const getTransform = (state: ReduxState) => get(state).transform;
+    export const getMouseMode = (state: ReduxState) => get(state).mouseMode;
   }
 }

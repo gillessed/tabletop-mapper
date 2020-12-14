@@ -65,7 +65,7 @@ const INITIAL_STATE2: Model.Types.State = {
   },
 };
 
-const createLayerHandler = (state: Model.Types.State, payload: Model.Payloads.CreateLayer) => {
+const createLayerHandler = (state: Model.Types.State, payload: Model.Payloads.CreateLayer): Model.Types.State => {
   let index = 1;
   while (findByName(state.layers, `Layer ${index}`)) {
     index++;
@@ -83,21 +83,29 @@ const createLayerHandler = (state: Model.Types.State, payload: Model.Payloads.Cr
   newState = DotProp.merge(newState, `layers.byId.${payload.parentId}.children`, [newLayer.id]);
   newState = DotProp.set(newState, `layers.byId.${newLayer.id}`, newLayer);
   newState = DotProp.merge(newState, `layers.all`, [newLayer.id]);
-
   return newState;
 }
 
-export const createFeatureReducer = (state: Model.Types.State, feature: Model.Types.Feature) => {
+export const createFeatureReducer = (state: Model.Types.State, feature: Model.Types.Feature): Model.Types.State => {
   let newState = state;
   newState = DotProp.merge(newState, `layers.byId.${feature.layerId}.features`, [feature.id]);
   newState = DotProp.set(newState, `features.byId.${feature.id}`, feature);
   newState = DotProp.merge(newState, `features.all`, [feature.id]);
+  return newState;
+}
 
+export const snapsToGridReducer = (state: Model.Types.State, payload: Model.Payloads.SnapsToGrid): Model.Types.State => {
+  let newState = state;
+  const { featureIds, snapsToGrid } = payload;
+  for (const featureId of featureIds) {
+    newState = DotProp.set(newState, `features.byId.${featureId}.geometry.snapToGrid`, snapsToGrid);
+  }
   return newState;
 }
 
 export const modelReducer: Reducer<Model.Types.State> = newTypedReducer<Model.Types.State>()
   .handlePayload(Model.Actions.createLayer.type, createLayerHandler)
   .handlePayload(Model.Actions.createFeature.type, createFeatureReducer)
+  .handlePayload(Model.Actions.setSnapsToGrid.type, snapsToGridReducer)
   .handleDefault((state = INITIAL_STATE2) => state)
   .build();

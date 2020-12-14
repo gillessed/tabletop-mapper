@@ -33,13 +33,16 @@ export namespace Model {
       return !!(object as Layer).features;
     }
 
-    export interface Asset {
+    export interface Asset extends Object {
       path: string;
       type: 'svg' | 'jpg' | 'png';
       gridDimensions?: { x: number, y: number};
+      tags: string;
     }
 
-    export interface Style extends Object {}
+    export interface Style extends Object {
+      
+    }
 
     export interface GeometryInfo {
       id: GeometryType;
@@ -128,11 +131,17 @@ export namespace Model {
       parentId: string;
       layerId: string;
     }
+
+    export interface SnapsToGrid {
+      featureIds: string[],
+      snapsToGrid: boolean,
+    }
   }
 
   export const DispatchActions = {
     createLayer: createActionWrapper<Payloads.CreateLayer>('model::createLayer'),
     createFeature: createActionWrapper<Types.Feature>('model::createFeature'),
+    setSnapsToGrid: createActionWrapper<Payloads.SnapsToGrid>('model::snapToGrid'),
   }
 
   export const Actions = {
@@ -141,6 +150,9 @@ export namespace Model {
 
   export namespace Selectors {
     export const get = (state: ReduxState) => state.model;
-    export const getLayers = (state: ReduxState) => state.model.layers;
+    export const getLayers = (state: ReduxState) => get(state).layers;
+    export const getFeatures = (state: ReduxState) => get(state).features;
+    export const getAssets = (state: ReduxState) => get(state).assets;
+    export const getStyles = (state: ReduxState) => get(state).styles;
   }
 }

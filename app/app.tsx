@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
-import logger from 'redux-logger';
+import { createLogger } from 'redux-logger';
 import createSagaMiddleware from 'redux-saga';
 import { AppContext, AppContextProvider } from './AppContextProvider';
 import { Root } from './containers/Root';
@@ -11,8 +11,13 @@ import { dispatcherCreators } from './redux/Dispatchers';
 import { AppReducer } from './redux/AppReducer';
 import { appSaga } from './redux/AppSaga';
 import { createRegister, SagaListener } from './redux/SagaListener';
+import { loggerPredicate } from './redux/Logger';
 
 const sagaMiddleware = createSagaMiddleware();
+
+const logger = createLogger({
+  predicate: loggerPredicate,
+});
 
 const store = createStore(
   AppReducer,

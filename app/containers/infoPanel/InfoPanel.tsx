@@ -27,13 +27,7 @@ class InfoPanelComponent extends React.PureComponent<Props, {}> {
     let view;
     const { selectedNode } = this.props.layerTree;
     if (this.props.model.features.all.indexOf(selectedNode) >= 0) {
-      view = (
-        <FeatureView
-          feature={this.props.model.features.byId[selectedNode]}
-          model={this.props.model}
-          dispatchers={this.dispatchers}
-        />
-      );
+      view = <FeatureView featureId={selectedNode} />;
     } else if (this.props.model.layers.all.indexOf(selectedNode) >= 0 && selectedNode !== Model.RootLayerId) {
       view = (
         <LayerView

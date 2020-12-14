@@ -1,37 +1,48 @@
 import * as React from 'react';
-import { Dispatchers } from '../../../redux/Dispatchers';
+import { useSelector, useStore } from 'react-redux';
 import { Model } from '../../../redux/model/ModelTypes';
-import { FeatureTypeSelector } from './FeatureTypeSelector';
 import './FeatureView.scss';
-import { GeometryButtons } from './GeometryButtons';
+import { FeatureIcon } from './FeatureIcon';
+import { Colors, Switch, Classes } from '@blueprintjs/core';
+import { SnapsToGridSwitch } from './SnapsToGridSwitch';
 
-interface Props {
-  model: Model.Types.State;
-  feature: Model.Types.Feature;
-  dispatchers: Dispatchers;
-}
-
-export class FeatureView extends React.PureComponent<Props, {}> {
-  public render() {
-    const geometryType = Model.Types.Geometries[this.props.feature.geometry.type].name;
-    return (
-      <div className='feature-view-container'>
-        <div className='title'> {this.props.feature.name} </div>
-        <div className='subtitle'>{geometryType}</div>
-        <div className='section'>
-          <FeatureTypeSelector
-            feature={this.props.feature}
-            dispatchers={this.props.dispatchers}
-          />
-        </div>
-        <div className='section'>
-          <GeometryButtons
-            feature={this.props.feature}
-            dispatchers={this.props.dispatchers}
-          />
-        </div>
-
-      </div>
-    );
+export namespace FeatureView {
+  export interface Props {
+    featureId: string;
   }
 }
+
+export const FeatureView = React.memo(function FeatureView({
+  featureId,
+}: FeatureView.Props) {
+  const store = useStore();
+  const features = useSelector(Model.Selectors.getFeatures);
+  const feature = features.byId[featureId];
+  console.log('***** featureId', featureId);
+  console.log('features', features);
+  console.log('feature', feature);
+  console.log('state', store.getState());
+  if (!feature) {
+    return null;
+  }
+  const geometryType = Model.Types.Geometries[feature.geometry.type];
+  return (
+    <div className='feature-view-container'>
+      <div className='feature-header'>
+        <FeatureIcon
+          feature={feature}
+          size={60}
+          color={Colors.LIGHT_GRAY5}
+        />
+        <div className='title'> {feature.name} </div>
+        <div className='subtitle'>{geometryType.name}</div>
+      </div>
+      <div className='feature-body'>
+        <div className='label'>Properties</div>
+        <div className='section'>
+          <SnapsToGridSwitch feature={feature} />
+        </div>
+      </div>
+    </div>
+  );
+});

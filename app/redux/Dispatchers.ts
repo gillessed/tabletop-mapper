@@ -4,6 +4,7 @@ import { LayerTree } from './layertree/LayerTreeTypes';
 import { Model } from './model/ModelTypes';
 import { ReduxState } from './AppReducer';
 import { createDispatcher, TypedDispatcher } from './utils/typedDispatcher';
+import { useContext } from 'react';
 
 export interface Dispatchers {
   model: TypedDispatcher<typeof Model.DispatchActions>;

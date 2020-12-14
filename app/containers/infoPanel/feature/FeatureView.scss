@@ -1,24 +1,52 @@
 @import '../../../../node_modules/@blueprintjs/core/lib/scss/variables.scss';
 
 .feature-view-container {
-  padding: 16px;
-  background: $dark-gray3;
+  background: $dark-gray1;
+  padding: 6px;
 
-  .section {
-    padding-top: 20px;
+  .feature-header {
+    display: grid;
+    grid-template-areas:
+      'icon title'
+      'icon subtitle';
+
+    grid-template-columns: 76px auto auto;
+    background: $dark-gray3;
+    padding: 10px;
+
+    .feature-icon {
+      grid-area: icon;
+      margin-right: 16px;
+    }
+    
+    div.title {
+      color: $light-gray5;
+      grid-area: title;
+      margin-bottom: 0px;
+    }
+  
+    div.subtitle {
+      color: $light-gray1;
+      grid-area: subtitle;
+    }
+
+    div.title, div.subtitle {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
-  .label {
-    padding-top   : 20px;
-    padding-bottom: 10px;
-  }
+  .feature-body {
+    padding: 0px 10px 10px 10px;
+    div.label {
+      color: $light-gray1;
+      padding-top   : 20px;
+      padding-bottom: 10px;
+    }
 
-  span.label {
-    padding-right: 10px;
-  }
-
-  #geometry-type-buttons,
-  #draw-button {
-    width: 100%;
+    span.label {
+      padding-right: 10px;
+    }
   }
 }

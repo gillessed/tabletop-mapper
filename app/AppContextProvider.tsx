@@ -13,6 +13,14 @@ export const AppContextConsumer = ContextComponent.Consumer;
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
+export function useAppContext() {
+  return React.useContext(ContextComponent);
+}
+
+export function useDispatchers() {
+  return useAppContext().dispatchers;
+}
+
 export function withAppContext<
   P extends { appContext?: AppContext },
   R = Omit<P, 'appContext'>,

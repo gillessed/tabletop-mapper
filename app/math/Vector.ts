@@ -1,6 +1,16 @@
-export class Coordinate {
+export interface Coordinate {
   x: number;
   y: number;
+}
+
+export function same(c1: Coordinate, c2: Coordinate) {
+  return c1.x === c2.x && c1.y === c2.y;
+}
+
+export function coordinateDistance(c1: Coordinate, c2: Coordinate) {
+  const dx = c2.x - c1.x;
+  const dy = c2.y - c1.y;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 export class Vector {
@@ -75,7 +85,15 @@ export class Transform {
   }
 
   public reverseV(point: Vector) {
-    return point.add(this.translation).scalarMultiply(1 * this.scale);
+    return point.add(this.translation).scalarMultiply(this.scale);
+  }
+
+  public applyScalar(x: number) {
+    return x / this.scale;
+  }
+
+  public reverseScalar(x: number) {
+    return x * this.scale;
   }
 
   public toSvg() {

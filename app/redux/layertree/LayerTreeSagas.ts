@@ -12,7 +12,7 @@ export function* layerTreeSaga(context: SagaContext) {
 }
 
 function* expandNodeWorker(context: SagaContext, action: TypedAction<string>) {
-  const layers: Indexable<Model.Types.Layer> = yield select(Model.Selectors.getLayers);
+  const layers: ReturnType<typeof Model.Selectors.getLayers> = yield select(Model.Selectors.getLayers);
   const layerId = action.payload;
   const ids: string[] = [layerId];
   let node = layers.byId[layerId];

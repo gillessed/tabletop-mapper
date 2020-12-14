@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Transform } from '../../../math/Vector';
-import './GridLines.scss';
+import './Gridlines.scss';
 
 export namespace GridLines {
   export interface Props {
