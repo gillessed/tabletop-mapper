@@ -46,7 +46,7 @@ class LayersComponent extends React.Component<Props> {
   private onClick = (e: any) => {
     const classes: string = e.target.className;
     if (classes.indexOf('layer-tree-container') >= 0) {
-      this.dispatchers.layerTree.selectNode(Model.RootLayerId);
+      this.dispatchers.layerTree.selectNodes([Model.RootLayerId]);
     }
   }
 
@@ -66,7 +66,7 @@ class LayersComponent extends React.Component<Props> {
       childNodes: children,
       hasCaret: children.length > 0,
       isExpanded: !!this.props.layerTree.expandedNodes[layer.id],
-      isSelected: layer.id === this.props.layerTree.selectedNode,
+      isSelected: this.props.layerTree.selectedNodes.indexOf(layer.id) >= 0,
     };
     return node;
   }
@@ -80,13 +80,13 @@ class LayersComponent extends React.Component<Props> {
       icon,
       label: feature.name,
       isExpanded: !!this.props.layerTree.expandedNodes[feature.id],
-      isSelected: feature.id === this.props.layerTree.selectedNode,
+      isSelected: this.props.layerTree.selectedNodes.indexOf(feature.id) >= 0,
     };
     return node;
   }
 
   private onNodeClick = (node: ITreeNode, _: number[]) => {
-    this.dispatchers.layerTree.selectNode(`${node.id}`);
+    this.dispatchers.layerTree.selectNodes([`${node.id}`]);
   };
 
   private onNodeExpand = (node: ITreeNode) => {

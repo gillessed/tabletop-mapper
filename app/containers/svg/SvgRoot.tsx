@@ -10,6 +10,10 @@ import { generateRandomString } from '../../utils/randomId';
 import { Features } from './features/Features';
 import { GridLines } from './grid/Gridlines';
 import { PartialGeometry } from './partialGeometry/PartialGeometry';
+import { FeatureOutlines } from './features/FeatureOutlines';
+import { MouseButtons } from '../../utils/mouse';
+import { Colors } from '@blueprintjs/core';
+import { doesFeatureContain } from '../../redux/model/FeatureIntersection';
 
 type MouseMode = Grid.Types.MouseMode;
 const MouseMode = Grid.Types.MouseMode;
@@ -25,6 +29,7 @@ const InitialScale = 50;
 const ZoomConstant = 1.05;
 const MaxScale = 400;
 const MinScale = 2;
+const SelectionPadding = 5;
 
 export const SvgRoot = React.memo(function SvgRoot({
   width,
@@ -43,19 +48,28 @@ export const SvgRoot = React.memo(function SvgRoot({
   const partialGeometry = useSelector(Grid.Selectors.getPartialGeometry);
   const transform = useSelector(Grid.Selectors.getTransform);
   const currentLayer = useSelector(LayerTree.Selectors.getCurrentLayer);
+  const features = useSelector(Model.Selectors.getFeatures);
 
-  const onMouseDown = React.useCallback((e: React.MouseEvent<SVGElement>) => {
-    dispatchers.grid.setMousePosition(new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY));
+  const onLeftMouseDown = React.useCallback((e: React.MouseEvent<SVGElement>) => {
+    const newMousePosition = new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    const coordinate = transform.applyV(newMousePosition).getCoordinate();
     switch (mouseMode) {
       case MouseMode.None:
-        dispatchers.grid.setMouseMode(MouseMode.Drag);
+        const hoveredFeatures: string[] = [];
+        const padding = transform.applyScalar(SelectionPadding);
+        for (const featureId of features.all) {
+          const feature = features.byId[featureId];
+          if (doesFeatureContain(feature, coordinate, padding)) {
+            hoveredFeatures.push(featureId);
+          }
+        }
+        dispatchers.layerTree.selectNodes(hoveredFeatures);
         break;
       case MouseMode.DrawPoint:
       case MouseMode.DrawRectangle:
       case MouseMode.DrawPath:
       case MouseMode.DrawCircle:
-        const coordinate = transform.applyV(mousePosition).getCoordinate();
-        const rounded = transform.applyV(mousePosition).round().getCoordinate();
+        const rounded = transform.applyV(newMousePosition).round().getCoordinate();
         const { complete, geometry } = addCoordinateToPartialGeometry(partialGeometry, partialGeometry.snapToGrid ? rounded : coordinate);
         if (complete) {
           dispatchers.grid.setMouseMode(MouseMode.None);
@@ -67,36 +81,62 @@ export const SvgRoot = React.memo(function SvgRoot({
             geometry: geometry as Model.Types.Geometry,
           });
           dispatchers.layerTree.expandNode(currentLayer);
-          dispatchers.layerTree.selectNode(featureId);
+          dispatchers.layerTree.selectNodes([featureId]);
           dispatchers.grid.updatePartialGeometry(undefined);
         } else {
           dispatchers.grid.updatePartialGeometry(geometry);
         }
         break;
     }
-  }, [dispatchers, mouseMode, mousePosition, partialGeometry, mouseMode, transform, currentLayer]);
+  }, [dispatchers, mouseMode, partialGeometry, mouseMode, transform, currentLayer, features]);
+
+  const onRightMouseDown = React.useCallback((e: React.MouseEvent<SVGElement>) => {
+    switch (mouseMode) {
+      case MouseMode.None:
+        dispatchers.grid.setMouseMode(MouseMode.Drag);
+        break;
+    }
+  }, [dispatchers]);
+
+  const onMouseDown = React.useCallback((e: React.MouseEvent<SVGElement>) => {
+    const newMousePosition = new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    dispatchers.grid.setMousePosition(newMousePosition);
+    if (e.button === MouseButtons.Left) {
+      onLeftMouseDown(e);
+    } else if (e.button === MouseButtons.Right) {
+      onRightMouseDown(e);
+    }
+  }, [dispatchers, onLeftMouseDown, onRightMouseDown]);
 
   const onMouseUp = React.useCallback(() => {
-    if (mouseMode === MouseMode.Drag) {
-      dispatchers.grid.setMouseMode(MouseMode.None);
+    switch (mouseMode) {
+      case MouseMode.None:
+        
+      case MouseMode.Drag:
+        dispatchers.grid.setMouseMode(MouseMode.None);
+        break;
     }
-  }, [dispatchers, mouseMode]);
+    if (mouseMode === MouseMode.Drag) {
+    }
+  }, [dispatchers, mouseMode, features]);
 
   const onMouseMove = React.useCallback((e: React.MouseEvent<SVGElement>) => {
     const newMousePosition = new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    if (mouseMode !== MouseMode.None) {
-      dispatchers.grid.setMousePosition(new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY));
+    switch(mouseMode) {
+      case MouseMode.Drag:
+        if (mousePosition) {
+          const newTranslation = newMousePosition
+            .subtract(mousePosition)
+            .scalarMultiply(1 / transform.scale)
+            .add(transform.translation);
+          dispatchers.grid.setTransform(transform.setTranslation(newTranslation));
+        }
+        break;
     }
-    if (mouseMode == MouseMode.Drag && mousePosition) {
-      const newTranslation = newMousePosition
-        .subtract(mousePosition)
-        .scalarMultiply(1 / transform.scale)
-        .add(transform.translation);
-      dispatchers.grid.setTransform(transform.setTranslation(newTranslation));
-    }
+    dispatchers.grid.setMousePosition(new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY));
   }, [dispatchers, mousePosition, mouseMode, transform]);
 
-  const onWheel = React.useCallback((e : React.WheelEvent<SVGElement>) => {
+  const onWheel = React.useCallback((e: React.WheelEvent<SVGElement>) => {
     if ((transform.scale === MinScale && e.nativeEvent.deltaY > 0) ||
       (transform.scale === MaxScale && e.nativeEvent.deltaY < 0)) {
       return;
@@ -124,10 +164,11 @@ export const SvgRoot = React.memo(function SvgRoot({
       onMouseMove={onMouseMove}
       onWheel={onWheel}
     >
-      <rect x={0} y={0} width={width} height={height} fill='#E1E8ED' />
+      <rect x={0} y={0} width={width} height={height} fill={Colors.LIGHT_GRAY5} />
       <g transform={transform.toSvg()}>
-        <PartialGeometry />
         <Features />
+        <FeatureOutlines />
+        <PartialGeometry />
         <GridLines transform={transform} width={width} height={height} />
       </g>
     </svg>

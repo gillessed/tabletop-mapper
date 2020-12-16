@@ -1,23 +1,28 @@
 import * as React from 'react';
 import { useSelector } from "react-redux";
 import { Model } from '../../../redux/model/ModelTypes';
-import { treeWalk } from '../../../redux/model/TreeWalk';
+import { treeWalk } from '../../../redux/model/ModelTree';
 import { PathFeature } from './PathFeature';
 import { PointFeature } from './PointFeature';
 import { RectangleFeature } from './RectangleFeature';
 import { CircleFeature } from './CircleFeature';
+import { visitFeature } from '../../../redux/model/ModelVisitors';
 
 function renderFeature(feature: Model.Types.Feature) {
-  switch (feature.geometry.type) {
-    case 'point':
-      return <PointFeature key={feature.id} feature={feature as Model.Types.Feature<Model.Types.Point>} />;
-    case 'rectangle':
-      return <RectangleFeature key={feature.id} feature={feature as Model.Types.Feature<Model.Types.Rectangle>} />;
-    case 'path':
-      return <PathFeature key={feature.id} feature={feature as Model.Types.Feature<Model.Types.Path>} />
-    case 'circle':
-      return <CircleFeature key={feature.id} feature={feature as Model.Types.Feature<Model.Types.Circle>} />
-  }
+  return visitFeature({
+    visitPoint: (point: Model.Types.Feature<Model.Types.Point>) => {
+      return <PointFeature key={feature.id} feature={point} />;
+    },
+    visitRectangle: (rectangle: Model.Types.Feature<Model.Types.Rectangle>) => {
+      return <RectangleFeature key={feature.id} feature={rectangle} />;
+    },
+    visitPath: (path: Model.Types.Feature<Model.Types.Path>) => {
+      return <PathFeature key={feature.id} feature={path} />;
+    },
+    visitCircle: (circle: Model.Types.Feature<Model.Types.Circle>) => {
+      return <CircleFeature key={feature.id} feature={circle} />;
+    },
+  }, feature);
 }
 
 export const Features = React.memo(function Features() {
@@ -28,5 +33,5 @@ export const Features = React.memo(function Features() {
     renderedFeatures.push(renderFeature(feature));
   });
 
-  return <>{renderedFeatures}</>;
+  return <g className='rendered-features'> {renderedFeatures} </g>;
 });

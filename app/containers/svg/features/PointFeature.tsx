@@ -1,9 +1,5 @@
 import * as React from 'react';
-import { connect, useSelector } from 'react-redux';
-import { ReduxState } from '../../../redux/AppReducer';
 import { Model } from '../../../redux/model/ModelTypes';
-import { SvgRectangle } from '../renderers/SvgRectangle';
-import { Grid } from '../../../redux/grid/GridTypes';
 import { SvgPoint } from '../renderers/SvgPoint';
 
 export namespace PointFeature {
@@ -12,7 +8,7 @@ export namespace PointFeature {
   }
 }
 
-const PointRadius = 0.1;
+export const PointRadius = 0.1;
 
 export const PointFeature = React.memo(function PointFeature({
   feature,

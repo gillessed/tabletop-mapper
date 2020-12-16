@@ -7,7 +7,7 @@ const INITIAL_STATE: LayerTree.Types.State = {
   expandedNodes: {
     [Model.RootLayerId]: true,
   },
-  selectedNode: Model.RootLayerId,
+  selectedNodes: [Model.RootLayerId],
 };
 
 const setNodesExpandedReducer = (state: LayerTree.Types.State, layerIds: string[]) => {
@@ -31,17 +31,17 @@ const collapseNodeReducer = (state: LayerTree.Types.State, layerId: string) => {
   };
 }
 
-const selectNodeReducer = (state: LayerTree.Types.State, layerId: string) => {
+const selectNodesReducers = (state: LayerTree.Types.State, layerIds: string[]): LayerTree.Types.State => {
   return {
     ...state,
-    selectedNode: layerId,
+    selectedNodes: layerIds,
   };
 }
 
 export const layerTreeReducer: Reducer<LayerTree.Types.State> = newTypedReducer<LayerTree.Types.State>()
   .handlePayload(LayerTree.Actions.setNodesExpanded.type, setNodesExpandedReducer)
   .handlePayload(LayerTree.Actions.collapseNode.type, collapseNodeReducer)
-  .handlePayload(LayerTree.Actions.selectNode.type, selectNodeReducer)
+  .handlePayload(LayerTree.Actions.selectNodes.type, selectNodesReducers)
   .handleDefault((state = INITIAL_STATE) => state)
   .build();
 

@@ -18,10 +18,11 @@ export const FeatureView = React.memo(function FeatureView({
   const store = useStore();
   const features = useSelector(Model.Selectors.getFeatures);
   const feature = features.byId[featureId];
-  console.log('***** featureId', featureId);
-  console.log('features', features);
-  console.log('feature', feature);
-  console.log('state', store.getState());
+  // TODO: (gcole) figure out why useSelector is returning wrong value sometimes.
+  // console.log('***** featureId', featureId);
+  // console.log('features', features);
+  // console.log('feature', feature);
+  // console.log('state', store.getState());
   if (!feature) {
     return null;
   }

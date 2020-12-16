@@ -1,6 +1,8 @@
 import { rectifyRectangle } from '../../math/RectifyGeometry';
 import { Coordinate, same, coordinateDistance } from '../../math/Vector';
 import { Model } from './ModelTypes';
+import { curry2, swapArgs2 } from '../../utils/functionalSugar';
+import { visitGeometry } from './ModelVisitors';
 
 export interface AddCoordinateResult {
   geometry: Partial<Model.Types.Geometry>;
@@ -8,16 +10,17 @@ export interface AddCoordinateResult {
 }
 
 export function addCoordinateToPartialGeometry(geometry: Partial<Model.Types.Geometry>, coordinate: Coordinate): AddCoordinateResult {
-  switch (geometry.type) {
-    case 'point': return addCoordinateToPointGeometry(geometry as Model.Types.Point, coordinate);
-    case 'rectangle': return addCoordinateToRectangleGeometry(geometry as Model.Types.Rectangle, coordinate);
-    case 'path': return addCoordinateToPathGeometry(geometry as Model.Types.Path, coordinate);
-    case 'circle': return addCoordinateToCircleGeometry(geometry as Model.Types.Circle, coordinate);
-  }
+  return visitGeometry({
+    visitPoint: curry2(swapArgs2(addCoordinateToPointGeometry))(coordinate),
+    visitRectangle: curry2(swapArgs2(addCoordinateToRectangleGeometry))(coordinate),
+    visitPath: curry2(swapArgs2(addCoordinateToPathGeometry))(coordinate),
+    visitCircle: curry2(swapArgs2(addCoordinateToCircleGeometry))(coordinate),
+  }, geometry as Model.Types.Geometry);
 }
 
-function addCoordinateToPointGeometry(_: Partial<Model.Types.Point>, coordinate: Coordinate): AddCoordinateResult {
+function addCoordinateToPointGeometry(partial: Partial<Model.Types.Point>, coordinate: Coordinate): AddCoordinateResult {
   const point: Model.Types.Point = {
+    ...partial,
     type: 'point',
     p: coordinate,
   };

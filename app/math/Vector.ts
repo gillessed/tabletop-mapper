@@ -39,7 +39,7 @@ export class Vector {
       this.y * s,
     );
   }
-  
+
   public round() {
     return new Vector(
       Math.round(this.x),
@@ -47,8 +47,21 @@ export class Vector {
     );
   }
 
+  public magnitude() {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+  }
+
   public getCoordinate() {
     return { x: this.x, y: this.y };
+  }
+
+  public dot(v: Vector): number {
+    return this.x * v.x + this.y * v.y;
+  }
+
+  public normalUnit(): Vector {
+    const magnitude = this.magnitude();
+    return new Vector(this.y / magnitude, -this.x / magnitude);
   }
 }
 

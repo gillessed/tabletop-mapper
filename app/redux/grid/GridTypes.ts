@@ -19,6 +19,7 @@ export namespace Grid {
       DrawRectangle,
       DrawPath,
       DrawCircle,
+      DragFeature,
     }
   }
 

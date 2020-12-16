@@ -87,6 +87,22 @@ export namespace Model {
       }
     };
 
+    export function isPoint(geometry: Model.Types.Geometry): geometry is Model.Types.Point {
+      return geometry.type === 'point';
+    }
+
+    export function isRectangle(geometry: Model.Types.Geometry): geometry is Model.Types.Rectangle {
+      return geometry.type === 'rectangle';
+    }
+
+    export function isPath(geometry: Model.Types.Geometry): geometry is Model.Types.Path {
+      return geometry.type === 'path';
+    }
+
+    export function isCircle(geometry: Model.Types.Geometry): geometry is Model.Types.Circle {
+      return geometry.type === 'circle';
+    }
+
     export interface Feature<T extends Geometry = Geometry> extends Object {
       layerId: string;
       geometry: T;

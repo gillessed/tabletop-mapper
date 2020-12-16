@@ -6,8 +6,9 @@ import { Model } from '../../../redux/model/ModelTypes';
 import { SvgRectangle } from '../renderers/SvgRectangle';
 import { SvgPoint } from '../renderers/SvgPoint';
 import { SvgPath } from '../renderers/SvgPath';
-import { SvgCircle} from '../renderers/SvgCircle';
+import { SvgCircle } from '../renderers/SvgCircle';
 import { coordinateDistance } from '../../../math/Vector';
+import { visitGeometry } from '../../../redux/model/ModelVisitors';
 
 const PartialPointRadius = 10;
 const PartialStrokeWidth = 4;
@@ -28,7 +29,7 @@ export const PartialGeometry = React.memo(function PartialGeometry() {
     return snapToGrid ? roundedMouseGridCoordinates : mouseGridCoordinates;
   }
 
-  function renderPoint(snapToGrid?: boolean) {
+  function renderPoint({ snapToGrid }: { snapToGrid?: boolean }) {
     const p = getMousePoint(snapToGrid);
     const radius = transform.applyScalar(PartialPointRadius);
     return (
@@ -48,7 +49,7 @@ export const PartialGeometry = React.memo(function PartialGeometry() {
     const rectifiedRectangle = p2 != null ? rectifyRectangle({ type: 'rectangle', p1, p2 }) : undefined;
     return (
       <>
-        {renderPoint(rectangle.snapToGrid)}
+        {renderPoint(rectangle)}
         {rectifiedRectangle && <SvgRectangle
           rectangle={rectifiedRectangle}
           strokeWidth={strokeWidth}
@@ -67,7 +68,7 @@ export const PartialGeometry = React.memo(function PartialGeometry() {
     };
     return (
       <>
-        {renderPoint(pathGeometry.snapToGrid)}
+        {renderPoint(pathGeometry)}
         <SvgPath
           pathGeometry={fullPathGeometry}
           strokeWidth={strokeWidth}
@@ -80,7 +81,7 @@ export const PartialGeometry = React.memo(function PartialGeometry() {
   function renderCircle(circle: Model.Types.Circle) {
     const strokeWidth = transform.applyScalar(PartialStrokeWidth);
     if (!circle.p) {
-      return renderPoint(circle.snapToGrid);
+      return renderPoint(circle);
     } else {
       const mousePoint = getMousePoint(circle.snapToGrid);
       const r = coordinateDistance(mousePoint, circle.p);
@@ -88,9 +89,15 @@ export const PartialGeometry = React.memo(function PartialGeometry() {
         ...circle,
         r,
       };
+      const pointRadius = transform.applyScalar(PartialPointRadius);
       return (
         <>
-          {renderPoint(circle.snapToGrid)}
+          <SvgPoint
+            point={{ type: 'point', p: circle.p }}
+            radius={pointRadius}
+            fillOpacity={PartialOpacity}
+          />
+          {renderPoint(circle)}
           <SvgCircle
             circle={fullCircle}
             strokeWidth={strokeWidth}
@@ -101,14 +108,10 @@ export const PartialGeometry = React.memo(function PartialGeometry() {
     }
   }
 
-  switch (partialGeometry.type) {
-    case 'point':
-      return renderPoint(partialGeometry.snapToGrid);
-    case 'rectangle':
-      return renderRectangle(partialGeometry as Model.Types.Rectangle);
-    case 'path':
-      return renderPath(partialGeometry as Model.Types.Path);
-    case 'circle':
-      return renderCircle(partialGeometry as Model.Types.Circle);
-  }
+  return visitGeometry({
+    visitPoint: renderPoint,
+    visitRectangle: renderRectangle,
+    visitPath: renderPath,
+    visitCircle: renderCircle,
+  }, partialGeometry as Model.Types.Geometry);
 });
