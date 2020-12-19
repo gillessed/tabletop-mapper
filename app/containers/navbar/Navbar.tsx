@@ -1,15 +1,20 @@
-import { Alignment, Button, Classes, Navbar } from '@blueprintjs/core';
-import * as React from 'react';
+import { Alignment, Button, Classes, Navbar, Popover, PopoverInteractionKind, PopoverPosition } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
+import * as React from 'react';
+import './Navbar.scss';
+import { NavbarMainMenu } from './NavbarMainMenu';
 
-export const MapperNavbar = React.memo(function MapperNavbar() {
+export function MapperNavbar() {
   return (
     <Navbar className={Classes.DARK}>
       <Navbar.Group align={Alignment.LEFT}>
-        <div style={{ width: 300 }} />
+        <div className='menu-spacer' />
       </Navbar.Group>
       <Navbar.Group align={Alignment.LEFT}>
-        <Button minimal icon={IconNames.MENU} />
+        <Popover interactionKind={PopoverInteractionKind.CLICK} position={PopoverPosition.BOTTOM}>
+          <Button minimal icon={IconNames.MENU} />
+          <NavbarMainMenu />
+        </Popover>
       </Navbar.Group>
       <Navbar.Group align={Alignment.LEFT}>
         <Button minimal icon={IconNames.GRID} />
@@ -19,4 +24,4 @@ export const MapperNavbar = React.memo(function MapperNavbar() {
       </Navbar.Group>
     </Navbar>
   );
-});
+}

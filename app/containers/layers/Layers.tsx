@@ -1,129 +1,111 @@
 import { Classes, ContextMenu, ITreeNode, Menu, Tree } from '@blueprintjs/core';
 import * as classNames from 'classnames';
 import * as React from 'react';
-import { connect } from 'react-redux';
-import { AppContext, withAppContext } from '../../AppContextProvider';
-import { ReduxState } from '../../redux/AppReducer';
-import { Dispatchers } from '../../redux/Dispatchers';
+import { useSelector } from 'react-redux';
+import { useDispatchers } from '../../DispatcherContextProvider';
 import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
 import { Model } from '../../redux/model/ModelTypes';
-import { LayerMenuItems } from './LayerMenuItem';
+import { Indexable } from '../../redux/utils/indexable';
+import { LayerMenuItem } from './LayerMenuItem';
 import './Layers.scss';
 
-;interface Props {
-  appContext: AppContext;
-  model: Model.Types.State;
-  layerTree: LayerTree.Types.State;
+function getTreeNode (
+  layerTree: LayerTree.Types.State,
+  layers: Indexable<Model.Types.Layer>,
+  features: Indexable<Model.Types.Feature>,
+  layerId: string,
+) {
+  const layer = layers.byId[layerId];
+  const children: ITreeNode[] = [];
+  for (const childId of layer.children) {
+    children.push(getTreeNode(layerTree, layers, features, childId));
+  }
+  for (const featureId of layer.features) {
+    children.push(getFeatureNode(layerTree, features, featureId));
+  }
+  const node: ITreeNode = {
+    id: layer.id,
+    icon: 'folder-open',
+    label: layer.name,
+    childNodes: children,
+    hasCaret: children.length > 0,
+    isExpanded: !!layerTree.expandedNodes[layer.id],
+    isSelected: layerTree.selectedNodes.indexOf(layer.id) >= 0,
+  };
+  return node;
 }
 
-class LayersComponent extends React.Component<Props> {
-  private dispatchers: Dispatchers;
+function getFeatureNode (
+  layerTree: LayerTree.Types.State,
+  features: Indexable<Model.Types.Feature>,
+  featureId: string,
+) {
+  const feature = features.byId[featureId];
+  const icon = Model.Types.Geometries[feature.geometry.type].icon;
+  const node: ITreeNode = {
+    id: feature.id,
+    hasCaret: false,
+    icon,
+    label: feature.name,
+    isExpanded: !!layerTree.expandedNodes[feature.id],
+    isSelected: layerTree.selectedNodes.indexOf(feature.id) >= 0,
+  };
+  return node;
+}
 
-  constructor(props: Props) {
-    super(props);
-    this.dispatchers = props.appContext.dispatchers;
-  }
+export function Layers() {
+  const dispatchers = useDispatchers();
+  const layers = useSelector(Model.Selectors.getLayers);
+  const features = useSelector(Model.Selectors.getFeatures);
+  const layerTree = useSelector(LayerTree.Selectors.get);
 
-  public render() {
-    const nodes: ITreeNode[] = this.getTreeNode(this.props.model, Model.RootLayerId).childNodes ?? [];
-    return (
-      <div className='layers-container'>
-        <div className='side-panel-header unselectable title'>Layers</div>
-        <div className='tree-container' onClick={this.onClick}>
-          <Tree
-            className={classNames('layer-tree-container', Classes.DARK)}
-            contents={nodes}
-            onNodeClick={this.onNodeClick}
-            onNodeCollapse={this.onNodeCollapse}
-            onNodeExpand={this.onNodeExpand}
-            onNodeContextMenu={this.onNodeContextMenu}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  private onClick = (e: any) => {
+  const onClick = React.useCallback((e: any) => {
     const classes: string = e.target.className;
     if (classes.indexOf('layer-tree-container') >= 0) {
-      this.dispatchers.layerTree.selectNodes([Model.RootLayerId]);
+      dispatchers.layerTree.selectNodes([Model.RootLayerId]);
     }
-  }
-
-  private getTreeNode = (model: Model.Types.State, layerId: string) => {
-    const layer = model.layers.byId[layerId];
-    const children: ITreeNode[] = [];
-    layer.children.forEach((childId: string) => {
-      children.push(this.getTreeNode(model, childId));
-    });
-    layer.features.forEach((featureId: string) => {
-      children.push(this.getFeatureNode(model, featureId));
-    });
-    const node: ITreeNode = {
-      id: layer.id,
-      icon: 'folder-open',
-      label: layer.name,
-      childNodes: children,
-      hasCaret: children.length > 0,
-      isExpanded: !!this.props.layerTree.expandedNodes[layer.id],
-      isSelected: this.props.layerTree.selectedNodes.indexOf(layer.id) >= 0,
-    };
-    return node;
-  }
-
-  private getFeatureNode = (model: Model.Types.State, featureId: string) => {
-    const feature = model.features.byId[featureId];
-    const icon = Model.Types.Geometries[feature.geometry.type].icon;
-    const node: ITreeNode = {
-      id: feature.id,
-      hasCaret: false,
-      icon,
-      label: feature.name,
-      isExpanded: !!this.props.layerTree.expandedNodes[feature.id],
-      isSelected: this.props.layerTree.selectedNodes.indexOf(feature.id) >= 0,
-    };
-    return node;
-  }
-
-  private onNodeClick = (node: ITreeNode, _: number[]) => {
-    this.dispatchers.layerTree.selectNodes([`${node.id}`]);
-  };
-
-  private onNodeExpand = (node: ITreeNode) => {
-    this.dispatchers.layerTree.expandNode(`${node.id}`);
-  };
-
-  private onNodeCollapse = (node: ITreeNode) => {
-    this.dispatchers.layerTree.collapseNode(`${node.id}`);
-  };
-
-  private onNodeContextMenu = (
+  }, [dispatchers]);
+  const onNodeClick = React.useCallback((node: ITreeNode, _: number[]) => {
+    dispatchers.layerTree.selectNodes([`${node.id}`]);
+  }, [dispatchers]);
+  const onNodeExpand = React.useCallback((node: ITreeNode) => {
+    dispatchers.layerTree.expandNode(`${node.id}`);
+  }, [dispatchers]);
+  const onNodeCollapse = React.useCallback((node: ITreeNode) => {
+    dispatchers.layerTree.collapseNode(`${node.id}`);
+  }, [dispatchers]);
+  const onNodeContextMenu = React.useCallback((
     node: ITreeNode,
     _path: number[],
-    e: React.MouseEvent<HTMLElement>
+    e: React.MouseEvent<HTMLElement> 
   ) => {
-    this.onNodeClick(node, _path);
-    if (this.props.model.features.all.indexOf(`${node.id}`) >= 0) {
+    onNodeClick(node, _path);
+    if (features.all.indexOf(`${node.id}`) >= 0) {
       return;
     }
     const menu = (
       <Menu>
-        <LayerMenuItems
-          parent={`${node.id}`}
-          dispatchers={this.dispatchers}
-        />
+        <LayerMenuItem parent={`${node.id}`} />
       </Menu>
     );
 
     ContextMenu.show(menu, { left: e.clientX, top: e.clientY });
-  }
+  }, [dispatchers, features, onNodeClick]);
+
+  const nodes: ITreeNode[] = getTreeNode(layerTree, layers, features, Model.RootLayerId).childNodes ?? [];
+  return (
+    <div className='layers-container'>
+      <div className='side-panel-header unselectable title'>Layers</div>
+      <div className='tree-container' onClick={onClick}>
+        <Tree
+          className={classNames('layer-tree-container', Classes.DARK)}
+          contents={nodes}
+          onNodeClick={onNodeClick}
+          onNodeCollapse={onNodeCollapse}
+          onNodeExpand={onNodeExpand}
+          onNodeContextMenu={onNodeContextMenu}
+        />
+      </div>
+    </div>
+  );
 }
-
-const mapStateToProps = (state: ReduxState) => {
-  return {
-    model: Model.Selectors.get(state),
-    layerTree: LayerTree.Selectors.get(state),
-  };
-};
-
-export const Layers = connect(mapStateToProps)(withAppContext(LayersComponent));

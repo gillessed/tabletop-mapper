@@ -1,24 +1,21 @@
 import * as React from 'react';
 import { Model } from '../../../redux/model/ModelTypes';
 import { SvgCircle } from '../renderers/SvgCircle';
+import { visitStyle } from '../../../redux/model/ModelVisitors';
 
 export namespace CircleFeature {
   export interface Props {
-    feature: Model.Types.Feature<Model.Types.Circle>;
+    geometry: Model.Types.Circle;
+    style: Model.Types.Style;
   }
 }
 
-const StrokeWidth = 0.05;
-
 export const CircleFeature = React.memo(function CircleFeature({
-  feature,
+  geometry, style,
 }: CircleFeature.Props) {
-  const { geometry } = feature;
-  return (
-    <SvgCircle
-      circle={geometry}
-      strokeWidth={StrokeWidth}
-    />
-  );
+  return visitStyle({
+    visitSvgStyle: (svgStyle: Model.Types.SvgStyle) => <SvgCircle circle={geometry} style={svgStyle} />,
+    visitBasicAssetStyle: () => null,
+  }, style);
 });
 

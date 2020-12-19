@@ -1,4 +1,4 @@
-import { Transform, Vector } from "../../math/Vector";
+import { Transform, Vector, Coordinate } from "../../math/Vector";
 import { ReduxState } from "../AppReducer";
 import { Model } from '../model/ModelTypes';
 import { createActionWrapper } from "../utils/typedAction";
@@ -10,6 +10,7 @@ export namespace Grid {
       mouseMode: MouseMode;
       partialGeometry?: Partial<Model.Types.Geometry>;
       mousePosition?: Vector;
+      mouseDragOrigin?: Coordinate;
     }
 
     export enum MouseMode {
@@ -19,7 +20,7 @@ export namespace Grid {
       DrawRectangle,
       DrawPath,
       DrawCircle,
-      DragFeature,
+      DragFeatures,
     }
   }
 
@@ -32,6 +33,7 @@ export namespace Grid {
     setMouseMode: createActionWrapper<Types.MouseMode>('grid::setMouseMode'),
     startDraw: createActionWrapper<Model.Types.GeometryType>('grid::startDraw'),
     updatePartialGeometry: createActionWrapper<Partial<Model.Types.Geometry>>('grid::updatePartialGeometry'),
+    setMouseDragOrigin: createActionWrapper<Coordinate | undefined>('grid::setMouseDragOrigin'),
   }
 
   export const Actions = {
@@ -44,5 +46,6 @@ export namespace Grid {
     export const getMousePosition = (state: ReduxState) => get(state).mousePosition;
     export const getTransform = (state: ReduxState) => get(state).transform;
     export const getMouseMode = (state: ReduxState) => get(state).mouseMode;
+    export const getMouseDragOrigin = (state: ReduxState) => get(state).mouseDragOrigin;
   }
 }

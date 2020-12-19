@@ -41,6 +41,9 @@ function addCoordinateToRectangleGeometry(partial: Partial<Model.Types.Rectangle
       complete: false,
     };
   } else {
+    if (same(partial.p1, coordinate)) {
+      return { geometry: partial, complete: false };
+    }
     const rectangle: Partial<Model.Types.Rectangle> = {
       ...partial,
       p2: coordinate,

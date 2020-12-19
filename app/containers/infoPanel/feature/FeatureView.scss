@@ -11,7 +11,7 @@
       'icon subtitle';
 
     grid-template-columns: 76px auto auto;
-    background: $dark-gray3;
+    background: $dark-gray4;
     padding: 10px;
 
     .feature-icon {
@@ -38,15 +38,27 @@
   }
 
   .feature-body {
-    padding: 0px 10px 10px 10px;
-    div.label {
-      color: $light-gray1;
-      padding-top   : 20px;
-      padding-bottom: 10px;
-    }
+    padding: 0px 10px 0px 10px;
 
-    span.label {
-      padding-right: 10px;
+    .feature-property {
+      padding-top: 10px;
+      padding-bottom: 10px;
+
+      .feature-name {
+        color: $light-gray1;
+        padding-bottom: 3px;
+      }
+  
+      .feature-row {
+        padding-right: 10px;
+      }
     }
+  }
+
+  .feature-style-header {
+    background-color: $dark-gray4;
+    padding: 6px;
+    color: $light-gray5;
+    margin-bottom: 10px;
   }
 }

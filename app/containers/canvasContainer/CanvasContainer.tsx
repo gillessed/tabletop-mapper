@@ -5,84 +5,48 @@ import { FeatureToolbar } from '../featureToolbar/FeatureToolbar';
 import { SvgRoot } from '../svg/SvgRoot';
 import './CanvasContainer.scss';
 
-interface State {
-  dimensions?: {
-    width: number;
-    height: number;
+export namespace CanvasContainer {
+  export interface Props {
+
   }
 }
 
-interface Props {
-  state: ReduxState;
-}
+export type Dimensions = { width: number, height: number } | undefined;
 
-class CanvasContainerInternal extends React.Component<Props, State> {
-  private containerDiv: HTMLDivElement;
+export const CanvasContainer = function CanvasContainer() {
+  const container = React.useRef<HTMLDivElement>();
+  const [dimensions, setDimensions] = React.useState<Dimensions>();
 
-  constructor(props: Props) {
-    super(props);
-    this.state = {}
+  // const { width, height } = dimensions;
+  let canvasElement = undefined;
+  if (container != null && dimensions != undefined) {
+    canvasElement = <SvgRoot width={dimensions.width} height={dimensions.height} />;
   }
 
-  public componentWillReceiveProps() {
-    if (this.containerDiv) {
-      setTimeout(() => {
-        this.setState({
-          dimensions: {
-            width: this.containerDiv.clientWidth,
-            height: this.containerDiv.clientHeight,
-          },
-        });
+  const updateDimensionsFromContainer = React.useCallback(() => {
+    if (
+      container != null &&
+      (container.current.clientWidth != (dimensions?.width ?? 'NaN') || container.current.clientHeight != (dimensions?.height ?? 'NaN'))
+    ) {
+      setDimensions({
+        width: container.current.clientWidth,
+        height: container.current.clientHeight,
       });
     }
-  }
+  }, [container, setDimensions]);
 
-  public render() {
-    return (
-      <div className='canvas-container' ref={this.setContainerRef}>
-        {this.renderCanvasElement()}
-        <FeatureToolbar />
-      </div> 
-    );
-  }
-
-  public componentDidMount() {
-    window.addEventListener('resize', this.windowResizeListener);
-  }
-
-  private renderCanvasElement = () => {
-    if (this.state.dimensions && this.containerDiv) {
-      const { width, height } = this.state.dimensions;
-      return (
-        <SvgRoot width={width} height={height} />
-      );
+  React.useEffect(() => {
+    updateDimensionsFromContainer();
+    window.addEventListener('resize', updateDimensionsFromContainer);
+    return () => {
+      window.removeEventListener('resize', updateDimensionsFromContainer);
     }
-  }
+  }, [updateDimensionsFromContainer, container]);
 
-  private setContainerRef = (ref: HTMLDivElement) => {
-    if (!this.containerDiv) {
-      this.containerDiv = ref;
-      this.setState({
-        dimensions: {
-          width: ref.clientWidth,
-          height: ref.clientHeight,
-        },
-      });
-    }
-  }
-
-  private windowResizeListener = () => {
-    this.setState({
-      dimensions: {
-        width: this.containerDiv.clientWidth,
-        height: this.containerDiv.clientHeight,
-      },
-    });
-  }
+  return (
+    <div className='canvas-container' ref={container}>
+      {canvasElement}
+      <FeatureToolbar />
+    </div>
+  );
 }
-
-const mapStateToProps = (state: ReduxState) => {
-  return { state };
-}
-
-export const CanvasContainer = connect(mapStateToProps)(CanvasContainerInternal);

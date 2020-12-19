@@ -1,5 +1,6 @@
 import { Model } from './ModelTypes';
-import { setIntersection } from '../../utils/sets';
+import { setIntersection, setMax } from '../../utils/sets';
+import { Indexable } from '../utils/indexable';
 
 export function reverseArray<T>(array: T[]): T[] {
   const reversed = [];
@@ -10,26 +11,53 @@ export function reverseArray<T>(array: T[]): T[] {
 }
 
 export function treeWalk(
-  model: Model.Types.State,
+  features: Indexable<Model.Types.Feature>,
+  layers: Indexable<Model.Types.Layer>,
   visitFeature: (feature: Model.Types.Feature<any>) => void,
 ) {
-  const stack: Array<Model.Types.Feature | Model.Types.Layer> = [model.layers.byId[Model.RootLayerId]];
+  const stack: Array<Model.Types.Feature | Model.Types.Layer> = [layers.byId[Model.RootLayerId]];
   while (stack.length !== 0) {
     const object = stack.pop();
     if (Model.Types.isFeature(object)) {
       visitFeature(object);
     } else if (Model.Types.isLayer(object)) {
-      const children = object.children.map((layerId) => {
-        return model.layers.byId[layerId];
+      const layerChildren = object.children.map((layerId) => {
+        return layers.byId[layerId];
       });
-      stack.push(...reverseArray(children));
+      stack.push(...reverseArray(layerChildren));
       
-      const features = object.features.map((featureId) => {
-        return model.features.byId[featureId];
+      const featureChildren = object.features.map((featureId) => {
+        return features.byId[featureId];
       });
-      stack.push(...reverseArray(features));
+      stack.push(...reverseArray(featureChildren));
     }
   }
+}
+
+export function getOrderedFeatures(
+  features: Indexable<Model.Types.Feature>,
+  layers: Indexable<Model.Types.Layer>,
+): Model.Types.Feature[] {
+  const orderedFeatures: Model.Types.Feature[] = [];
+  treeWalk(features, layers, (feature) => orderedFeatures.push(feature));
+  return orderedFeatures;
+}
+
+export function getHighestFeatureId(
+  features: Indexable<Model.Types.Feature>,
+  layers: Indexable<Model.Types.Layer>,
+  featureIds: Iterable<string>,
+): string {
+  const orderedFeatures = getOrderedFeatures(features, layers);
+  const indexedFeatures: { [featureId: string]: number } = {};
+  orderedFeatures.forEach((feature, index) => {
+    indexedFeatures[feature.id] = index;
+  });
+  const highestFeature = setMax(
+    featureIds,
+    (featureId) => indexedFeatures[featureId],
+  );
+  return highestFeature;
 }
 
 export function getAncestors(

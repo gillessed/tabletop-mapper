@@ -1,23 +1,20 @@
 import * as React from 'react';
 import { Model } from '../../../redux/model/ModelTypes';
 import { SvgPoint } from '../renderers/SvgPoint';
+import { visitStyle } from '../../../redux/model/ModelVisitors';
 
 export namespace PointFeature {
   export interface Props {
-    feature: Model.Types.Feature<Model.Types.Point>;
+    geometry: Model.Types.Point;
+    style: Model.Types.Style;
   }
 }
 
-export const PointRadius = 0.1;
-
 export const PointFeature = React.memo(function PointFeature({
-  feature,
+  geometry, style,
 }: PointFeature.Props) {
-  const { geometry } = feature;
-  return (
-    <SvgPoint
-      point={geometry}
-      radius={PointRadius}
-    />
-  );
+  return visitStyle({
+    visitSvgStyle: (svgStyle: Model.Types.SvgStyle) => <SvgPoint point={geometry} style={svgStyle} />,
+    visitBasicAssetStyle: () => null,
+  }, style);
 });

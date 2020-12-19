@@ -1,22 +1,27 @@
 {
-    "compilerOptions": {                     
-        "target": "es5",
-        "lib": ["es5", "es6", "dom"],
-        "experimentalDecorators": true,
-        "module": "commonjs",
-        "noImplicitAny": true,
-        "removeComments": true,
-        "outDir": "build",
-        "preserveConstEnums": true,
-        "sourceMap": true,
-        "jsx": "react"
-    },
-    "exclude": [
-        "node_modules",
-        "semantic"
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "es5",
+      "es6",
+      "dom"
     ],
-    "include": [
-        "main.ts",
-        "declarations.d.ts"
-    ]
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "outDir": "build",
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "jsx": "react",
+    "downlevelIteration": true,
+  },
+  "exclude": [
+    "node_modules",
+    "semantic"
+  ],
+  "include": [
+    "main.ts",
+    "declarations.d.ts"
+  ]
 }

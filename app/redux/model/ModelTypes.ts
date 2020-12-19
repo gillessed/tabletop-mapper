@@ -41,7 +41,31 @@ export namespace Model {
     }
 
     export interface Style extends Object {
-      
+      type: 'svg' | 'basic-asset';
+      editable: boolean;
+    }
+
+    export interface SvgStyle extends Style {
+      type: 'svg';
+      fill?: string;
+      fillOpacity?: number;
+      stroke?: string;
+      strokeWidth?: number;
+      strokeOpacity?: number;
+      pointRadius?: number;
+    }
+
+    export interface BasicAssetStyle extends Style {
+      type: 'basic-asset';
+      assetId?: string;
+    }
+
+    export function isSvgStyle(style: Style): style is SvgStyle {
+      return style.type === 'svg';
+    }
+
+    export function isBasicAssetStyle(style: Style): style is BasicAssetStyle {
+      return style.type === 'basic-asset';
     }
 
     export interface GeometryInfo {
@@ -106,6 +130,7 @@ export namespace Model {
     export interface Feature<T extends Geometry = Geometry> extends Object {
       layerId: string;
       geometry: T;
+      styleId: string;
     }
 
     export function isFeature(object: Object): object is Feature {
@@ -152,12 +177,37 @@ export namespace Model {
       featureIds: string[],
       snapsToGrid: boolean,
     }
+
+    export interface TranslateFeatures {
+      featureIds: Iterable<string>;
+      translation: Coordinate;
+    }
+
+    export interface SetFeatureName {
+      featureId: string;
+      name: string;
+    }
+
+    export interface SetFeatureStyle {
+      featureIds: Iterable<string>;
+      styleId: string;
+    }
+
+    export interface SetPathsClosed {
+      pathIds: string[];
+      closed: boolean;
+    }
   }
 
   export const DispatchActions = {
     createLayer: createActionWrapper<Payloads.CreateLayer>('model::createLayer'),
     createFeature: createActionWrapper<Types.Feature>('model::createFeature'),
+    translateFeatures: createActionWrapper<Payloads.TranslateFeatures>('model::translateFeatures'),
+    setFeatureName: createActionWrapper<Payloads.SetFeatureName>('model::setFeatureName'),
+    setFeatureStyle: createActionWrapper<Payloads.SetFeatureStyle>('model::setFeatureStyle'),
     setSnapsToGrid: createActionWrapper<Payloads.SnapsToGrid>('model::snapToGrid'),
+    setPathsClosed: createActionWrapper<Payloads.SetPathsClosed>('model::setPathsClosed'),
+    setStyle: createActionWrapper<Model.Types.Style>('model::setStyle'),
   }
 
   export const Actions = {

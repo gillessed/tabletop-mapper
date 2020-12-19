@@ -1,55 +1,54 @@
-
 export interface Action {
-    type: string;
-    payload: any;
-    meta?: any;
+  type: string;
+  payload: any;
+  meta?: any;
 }
 
 export interface TypedAction<T> extends Action {
-    payload: T;
+  payload: T;
 }
 
 export interface ActionWrapper<T> {
-    type: ActionType<T>;
-    create: (payload: T) => TypedAction<T>;
+  type: ActionType<T>;
+  create: (payload: T) => TypedAction<T>;
 }
 
 export type ActionType<T> = string & {
-    __action_type_brand?: T;
+  __action_type_brand?: T;
 };
 
 export function createActionType<T>(type: string): ActionType<T> {
-    return type;
+  return type;
 }
 
 export function createAction<T, P extends T>(type: ActionType<T>, payload: P, meta?: any): TypedAction<T> {
-    if (meta) {
-        return { type, payload, meta };
-    } else {
-        return { type, payload };
-    }
+  if (meta) {
+    return { type, payload, meta };
+  } else {
+    return { type, payload };
+  }
 }
 
 export function isActionType<T>(action: Action, type: ActionType<T>): action is TypedAction<T> {
-    return action.type === type;
+  return action.type === type;
 }
 
 export interface TypedActionCreator<T> {
-    (payload: T, meta?: any): TypedAction<T>;
+  (payload: T, meta?: any): TypedAction<T>;
 }
 
 export function createActionCreator<T>(type: ActionType<T>): (payload: T, meta?: any) => {
-    type: string;
-    payload: T;
-    meta?: any;
+  type: string;
+  payload: T;
+  meta?: any;
 } {
-    return function (payload, meta) { return createAction(type, payload, meta); };
+  return function (payload, meta) { return createAction(type, payload, meta); };
 }
 
 export function createActionWrapper<T>(type: string): ActionWrapper<T> {
-    const actionType = createActionType<T>(type);
-    return {
-        type: actionType,
-        create: createActionCreator(actionType),
-    };
+  const actionType = createActionType<T>(type);
+  return {
+    type: actionType,
+    create: createActionCreator(actionType),
+  };
 }

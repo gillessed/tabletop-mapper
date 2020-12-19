@@ -1,10 +1,11 @@
+import { Classes, Colors } from '@blueprintjs/core';
 import * as React from 'react';
 import { useSelector, useStore } from 'react-redux';
 import { Model } from '../../../redux/model/ModelTypes';
-import './FeatureView.scss';
+import { StyleEditor } from '../style/StyleEditor';
 import { FeatureIcon } from './FeatureIcon';
-import { Colors, Switch, Classes } from '@blueprintjs/core';
-import { SnapsToGridSwitch } from './SnapsToGridSwitch';
+import { getFeatureProperties } from './FeatureProperties';
+import './FeatureView.scss';
 
 export namespace FeatureView {
   export interface Props {
@@ -17,16 +18,10 @@ export const FeatureView = React.memo(function FeatureView({
 }: FeatureView.Props) {
   const store = useStore();
   const features = useSelector(Model.Selectors.getFeatures);
+  const styles = useSelector(Model.Selectors.getStyles);
   const feature = features.byId[featureId];
-  // TODO: (gcole) figure out why useSelector is returning wrong value sometimes.
-  // console.log('***** featureId', featureId);
-  // console.log('features', features);
-  // console.log('feature', feature);
-  // console.log('state', store.getState());
-  if (!feature) {
-    return null;
-  }
   const geometryType = Model.Types.Geometries[feature.geometry.type];
+  const properties = getFeatureProperties(feature);
   return (
     <div className='feature-view-container'>
       <div className='feature-header'>
@@ -39,11 +34,19 @@ export const FeatureView = React.memo(function FeatureView({
         <div className='subtitle'>{geometryType.name}</div>
       </div>
       <div className='feature-body'>
-        <div className='label'>Properties</div>
-        <div className='section'>
-          <SnapsToGridSwitch feature={feature} />
-        </div>
+        {properties.map((property) => {
+          return (
+            <div className='feature-property' key={property.name}>
+              <div className='feature-name label'>{property.name}</div>
+              <div className='feature-row'>
+                {property.row}
+              </div>
+            </div>
+          );
+        })}
       </div>
+      <div className='feature-style-header title'>Style</div>
+      <StyleEditor style={styles.byId[feature.styleId]} editingFeatureId={feature.id}/>
     </div>
   );
 });

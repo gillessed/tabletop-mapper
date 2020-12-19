@@ -6,7 +6,6 @@ let enableLogging = true;
 let enableLogMousePosition = false;
 let enableLogTransform = false;
 
-console.log('adding repl');
 (window as any).repl = {
   ...((window as any).repl ?? {}),
   setLogging: (value: boolean) => {
@@ -21,7 +20,6 @@ console.log('adding repl');
 }
 
 export function loggerPredicate(getState: () => ReduxState, action: TypedAction<any>): boolean {
-  console.log('****** action? ', action);
   if (!enableLogging) {
     return false;
   } else if (action.type === Grid.Actions.setMousePosition.type) {

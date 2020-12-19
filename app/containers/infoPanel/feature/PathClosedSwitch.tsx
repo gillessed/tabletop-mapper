@@ -4,24 +4,24 @@ import { Model } from '../../../redux/model/ModelTypes';
 import './FeatureView.scss';
 import { useDispatchers } from '../../../DispatcherContextProvider';
 
-export namespace SnapsToGridSwitch {
+export namespace PathClosedSwitch {
   export interface Props {
-    feature: Model.Types.Feature;
+    path: Model.Types.Feature<Model.Types.Path>;
   }
 }
 
-export const SnapsToGridSwitch = React.memo(function SnapsToGridSwitch({
-  feature,
-}: SnapsToGridSwitch.Props) {
+export const PathClosedSwitch = React.memo(function PathClosedSwitch({
+  path,
+}: PathClosedSwitch.Props) {
   const dispatchers = useDispatchers();
   const onChange = React.useCallback((event: React.FormEvent) => {
-    dispatchers.model.setSnapsToGrid({ featureIds: [feature.id], snapsToGrid: (event.target as HTMLInputElement).checked });
-  }, [dispatchers, feature]);
+    dispatchers.model.setPathsClosed({ pathIds: [path.id], closed: (event.target as HTMLInputElement).checked });
+  }, [dispatchers, path]);
   return (
     <Switch
       className={Classes.DARK}
-      label='Snaps to grid'
-      checked={!!feature.geometry.snapToGrid}
+      label='Closed path'
+      checked={!!path.geometry.closed}
       onChange={onChange}
     />
   );

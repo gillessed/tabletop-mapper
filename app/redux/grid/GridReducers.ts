@@ -1,5 +1,5 @@
 import { Reducer } from 'redux';
-import { Transform, Vector } from '../../math/Vector';
+import { Transform, Vector, Coordinate } from '../../math/Vector';
 import { Model } from '../model/ModelTypes';
 import { newTypedReducer } from '../utils/typedReducer';
 import { Grid } from './GridTypes';
@@ -42,8 +42,18 @@ const startDrawReducer = (state: Grid.Types.State, type: Model.Types.GeometryTyp
   };
 }
 
-const updatePartialGeometryReducer = (state: Grid.Types.State, partialGeometry: Model.Types.Geometry): Grid.Types.State => {
+const updatePartialGeometryReducer = (
+  state: Grid.Types.State,
+  partialGeometry: Partial<Model.Types.Geometry>,
+): Grid.Types.State => {
   return { ...state, partialGeometry };
+}
+
+const setMouseDragOriginReducer = (
+  state: Grid.Types.State,
+  mouseDragOrigin: Coordinate,
+): Grid.Types.State => {
+  return { ...state, mouseDragOrigin };
 }
 
 export const gridReducer: Reducer<Grid.Types.State> = newTypedReducer<Grid.Types.State>()
@@ -52,5 +62,6 @@ export const gridReducer: Reducer<Grid.Types.State> = newTypedReducer<Grid.Types
   .handlePayload(Grid.Actions.setMouseMode.type, setMouseModeReducer)
   .handlePayload(Grid.Actions.startDraw.type, startDrawReducer)
   .handlePayload(Grid.Actions.updatePartialGeometry.type, updatePartialGeometryReducer)
+  .handlePayload(Grid.Actions.setMouseDragOrigin.type, setMouseDragOriginReducer)
   .handleDefault((state = INITIAL_STATE) => state)
   .build();

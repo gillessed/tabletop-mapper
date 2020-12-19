@@ -1,38 +1,40 @@
 import { MenuItem } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import * as React from 'react';
-import { Dispatchers } from '../../redux/Dispatchers';
 import { generateRandomString } from '../../utils/randomId';
+import { useDispatchers } from '../../DispatcherContextProvider';
 
-interface Props {
-  parent: string;
-  dispatchers: Dispatchers;
+export namespace LayerMenuItem {
+  export interface Props {
+    parent: string;
+  }
 }
 
-export class LayerMenuItems extends React.PureComponent<Props, {}> {
-  public render() {
-    return (
-      <>
-        <MenuItem
-          key='new-layer-item'
-          icon={IconNames.FOLDER_NEW}
-          text='Create New Layer'
-          onClick={this.onClickCreateLayer}
-        />
-        <MenuItem
-          key='delete-layer-item'
-          icon={IconNames.TRASH}
-          text='Delete Layer'
-        />
-      </>
-    );
-  }
-
-  private onClickCreateLayer = () => {
+export const LayerMenuItem = React.memo(function LayerMenuItem({
+  parent
+}: LayerMenuItem.Props) {
+  const dispatchers = useDispatchers();
+  const onClickCreateLayer = React.useCallback(() => {
     const layerId = generateRandomString();
-    this.props.dispatchers.model.createLayer({
+    dispatchers.model.createLayer({
       layerId,
-      parentId: this.props.parent,
+      parentId: parent,
     });
-  }
-}
+  }, [dispatchers]);
+  return (
+    <>
+      <MenuItem
+        key='new-layer-item'
+        icon={IconNames.FOLDER_NEW}
+        text='Create New Layer'
+        onClick={onClickCreateLayer}
+      />
+      <MenuItem
+        key='delete-layer-item'
+        icon={IconNames.TRASH}
+        text='Delete Layer'
+      />
+    </>
+  );
+  
+});

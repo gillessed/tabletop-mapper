@@ -35,6 +35,8 @@ export namespace LayerTree {
       if (layerTree.selectedNodes.length > 1) {
         const layerId = findCommonAncestor(model, layerTree.selectedNodes);
         return layerId;
+      } else if (layerTree.selectedNodes.length === 0) {
+        return Model.RootLayerId;
       } else {
         let selectedId = layerTree.selectedNodes[0];
         if (model.features.byId[selectedId]) {

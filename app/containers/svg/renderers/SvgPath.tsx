@@ -4,15 +4,12 @@ import { Model } from '../../../redux/model/ModelTypes';
 export namespace SvgPath { 
   export interface Props {
     pathGeometry: Model.Types.Path;
-    strokeWidth: number;
-    strokeOpacity?: number;
+    style: Model.Types.SvgStyle
   }
 }
 
 export const SvgPath = React.memo(function SvgPath({
-  pathGeometry,
-  strokeWidth,
-  strokeOpacity,
+  pathGeometry, style,
 }: SvgPath.Props) {
   const { path } = pathGeometry;
   const [first, ...rest] = path;
@@ -22,9 +19,10 @@ export const SvgPath = React.memo(function SvgPath({
   const pathDefinition = `${pathStart} ${pathMoves} ${closedPath}`;
   return (
     <path
-      stroke='black'
-      strokeWidth={strokeWidth}
-      strokeOpacity={strokeOpacity ?? 1}
+      stroke={style.stroke}
+      strokeWidth={style.strokeWidth}
+      strokeOpacity={style.strokeOpacity}
+      strokeLinejoin='round'
       fill='none'
       d={pathDefinition}
     />

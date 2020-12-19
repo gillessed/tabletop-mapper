@@ -14,3 +14,25 @@ export function setIntersection<T>(...sets: Set<T>[]): Set<T> {
     return intersection;
   }
 }
+
+export function setFirst<T>(iterable: Iterable<T>): T {
+  for (const t of iterable) {
+    return t;
+  }
+}
+
+export function setMax<T>(
+  iterable: Iterable<T>,
+  valueFunction: (t: T) => number,
+): T {
+  let tmax = setFirst(iterable);
+  let maxValue = valueFunction(tmax);
+  for (const t of iterable) {
+    const value = valueFunction(t);
+    if (value > maxValue) {
+      tmax = t;
+      maxValue = value;
+    }
+  }
+  return tmax;
+}

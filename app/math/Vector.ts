@@ -13,20 +13,30 @@ export function coordinateDistance(c1: Coordinate, c2: Coordinate) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+// NOTE: (gcole) flip the y so that in the display, positive y is towards
+// the top of the screen
+export function displayCoordinate(c: Coordinate) {
+  return `[${c.x}, ${-c.y}]`;
+}
+
 export class Vector {
   constructor(
     public readonly x: number,
     public readonly y: number,
   ) { }
 
-  public add(v: Vector) {
+  public static of(c: Coordinate): Vector {
+    return new Vector(c.x, c.y);
+  }
+
+  public add(v: Coordinate) {
     return new Vector(
       this.x + v.x,
       this.y + v.y,
     );
   }
 
-  public subtract(v: Vector) {
+  public subtract(v: Coordinate) {
     return new Vector(
       this.x - v.x,
       this.y - v.y,
@@ -89,6 +99,10 @@ export class Transform {
     return this.applyV(new Vector(x, y));
   }
 
+  public applyC(c: Coordinate): Coordinate {
+    return this.applyV(Vector.of(c)).getCoordinate();
+  }
+
   public applyV(point: Vector) {
     return point.scalarMultiply(1 / this.scale).subtract(this.translation);
   }
@@ -99,6 +113,10 @@ export class Transform {
 
   public reverseV(point: Vector) {
     return point.add(this.translation).scalarMultiply(this.scale);
+  }
+
+  public reverseC(c: Coordinate): Coordinate {
+    return this.reverseV(Vector.of(c)).getCoordinate();
   }
 
   public applyScalar(x: number) {

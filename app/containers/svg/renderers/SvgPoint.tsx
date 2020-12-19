@@ -4,25 +4,27 @@ import { Model } from '../../../redux/model/ModelTypes';
 export namespace SvgPoint { 
   export interface Props {
     point: Model.Types.Point;
-    radius: number;
-    fillOpacity?: number;
+    style: Model.Types.SvgStyle;
   }
 }
 
+export const SvgPointRadius = 0.1;
+
 export const SvgPoint = React.memo(function SvgPoint({
   point,
-  radius,
-  fillOpacity,
+  style,
 }: SvgPoint.Props) {
   const { p } = point;
+  // NOTE: (gcole) while points are under the hood fills, they use the stroke values
+  // from the style to stay consistent with the default style having no fill.
   return (
     <circle
       stroke='none'
-      fill='black'
-      fillOpacity={fillOpacity ?? 1}
+      fill={style.stroke}
+      fillOpacity={style.strokeOpacity}
       cx={p.x}
       cy={p.y}
-      r={radius}
+      r={style.pointRadius}
     />
   );
 });

@@ -1,23 +1,20 @@
 import * as React from 'react';
 import { Model } from '../../../redux/model/ModelTypes';
 import { SvgRectangle } from '../renderers/SvgRectangle';
+import { visitStyle } from '../../../redux/model/ModelVisitors';
 
 export namespace RectangleFeature {
   export interface Props {
-    feature: Model.Types.Feature<Model.Types.Rectangle>;
+    geometry: Model.Types.Rectangle;
+    style: Model.Types.Style;
   }
 }
 
-const StrokeWidth = 0.05;
-
 export const RectangleFeature = React.memo(function RectangleFeature({
-  feature,
+  geometry, style,
 }: RectangleFeature.Props) {
-  const { geometry } = feature;
-  return (
-    <SvgRectangle
-      rectangle={geometry}
-      strokeWidth={StrokeWidth}
-    />
-  );
+  return visitStyle({
+    visitSvgStyle: (svgStyle: Model.Types.SvgStyle) => <SvgRectangle rectangle={geometry} style={svgStyle} />,
+    visitBasicAssetStyle: () => null,
+  }, style);
 });

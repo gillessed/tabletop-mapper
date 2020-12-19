@@ -4,7 +4,6 @@ import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
 import { createLogger } from 'redux-logger';
 import createSagaMiddleware from 'redux-saga';
-import { AppContext, AppContextProvider } from './AppContextProvider';
 import { Root } from './containers/Root';
 import { applyKeyboardNavigationListener, applyMouseNavigationListener } from './navigationListeners';
 import { dispatcherCreators } from './redux/Dispatchers';
@@ -12,6 +11,8 @@ import { AppReducer } from './redux/AppReducer';
 import { appSaga } from './redux/AppSaga';
 import { createRegister, SagaListener } from './redux/SagaListener';
 import { loggerPredicate } from './redux/Logger';
+import { DispatcherContextProvider } from './DispatcherContextProvider';
+import { SagaListenerContextProvider } from './SagaListenerContextProvider';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -22,7 +23,7 @@ const logger = createLogger({
 const store = createStore(
   AppReducer,
   applyMiddleware(
-    // logger,
+    logger,
     sagaMiddleware,
   ),
 );
@@ -33,16 +34,14 @@ const sagaListeners: Set<SagaListener<any>> = new Set();
 const sagaRegister = createRegister(store.dispatch);
 const dispatchers = dispatcherCreators(store);
 sagaMiddleware.run(appSaga, {}, sagaListeners);
-const appContext: AppContext = {
-  dispatchers,
-  sagaRegister,
-};
 
 const providers = (
   <Provider store={store}>
-    <AppContextProvider value={appContext}>
-      <Root />
-    </AppContextProvider>
+    <DispatcherContextProvider value={dispatchers}>
+      <SagaListenerContextProvider value={sagaRegister}>
+        <Root />
+      </SagaListenerContextProvider>
+    </DispatcherContextProvider>
   </Provider>
 )
 

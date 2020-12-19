@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { useSelector } from 'react-redux';
-import { useDispatchers } from '../../AppContextProvider';
+import { useDispatchers } from '../../DispatcherContextProvider';
 import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
 import { Model } from '../../redux/model/ModelTypes';
 import { FeatureView } from './feature/FeatureView';
 import './InfoPanel.scss';
 import { LayerView } from './LayerView';
+import { Classes } from '@blueprintjs/core';
+import classNames from 'classnames';
 
 export namespace InfoPanel {
   export interface Props {
@@ -33,8 +35,9 @@ export const InfoPanel = React.memo(function InfoPanel() {
       />
     );
   }
+  const classes = classNames('feature-panel-container', Classes.DARK);
   return (
-    <div className='feature-panel-container'>
+    <div className={classes}>
       {view}
     </div>
   );

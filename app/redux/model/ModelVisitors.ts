@@ -39,3 +39,17 @@ export function visitGeometry<Result>(visitor: GeometryVisitor<Result>, geometry
       return visitor.visitCircle(geometry as Model.Types.Circle);
   }
 }
+
+export interface StyleVisitor<Result> {
+  visitSvgStyle: (style: Model.Types.SvgStyle) => Result;
+  visitBasicAssetStyle: (style: Model.Types.BasicAssetStyle) => Result;
+}
+
+export function visitStyle<Result>(visitor: StyleVisitor<Result>, style: Model.Types.Style) {
+  switch (style.type) {
+    case "svg":
+      return visitor.visitSvgStyle(style as Model.Types.SvgStyle);
+    case "basic-asset":
+      return visitor.visitBasicAssetStyle(style as Model.Types.BasicAssetStyle);
+  }
+}
