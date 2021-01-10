@@ -1,0 +1,15 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+
+.project-list {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  height: 400px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  .no-project-details {
+    color: $light-gray1;
+    width: 300px;
+  }
+}

@@ -1,4 +1,4 @@
-import { Model } from "../model/ModelTypes";
+import { Model } from "../redux/model/ModelTypes";
 
 export function expandRectangle(
   rectangle: Model.Types.Rectangle,

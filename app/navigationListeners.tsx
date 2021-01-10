@@ -3,7 +3,7 @@ import { etn } from './etn';
 import { ReduxState } from './redux/AppReducer';
 
 export function applyMouseNavigationListener(store: Store<ReduxState>) {
-  const window = etn.window;
+  const window = etn().window;
   window.on('app-command', (_, command) => {
     if (command === 'browser-backward') {
     }

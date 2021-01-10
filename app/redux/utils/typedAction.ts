@@ -29,6 +29,10 @@ export function createAction<T, P extends T>(type: ActionType<T>, payload: P, me
   }
 }
 
+export function createPlaceholderAction<P>(payload: P): TypedAction<P> {
+  return { type: 'none', payload };
+}
+
 export function isActionType<T>(action: Action, type: ActionType<T>): action is TypedAction<T> {
   return action.type === type;
 }

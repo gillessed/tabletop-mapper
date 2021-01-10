@@ -34,7 +34,7 @@ export const StyleEditor = React.memo(function StyleEditor({
     }
   }, [dispatchers, editingFeatureId, style]);
   const onClickDuplicateStyle = React.useCallback(() => {
-    const newStyle = { ...style, name: style.name + '(Copy)', id: generateRandomString() };
+    const newStyle = { ...style, name: style.name + ' (Copy)', id: generateRandomString(), editable: true };
     dispatchers.model.setStyle(newStyle);
     if(editingFeatureId != null) {
       dispatchers.model.setFeatureStyle({ featureIds: [editingFeatureId], styleId: newStyle.id });

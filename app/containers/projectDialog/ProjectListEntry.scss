@@ -1,0 +1,28 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+
+.project-list-entry {
+  display: flex;
+  flex-direction: column;
+  height: 60px;
+  width: 100%;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
+  transition: ease-in-out 0.1s;
+
+  &:hover {
+    background-color: $cobalt1;
+  }
+  
+  &:not(:last-child) {
+    margin-bottom: 10px;
+  }
+
+  .title {
+    color: $light-gray1;
+  }
+
+  .subtitle {
+    color: $gray1;
+  }
+}

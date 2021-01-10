@@ -1,11 +1,14 @@
 import { all, fork } from 'redux-saga/effects';
-import { initialize } from './initialize/InitializationSaga';
+import { AppConfig } from '../config/AppConfig';
 import { layerTreeSaga } from './layertree/LayerTreeSagas';
-import { modelSaga } from './model/ModelSagas';
+import { projectSaga } from './project/ProjectSaga';
 import { ListenerLoop, SagaListener } from './SagaListener';
+import { IToaster } from '@blueprintjs/core';
+import { assetSaga } from './asset/AssetSagas';
 
 export interface SagaContext {
-
+  appConfig: AppConfig;
+  appToaster: IToaster;
 }
 
 export function* appSaga(context: SagaContext, listeners: Set<SagaListener<any>>) {
@@ -14,8 +17,8 @@ export function* appSaga(context: SagaContext, listeners: Set<SagaListener<any>>
     fork(ListenerLoop, listeners),
 
     // App Sagas
-    fork(initialize),
-    fork(modelSaga, context),
     fork(layerTreeSaga, context),
+    fork(projectSaga, context),
+    fork(assetSaga, context),
   ]);
 }

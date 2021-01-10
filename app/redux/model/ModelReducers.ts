@@ -6,38 +6,38 @@ import { findByName } from "./ModelUtils";
 import { DefaultSvgStyle, DefaultBasicAssetStyle } from './DefaultStyles';
 import { translateFeature } from './FeatureTranslation';
 
-const InitialState: Model.Types.State = {
-  layers: {
-    byId: {
-      [Model.RootLayerId]: {
-        id: Model.RootLayerId,
-        name: 'Root',
-        parent: null,
-        visible: true,
-        children: [],
-        features: [],
-      }
+export function createEmptyModel(): Model.Types.State {
+  return{
+    layers: {
+      byId: {
+        [Model.RootLayerId]: {
+          id: Model.RootLayerId,
+          name: 'Root',
+          parent: null,
+          visible: true,
+          children: [],
+          features: [],
+        }
+      },
+      all: [ Model.RootLayerId],
     },
-    all: [ Model.RootLayerId],
-  },
-  assets: {
-    byId: {},
-    all: [],
-  },
-  features: {
-    byId: {},
-    all: [],
-  },
-  styles: {
-    byId: { 
-      [DefaultSvgStyle.id]: DefaultSvgStyle,
-      [DefaultBasicAssetStyle.id]: DefaultBasicAssetStyle,
+    features: {
+      byId: {},
+      all: [],
     },
-    all: [DefaultSvgStyle.id, DefaultBasicAssetStyle.id],
-  },
-};
+    styles: {
+      byId: { 
+        [DefaultSvgStyle.id]: DefaultSvgStyle,
+        [DefaultBasicAssetStyle.id]: DefaultBasicAssetStyle,
+      },
+      all: [DefaultSvgStyle.id, DefaultBasicAssetStyle.id],
+    },
+  };
+}
 
-const INITIAL_STATE2: Model.Types.State = {
+const InitialState: Model.Types.State = createEmptyModel();
+
+const TestState: Model.Types.State = {
   ...InitialState,
   layers: {
     byId: {
@@ -69,6 +69,8 @@ const INITIAL_STATE2: Model.Types.State = {
     all: ['root-layer', '1', '2'],
   },
 };
+
+const setModelReducer = (_: Model.Types.State, newState: Model.Types.State): Model.Types.State => newState;
 
 const createLayerReducer = (state: Model.Types.State, payload: Model.Payloads.CreateLayer): Model.Types.State => {
   let index = 1;
@@ -175,6 +177,7 @@ const setStyleReducer = (
 }
 
 export const modelReducer: Reducer<Model.Types.State> = newTypedReducer<Model.Types.State>()
+  .handlePayload(Model.Actions.setModel.type, setModelReducer)
   .handlePayload(Model.Actions.createLayer.type, createLayerReducer)
   .handlePayload(Model.Actions.createFeature.type, createFeatureReducer)
   .handlePayload(Model.Actions.translateFeatures.type, translateFeaturesReducer)
@@ -183,5 +186,5 @@ export const modelReducer: Reducer<Model.Types.State> = newTypedReducer<Model.Ty
   .handlePayload(Model.Actions.setSnapsToGrid.type, snapsToGridReducer)
   .handlePayload(Model.Actions.setPathsClosed.type, setPathsClosedReducer)
   .handlePayload(Model.Actions.setStyle.type, setStyleReducer)
-  .handleDefault((state = INITIAL_STATE2) => state)
+  .handleDefault((state = TestState) => state)
   .build();

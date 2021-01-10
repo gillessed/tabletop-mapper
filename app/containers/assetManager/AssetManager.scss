@@ -1,0 +1,39 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+
+.asset-manager {
+  width: 100%;
+  height: 100%;
+  background-color: $dark-gray2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .asset-manager-content {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    max-width: 1600px;
+
+    .asset-manager-title {
+      margin-top: 20px;
+      margin-bottom: 40px;
+      color: $light-gray5;
+      font-size: 32px;
+      align-self: center;
+    }
+
+    .asset-control-group {
+      button{
+        width: 100px;
+      }
+    }
+
+    .no-assets-state {
+      margin-top: 100px;
+    }
+
+    .no-matching-assets-state {
+      margin-top: 100px;
+    }
+  }
+}

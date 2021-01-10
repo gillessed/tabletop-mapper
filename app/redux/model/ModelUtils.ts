@@ -1,7 +1,6 @@
-import { Indexable } from "../utils/indexable";
-import { Model } from "./ModelTypes";
+import { Identifiable, Indexable } from "../utils/indexable";
 
-export const findByName = <T extends Model.Types.Object>(index: Indexable<T>, name: string) => {
+export const findByName = <T extends Identifiable>(index: Indexable<T>, name: string) => {
   return index.all.find((id: string) => {
     if (index.byId[id].name === name) {
       return true;

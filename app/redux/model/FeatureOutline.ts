@@ -1,9 +1,8 @@
+import { expandCircle, expandRectangle } from "../../math/ExpandGeometry";
+import { curry2 } from "../../utils/functionalSugar";
+import { DefaultSvgStyle } from "./DefaultStyles";
 import { Model } from "./ModelTypes";
 import { visitFeature, visitStyle } from "./ModelVisitors";
-import { DefaultSvgStyle } from "./DefaultStyles";
-import { curry2 } from "../../utils/functionalSugar";
-import { expandRectangle, expandCircle } from "../utils/geometry";
-
 
 function getOutlineForPointFeature(
   style: Model.Types.Style,

@@ -1,0 +1,75 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+
+.asset-pack-grid-item, .asset-grid-item {
+  width: 200px;
+  height: 266px;
+  margin-right: 10px;
+  margin-top: 10px;
+  background: $dark-gray4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  overflow: hidden;
+
+}
+.asset-grid-item {
+  .asset-image-container {
+    padding: 5px;
+    background-color: $light-gray5;
+    width: 170px;
+    height: 170px;
+    display: grid;
+    border-radius: 5px;
+    box-shadow: 0px 0px 3px 1px $light-gray3;
+    
+    .asset-image {
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
+    }
+  }
+}
+
+.asset-pack-grid-item {
+    
+  &:hover {
+    background: $dark-gray5;
+    cursor: pointer;
+  }
+
+  .image-preview-container {
+    padding: 5px;
+    background-color: $light-gray5;
+    width: 170px;
+    height: 170px;
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(3, auto);
+    gap: 5px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 3px 1px $light-gray3;
+
+    .image-preview {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+    }
+  }
+}
+
+.asset-pack-grid-item, .asset-grid-item {
+  .title {
+    margin-top: 10px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: $gray3;
+  }
+}

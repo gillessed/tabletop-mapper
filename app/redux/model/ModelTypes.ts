@@ -3,7 +3,7 @@ import { IconNames } from '@blueprintjs/icons';
 import { Coordinate } from '../../math/Vector';
 import { ReduxState } from "../AppReducer";
 import { Grid } from "../grid/GridTypes";
-import { Indexable } from "../utils/indexable";
+import { Indexable, Identifiable } from "../utils/indexable";
 import { createActionWrapper } from "../utils/typedAction";
 
 export namespace Model {
@@ -12,35 +12,22 @@ export namespace Model {
 
     export interface State {
       layers: Indexable<Layer>;
-      assets: Indexable<Asset>;
       features: Indexable<Feature>;
       styles: Indexable<Style>;
     }
 
-    export interface Object {
-      id: string;
-      name: string;
-    }
-
-    export interface Layer extends Object {
+    export interface Layer extends Identifiable {
       visible: boolean;
       children: string[];
       features: string[];
       parent: string | null;
     }
 
-    export function isLayer(object: Object): object is Layer {
+    export function isLayer(object: Identifiable): object is Layer {
       return !!(object as Layer).features;
     }
 
-    export interface Asset extends Object {
-      path: string;
-      type: 'svg' | 'jpg' | 'png';
-      gridDimensions?: { x: number, y: number};
-      tags: string;
-    }
-
-    export interface Style extends Object {
+    export interface Style extends Identifiable {
       type: 'svg' | 'basic-asset';
       editable: boolean;
     }
@@ -127,13 +114,13 @@ export namespace Model {
       return geometry.type === 'circle';
     }
 
-    export interface Feature<T extends Geometry = Geometry> extends Object {
+    export interface Feature<T extends Geometry = Geometry> extends Identifiable {
       layerId: string;
       geometry: T;
       styleId: string;
     }
 
-    export function isFeature(object: Object): object is Feature {
+    export function isFeature(object: Identifiable): object is Feature {
       return !!(object as Feature).layerId;
     }
 
@@ -200,6 +187,7 @@ export namespace Model {
   }
 
   export const DispatchActions = {
+    setModel: createActionWrapper<Model.Types.State>('model::setModel'),
     createLayer: createActionWrapper<Payloads.CreateLayer>('model::createLayer'),
     createFeature: createActionWrapper<Types.Feature>('model::createFeature'),
     translateFeatures: createActionWrapper<Payloads.TranslateFeatures>('model::translateFeatures'),
@@ -218,7 +206,6 @@ export namespace Model {
     export const get = (state: ReduxState) => state.model;
     export const getLayers = (state: ReduxState) => get(state).layers;
     export const getFeatures = (state: ReduxState) => get(state).features;
-    export const getAssets = (state: ReduxState) => get(state).assets;
     export const getStyles = (state: ReduxState) => get(state).styles;
   }
 }

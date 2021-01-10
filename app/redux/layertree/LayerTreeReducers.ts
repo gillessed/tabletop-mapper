@@ -38,10 +38,20 @@ const selectNodesReducers = (state: LayerTree.Types.State, layerIds: string[]): 
   };
 }
 
+const setModelReducer = (): LayerTree.Types.State => {
+  return {
+    expandedNodes: {
+      [Model.RootLayerId]: true,
+    },
+    selectedNodes: [],
+  };
+}
+
 export const layerTreeReducer: Reducer<LayerTree.Types.State> = newTypedReducer<LayerTree.Types.State>()
   .handlePayload(LayerTree.Actions.setNodesExpanded.type, setNodesExpandedReducer)
   .handlePayload(LayerTree.Actions.collapseNode.type, collapseNodeReducer)
   .handlePayload(LayerTree.Actions.selectNodes.type, selectNodesReducers)
+  .handlePayload(Model.Actions.setModel.type, setModelReducer)
   .handleDefault((state = INITIAL_STATE) => state)
   .build();
 

@@ -17,3 +17,11 @@ export function getPairs<T>(a: T[], wrap?: boolean): { p1: T, p2: T}[] {
   }
   return pairs;
 }
+
+export function range(count: number, start: number = 0): number[] {
+  const array: number[] = [];
+  for (let i = 0; i < count; i++) {
+    array.push(i + start);
+  }
+  return array;
+}

@@ -1,0 +1,20 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+
+.asset-grid {
+  width: 100%;
+  height: calc(100vh - 200px);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  justify-content: center;
+
+  .asset-grid-filler {
+    width: 200px;
+    height: 0px;
+    visibility: hidden;
+    margin-right: 10px;
+  }
+}

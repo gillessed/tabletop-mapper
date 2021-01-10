@@ -3,8 +3,12 @@ import { IconNames } from '@blueprintjs/icons';
 import * as React from 'react';
 import './Navbar.scss';
 import { NavbarMainMenu } from './NavbarMainMenu';
+import { useSelector } from 'react-redux';
+import { Project } from '../../redux/project/ProjectTypes';
+import { isAsyncLoaded } from '../../redux/utils/async';
 
 export function MapperNavbar() {
+  const project = useSelector(Project.Selectors.get);
   return (
     <Navbar className={Classes.DARK}>
       <Navbar.Group align={Alignment.LEFT}>
@@ -15,12 +19,16 @@ export function MapperNavbar() {
           <Button minimal icon={IconNames.MENU} />
           <NavbarMainMenu />
         </Popover>
-      </Navbar.Group>
-      <Navbar.Group align={Alignment.LEFT}>
         <Button minimal icon={IconNames.GRID} />
-      </Navbar.Group>
-      <Navbar.Group align={Alignment.LEFT}>
         <Button minimal icon={IconNames.COG} />
+        {isAsyncLoaded(project) &&
+          <>
+            <Navbar.Divider />
+            <Navbar.Heading>
+              <div className='title navbar-title'>{project.value.name}</div>
+            </Navbar.Heading>
+          </>
+        }
       </Navbar.Group>
     </Navbar>
   );

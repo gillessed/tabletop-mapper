@@ -1,17 +1,27 @@
 import * as React from 'react';
 import { Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
 import { IconNames } from "@blueprintjs/icons";
+import { useDispatchers } from '../../DispatcherContextProvider';
 
 export function NavbarMainMenu() {
+  const dispatchers = useDispatchers();
+  const onClickMapBrowser = React.useCallback(() => {
+    dispatchers.navigation.setProjectDialogOpen(true);
+  }, [dispatchers]);
+  const onClickSave = React.useCallback(() => {
+    dispatchers.project.saveProject();
+  }, [dispatchers]);
+  const onOpenAssetManager = React.useCallback(() => {
+    dispatchers.navigation.setCurrentView('AssetManager');
+  }, [dispatchers]);
   return (
     <Menu>
-      <MenuItem text='New Map' icon={IconNames.NEW_LAYER} />
-      <MenuItem text='Open Map' icon={IconNames.DOCUMENT_OPEN} />
-      <MenuItem text='Save Map' icon={IconNames.FLOPPY_DISK}/>
+      <MenuItem text='Map Browser' icon={IconNames.FOLDER_OPEN} onClick={onClickMapBrowser} />
+      <MenuItem text='Save Map' icon={IconNames.FLOPPY_DISK} onClick={onClickSave} />
       <MenuDivider />
-      <MenuItem text='Open Asset Manager' icon={IconNames.MEDIA}/>
+      <MenuItem text='Open Asset Manager' icon={IconNames.MEDIA} onClick={onOpenAssetManager}/>
       <MenuDivider />
-      <MenuItem text='Exit' icon={IconNames.LOG_OUT}/>
+      <MenuItem text='Exit' icon={IconNames.LOG_OUT} />
     </Menu>
   );
 }

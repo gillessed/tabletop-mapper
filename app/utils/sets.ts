@@ -36,3 +36,20 @@ export function setMax<T>(
   }
   return tmax;
 }
+
+export function pickRandom<T>(
+  iterable: Iterable<T>,
+  count: number,
+): Set<T> {
+  let array = [...iterable];
+  const picks = new Set<T>();
+  for (let i = 0; i < count; i++) {
+    if (array.length === 0) {
+      break;
+    }
+    const pick = Math.floor(Math.random() * array.length);
+    picks.add(array[pick]);
+    array.splice(pick, 1);
+  }
+  return picks;
+}

@@ -48,12 +48,12 @@ function consume(copyTask: CopyTask) {
 function copyFile(source: string, target: string): Promise<void> {
   let done = false;
   return new Promise((resolve: () => void, reject: (reason: any) => void) => {
-    let readStream = etn.fs.createReadStream(source);
+    let readStream = etn().fs.createReadStream(source);
     readStream.once('error', (error: any) => {
       reject(error);
     });
 
-    let writeStream = etn.fs.createWriteStream(target);
+    let writeStream = etn().fs.createWriteStream(target);
     writeStream.once('error', (error: any) => {
       reject(error);
     });
