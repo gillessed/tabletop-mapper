@@ -49,6 +49,7 @@ export interface AssetManagerState {
 
 export function AssetManager() {
   const assetIndex = useSelector(Asset.Selectors.getAssetIndex);
+  const assetPackIndex = useSelector(Asset.Selectors.getAssetPackIndex);
   const dispatchers = useDispatchers();
   const [assetManagerState, setAssetManagerState] = React.useState<AssetManagerState>({
     view: 'by-pack',
@@ -77,28 +78,19 @@ export function AssetManager() {
   const assetItems = React.useMemo(() => {
     let allItems: Asset.Types.AssetItem[] = [];
     if (assetManagerState.view === 'by-pack') {
-      const assetItems: { [name: string]: Asset.Types.AssetPack } = {};
-      for (const assetId of assetIndex.all) {
-        const asset = assetIndex.byId[assetId];
-        const packName = asset.packName ?? '';
-        if (assetItems[packName] == null) {
-          assetItems[packName] = { assets: [], name: packName };
-        }
-        assetItems[packName].assets.push(asset);
-      }
-      for (const key of Object.keys(assetItems)) {
-        allItems.push(assetItems[key]);
+      for (const assetPackId of assetPackIndex.all) {
+        const assetPack = assetPackIndex.byId[assetPackId];
+        allItems.push(assetPack);
       }
     } else if (assetManagerState.view === 'by-tag') {
       // TODO (gcole)
     } else if (assetManagerState.view === 'pack') {
-      const packName = assetManagerState.viewingItem;
-      if (packName != null && packName.length !== 0) {
-        for (const assetId of assetIndex.all) {
+      const packId = assetManagerState.viewingItem;
+      const assetPack = assetPackIndex.byId[packId];
+      if (assetPack != null) {
+        for (const assetId of assetPack.assetIds) {
           const asset = assetIndex.byId[assetId];
-          if (asset.packName === packName) {
             allItems.push(asset);
-          }
         }
       }
     }
@@ -111,7 +103,6 @@ export function AssetManager() {
   const classes = classNames('asset-manager', Classes.DARK);
   const hasAssets = assetIndex.all.length > 0;
   const foundAssets = assetItems.length > 0;
-  console.log(hasAssets, foundAssets, assetView === 'grid');
   return (
     <div className={classes}>
       <div className='asset-manager-content'>

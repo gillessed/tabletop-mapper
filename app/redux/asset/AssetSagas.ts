@@ -65,7 +65,7 @@ function* importAssetsSaga(context: SagaContext, action: TypedAction<string[]>) 
         name: fileToImport.getFilenameNoExtension(),
         extension: originalExtension,
         tagIds: [],
-        assetPackId,
+        assetPackId: newAssetPack.id,
       };
       const target = appConfig.getAssetFileById(newAsset.id, originalExtension);
       yield call(target.getParent().mkdirP);

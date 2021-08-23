@@ -24,8 +24,8 @@ module.exports = {
     rules: [
       { test: /\.(tsx?)$/, loader: 'ts-loader', exclude: /node_modules/ },
       { test: /\.(jsx?)$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.css$/, loader: 'style-loader!css-loader' },
-      { test: /\.less$/, loader: 'style-loader!css-loader!less-loader' },
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader'] },
       { test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file-loader' },
       {
         test: /\.scss$/,

@@ -3,6 +3,7 @@ import { Asset } from '../../redux/asset/AssetTypes';
 import './AssetGridItem.scss';
 import { AssetManagerState } from './AssetManager';
 import { useAppConfig } from '../../AppConfigContextProvider';
+import { useSelector } from 'react-redux';
 
 export namespace AssetPackGridItem {
   export interface Props {
@@ -15,12 +16,15 @@ export const AssetPackGridItem = React.memo(function AssetPackGridItem({
   assetPack, setAssetManagerState
 }: AssetPackGridItem.Props) {
   const appConfig = useAppConfig();
-  const previews = assetPack.assets.slice(0, 9);
+  const assetIndex = useSelector(Asset.Selectors.getAssetIndex);
+  const previews = assetPack.assetIds.slice(0, 9).map((id) => {
+    return assetIndex.byId[id];
+  });
   const onClick = React.useCallback(() => {
     setAssetManagerState({
       view: 'pack',
       viewingItem: assetPack.name,
-    })
+    });
   }, [assetPack, setAssetManagerState]);
   return (
     <div className='asset-pack-grid-item' onClick={onClick}>
@@ -36,7 +40,7 @@ export const AssetPackGridItem = React.memo(function AssetPackGridItem({
         })}
       </div>
       <div className='title'>{assetPack.name}</div>
-      <div className='subtitle'>{assetPack.assets.length} assets</div>
+      <div className='subtitle'>{assetPack.assetIds.length} assets</div>
     </div>
   );
 });

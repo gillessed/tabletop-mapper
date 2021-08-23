@@ -6,8 +6,8 @@
   "scripts": {
     "start": "electron build/main.js",
     "start-logging": "ELECTRON_ENABLE_LOGGING=1 & electron build/main.js",
-    "watch": "./node_modules/.bin/webpack-dev-server",
-    "electron-rebuild": "./node_modules/.bin/electron-rebuild"
+    "watch": "webpack serve --config webpack.config.js --progress",
+    "electron-rebuild": "electron-rebuild"
   },
   "author": "gillessed",
   "license": "CC0-1.0",
@@ -15,18 +15,18 @@
     "babel": "^6.23.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.1.0",
-    "css-loader": "^3.4.2",
+    "css-loader": "^6.2.0",
     "electron": "8.2.0",
     "electron-packager": "^14.2.1",
     "electron-rebuild": "^1.10.1",
     "file-loader": "^6.0.0",
     "less": "^3.11.1",
     "node-libs-browser": "^2.2.1",
-    "node-sass": "^4.13.1",
+    "node-sass": "^6.0.1",
     "react-codemod": "^5.2.0",
-    "sass-loader": "^8.0.2",
+    "sass-loader": "^12.1.0",
     "style-loader": "^1.1.3",
-    "webpack": "^4.42.1",
+    "webpack": "^5.51.1",
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
@@ -64,6 +64,6 @@
     "ts-loader": "^6.2.2",
     "tslint": "^6.1.0",
     "typescript": "3.9.7",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^4.8.0"
   }
 }

@@ -57,7 +57,7 @@ export function createUpsertIndexableReducer<State, Payload extends Identifiable
     newById[payload.id] = payload;
     const newAll = [...current.all];
     const idIndex = current.all.indexOf(payload.id);
-    if (idIndex >= 0) {
+    if (idIndex < 0) {
       newAll.push(payload.id);
     }
     const newIndexable = { byId: newById, all: newAll };
