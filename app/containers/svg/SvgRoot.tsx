@@ -15,7 +15,7 @@ import { FeatureDragShadows } from './features/FeatureDragShadows';
 import { FeatureOutlines } from './features/FeatureOutlines';
 import { FeaturePartialGeometries } from './features/FeaturePartialGeometries';
 import { Features } from './features/Features';
-import { GridLines } from './grid/Gridlines';
+import { GridLines } from './grid/GridLines';
 import { getFeatureTranslation } from '../../redux/model/FeatureTranslation';
 import { getHighestFeatureId } from '../../redux/model/ModelTree';
 
