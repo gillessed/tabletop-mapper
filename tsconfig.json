@@ -15,6 +15,7 @@
     "sourceMap": true,
     "jsx": "react",
     "downlevelIteration": true,
+    "skipLibCheck": true,
   },
   "exclude": [
     "node_modules",
