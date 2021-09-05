@@ -1,0 +1,70 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+
+.asset-grid-item {
+  display       : flex;
+  flex-direction: row;
+  align-items   : center;
+  min-height    : 50px;
+  max-height    : 50px;
+  padding-left  : 5px;
+
+  &:nth-child(2n) {
+    background-color: darken($dark-gray3, 4%);
+
+    &:hover {
+      background-color: darken($dark-gray3, 2%);
+    }
+  }
+
+  &:nth-child(2n+1) {
+    background-color: lighten($dark-gray3, 2%);
+
+    &:hover {
+      background-color: lighten($dark-gray3, 4%);
+    }
+  }
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  .image-container {
+    padding         : 5px;
+    background-color: $light-gray5;
+    width           : 40px;
+    height          : 40px;
+    display         : grid;
+    border-radius   : 5px;
+    box-shadow      : 0px 0px 3px 1px $light-gray3;
+
+    .asset-image {
+      width     : 30px;
+      height    : 30px;
+      object-fit: contain;
+    }
+  }
+
+  .title-container {
+    width: 300px;
+
+    .title {
+      margin-left: 20px;
+      max-width  : 250px;
+      font-size  : 14px;
+    }
+  }
+
+  .grid-dimension-input {
+    .bp3-input-group {
+      width: 36px;
+    }
+
+    &.left-input {
+      margin-right: 6px;
+    }
+
+    &.right-input {
+      margin-left: 6px;
+    }
+  }
+}

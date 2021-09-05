@@ -25,3 +25,31 @@ export function range(count: number, start: number = 0): number[] {
   }
   return array;
 }
+
+export function compact<T>(array: Array<T | null | undefined>): T[] {
+  const filtered: T[] = [];
+  for (const element of array) {
+    if (element != null) {
+      filtered.push(element);
+    }
+  }
+  return filtered;
+}
+
+export function arrayEquals<T>(a1: T[], a2: T[]): boolean {
+  if (a1 == null && a2 == null) {
+    return true;
+  }
+  if (a1 == null || a2 == null) {
+    return false;
+  }
+  if (a1.length !== a2.length) {
+    return false;
+  }
+  for (let i = 0; i < a1.length; i++) {
+    if (a1[i] !== a2[i]) {
+      return false;
+    }
+  }
+  return true;
+}

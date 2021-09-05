@@ -1,4 +1,5 @@
-import { etn } from '../etn';
+import { Ipc } from '../ipc/ipcCommands';
+import { ipcInvoke } from '../ipc/ipcInvoke';
 
 class Queue<T> {
   private items: T[] = [];
@@ -46,26 +47,7 @@ function consume(copyTask: CopyTask) {
 }
 
 function copyFile(source: string, target: string): Promise<void> {
-  let done = false;
-  return new Promise((resolve: () => void, reject: (reason: any) => void) => {
-    let readStream = etn().fs.createReadStream(source);
-    readStream.once('error', (error: any) => {
-      reject(error);
-    });
-
-    let writeStream = etn().fs.createWriteStream(target);
-    writeStream.once('error', (error: any) => {
-      reject(error);
-    });
-    writeStream.once('close', () => {
-      if (!done) {
-        done = true;
-        resolve();
-      }
-    });
-
-    readStream.pipe(writeStream);
-  });
+  return ipcInvoke(Ipc.CopyFile, source, target);
 }
 
 attempt();

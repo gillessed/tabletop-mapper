@@ -2,6 +2,7 @@ import { Reducer } from 'redux';
 import { newTypedReducer } from '../utils/typedReducer';
 import { LayerTree } from './LayerTreeTypes';
 import { Model } from '../model/ModelTypes';
+import { arrayEquals } from '../../utils/array';
 
 const INITIAL_STATE: LayerTree.Types.State = {
   expandedNodes: {
@@ -31,10 +32,13 @@ const collapseNodeReducer = (state: LayerTree.Types.State, layerId: string) => {
   };
 }
 
-const selectNodesReducers = (state: LayerTree.Types.State, layerIds: string[]): LayerTree.Types.State => {
+const selectNodesReducers = (state: LayerTree.Types.State, objectIds: string[]): LayerTree.Types.State => {
+  if (arrayEquals(state.selectedNodes, objectIds)) {
+    return state;
+  }
   return {
     ...state,
-    selectedNodes: layerIds,
+    selectedNodes: objectIds,
   };
 }
 

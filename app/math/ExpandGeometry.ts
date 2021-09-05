@@ -12,15 +12,3 @@ export function expandRectangle(
   };
   return result;
 }
-
-export function expandCircle(
-  circle: Model.Types.Circle,
-  delta: number,
-): Model.Types.Circle {
-  const { r } = circle;
-  const outline: Model.Types.Circle = {
-    ...circle,
-    r: r + delta,
-  };
-  return outline;
-}

@@ -7,18 +7,18 @@ import { Feature } from './Feature';
 export const Features = function Features() {
   const features = useSelector(Model.Selectors.getFeatures);
   const layers = useSelector(Model.Selectors.getLayers);
-  const styles = useSelector(Model.Selectors.getStyles);
 
-  const renderedFeatures: JSX.Element[] = [];
-  treeWalk(features, layers, (feature) => {
-    const { styleId, geometry } = feature;
-    const style = styles.byId[styleId];
-    renderedFeatures.push(<Feature
-      key={feature.id}
-      geometry={geometry}
-      style={style}
-    />);
-  });
+  const renderedFeatures = React.useMemo(() => {
+    const elements: JSX.Element[] = [];
+    treeWalk(features, layers, (feature) => {
+      elements.push(<Feature
+        key={feature.id}
+        feature={feature}
+      />);
+    });
+    elements.reverse();
+    return elements;
+  }, [features, layers]);
 
   return <g className='rendered-features'> {renderedFeatures} </g>;
 };

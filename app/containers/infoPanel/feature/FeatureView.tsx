@@ -1,8 +1,7 @@
-import { Classes, Colors } from '@blueprintjs/core';
+import { Colors } from '@blueprintjs/core';
 import * as React from 'react';
-import { useSelector, useStore } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Model } from '../../../redux/model/ModelTypes';
-import { StyleEditor } from '../style/StyleEditor';
 import { FeatureIcon } from './FeatureIcon';
 import { getFeatureProperties } from './FeatureProperties';
 import './FeatureView.scss';
@@ -16,9 +15,7 @@ export namespace FeatureView {
 export const FeatureView = React.memo(function FeatureView({
   featureId,
 }: FeatureView.Props) {
-  const store = useStore();
   const features = useSelector(Model.Selectors.getFeatures);
-  const styles = useSelector(Model.Selectors.getStyles);
   const feature = features.byId[featureId];
   const geometryType = Model.Types.Geometries[feature.geometry.type];
   const properties = getFeatureProperties(feature);
@@ -31,7 +28,7 @@ export const FeatureView = React.memo(function FeatureView({
           color={Colors.LIGHT_GRAY5}
         />
         <div className='title'> {feature.name} </div>
-        <div className='subtitle'>{geometryType.name}</div>
+        <div className='subtitle'>{Model.Types.FeatureNames[feature.type]}</div>
       </div>
       <div className='feature-body'>
         {properties.map((property) => {
@@ -46,7 +43,6 @@ export const FeatureView = React.memo(function FeatureView({
         })}
       </div>
       <div className='feature-style-header title'>Style</div>
-      <StyleEditor style={styles.byId[feature.styleId]} editingFeatureId={feature.id}/>
     </div>
   );
 });

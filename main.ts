@@ -2,6 +2,8 @@ import * as Electron from 'electron';
 import * as path from 'path';
 import * as process from 'process';
 import * as url from 'url';
+import { ShortcutCommand } from './app/ipc/ipcCommands';
+import { registerIpcHandlers } from './ipc';
 
 process.setMaxListeners(0);
 const app = Electron.app;
@@ -44,7 +46,15 @@ function createWindow() {
       window.webContents.openDevTools();
     }
   });
+
+  globalShortcut.register('CommandOrControl+Shift+R', () => {
+    for (const window of Electron.BrowserWindow.getAllWindows()) {
+      window.reload();
+    }
+  });
 }
+
+registerIpcHandlers();
 
 app.whenReady().then(createWindow);
 

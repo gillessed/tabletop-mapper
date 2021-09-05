@@ -1,0 +1,22 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+@import '../../../scss/Scrollbar.scss';
+
+.asset-pack-grid {
+  width: 100%;
+  height: calc(100vh - 200px);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  justify-content: center;
+  @include scrollbars(10px, $dark-gray3, $dark-gray2);
+  
+  .asset-grid-filler {
+    width: 200px;
+    height: 0px;
+    visibility: hidden;
+    margin-right: 10px;
+  }
+}

@@ -1,7 +1,8 @@
-@import '@blueprintjs/core/lib/scss/variables.scss';
+@import "@blueprintjs/core/lib/scss/variables.scss";
 
 .new-map-form {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 400px;
 }

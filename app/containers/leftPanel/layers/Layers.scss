@@ -1,0 +1,61 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+@import '../../../scss/Scrollbar.scss';
+
+.layer-tree-container {
+  display         : flex;
+  flex-direction  : column;
+  flex            : 1;
+  overflow-y      : auto;
+  background-color: $dark-gray1;
+  height          : 100%;
+  max-height      : calc(100vh - 110px);
+
+  .layer-tree-mask {
+    height    : 100%;
+    max-height: calc(100vh - 110px);
+    @include scrollbars(10px, pink, $dark-gray1);
+  }
+
+  .layer-tree {
+    height        : 100%;
+    min-width     : 100%;
+    padding-bottom: 20px;
+
+    .layer-tree-node {
+      & > .bp3-tree-node-content {
+        position: relative;
+      }
+
+      .bp3-tree-node-label {
+        position: static;
+      }
+
+      .reparent-line {
+        position        : absolute;
+        left            : 0px;
+        right           : 0px;
+        height          : 6px;
+        background-color: rgba($red1, 0.7);
+        z-index         : 10;
+
+        &.reparent-top-line {
+          top: -3px;
+        }
+
+        &.reparent-bottom-line {
+          bottom: -3px;
+        }
+      }
+
+      &.reparent-into {
+        background-color: rgba($red1, 0.7);
+      }
+    }
+
+    &.reparenting .bp3-tree-node:not(.bp3-tree-node-selected) {
+      .bp3-tree-node-content {
+        background-color: rgba(black, 0);
+      }
+    }
+  }
+}

@@ -7,22 +7,23 @@ import createSagaMiddleware from 'redux-saga';
 import { AppConfigFiles, createNewAppConfig, writeAppConfig, readAppConfig } from './config/AppConfig';
 import { Root } from './containers/Root';
 import { DispatcherContextProvider } from './DispatcherContextProvider';
-import { applyKeyboardNavigationListener, applyMouseNavigationListener } from './navigationListeners';
 import { AppReducer } from './redux/AppReducer';
 import { appSaga, SagaContext } from './redux/AppSaga';
 import { dispatcherCreators } from './redux/Dispatchers';
 import { loggerPredicate } from './redux/Logger';
 import { createRegister, SagaListener } from './redux/SagaListener';
 import { SagaListenerContextProvider } from './SagaListenerContextProvider';
-import { getAppDir } from './utils/appDir';
-import { etn } from './etn';
 import { AppConfigContextProvider } from './AppConfigContextProvider';
 import { Toaster, Spinner, Colors, Classes, Intent } from '@blueprintjs/core';
 import { readAssetDataFile } from './redux/asset/AssetDataFile';
 import { Asset } from './redux/asset/AssetTypes';
+import { Filer, setFilerSeparator } from './utils/filer';
+import { ipcInvoke } from './ipc/ipcInvoke';
+import { Ipc } from './ipc/ipcCommands';
+import './scss/Scrollbar.scss';
+import { registerKeyboardShortcuts } from './KeyboardShortcuts';
 
 const AppVersion = '0.1.0';
-
 
 function LoadingScreen() {
   return (
@@ -51,15 +52,26 @@ async function initialize() {
     document.getElementById("content")
   );
 
-  const appDir = getAppDir();
+  const platformInfo = await ipcInvoke(Ipc.GetPlatformInfo);
+  console.log('platform info ', platformInfo);
+  const { appDirPath, separatorChar } = platformInfo;
+  setFilerSeparator(separatorChar);
+  const appDir = Filer.open(appDirPath);
+
   await appDir.mkdirP();
-  const appConfigFile = getAppDir().resolve(AppConfigFiles.appConfigFilename);
+  const appConfigFile = appDir.resolve(AppConfigFiles.appConfigFilename);
+  console.log("Checking for app config file");
   const appConfigExists = await appConfigFile.exists();
   if (!appConfigExists) {
     const newAppConfig = createNewAppConfig(appDir, AppVersion);
+    console.log("Writing blank app config file");
     await writeAppConfig(appConfigFile, newAppConfig);
   }
+
+  console.log("Reading app config");
   const appConfig = await readAppConfig(appConfigFile);
+
+  console.log("Creating project and asset directories");
   await appConfig.projectsDir.mkdirP();
   await appConfig.assetDir.mkdirP();
 
@@ -78,8 +90,7 @@ async function initialize() {
       sagaMiddleware,
     ),
   );
-  applyMouseNavigationListener(store);
-  applyKeyboardNavigationListener(store);
+  registerKeyboardShortcuts(store);
 
   const assets = await readAssetDataFile(appConfig);
   store.dispatch(Asset.Actions.setAssetState.create(assets));
@@ -117,7 +128,6 @@ async function initialize() {
 
 try {
   initialize();
-} catch {
-  etn().dialog.showErrorBox('Error', 'There was a problem initializing the application.');
-  etn().app.quit();
+} catch (error) {
+  console.error('Could not instantiate app', error);
 }

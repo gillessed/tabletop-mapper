@@ -1,0 +1,13 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+@import '../../../scss/Scrollbar.scss';
+
+.asset-list {
+  width: 100%;
+  height: calc(100vh - 250px);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  @include scrollbars(10px, $dark-gray3, $dark-gray2);
+}

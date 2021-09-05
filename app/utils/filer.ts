@@ -1,9 +1,16 @@
-import { etn } from '../etn';
 import { copyQueue } from './fileCopier';
+import { ipcInvoke } from '../ipc/ipcInvoke';
+import { Ipc } from '../ipc/ipcCommands';
+
+let FilerSeparator = '/';
+export function setFilerSeparator(s: string) {
+  FilerSeparator = s;
+}
+
 
 function trimSlashesEnd(str: string) {
   let result = str;
-  while (str.endsWith('/')) {
+  while (str.endsWith(FilerSeparator)) {
     result = result.substr(0, result.length - 1);
   }
   return result;
@@ -11,7 +18,7 @@ function trimSlashesEnd(str: string) {
 
 function trimSlashesStart(str: string) {
   let result = str;
-  while (str.startsWith('/')) {
+  while (str.startsWith(FilerSeparator)) {
     result = result.substr(0, result.length - 1);
   }
   return result;
@@ -30,17 +37,17 @@ export class Filer {
   public static open = (fullPath: string) => new Filer(fullPath);
 
   public resolve(file: string): Filer {
-    return Filer.open(`${trimSlashesEnd(this.fullPath)}/${trimSlashesStart(file)}`);
+    return Filer.open(`${trimSlashesEnd(this.fullPath)}${FilerSeparator}${trimSlashesStart(file)}`);
   }
 
   public getParent(): Filer {
-    const pathElements = this.fullPath.split('/');
+    const pathElements = this.fullPath.split(FilerSeparator);
     const parentElements = pathElements.slice(0, pathElements.length - 1);
-    return Filer.open(parentElements.join('/'));
+    return Filer.open(parentElements.join(FilerSeparator));
   }
 
   public getFilename(): string {
-    const split = this.fullPath.split('/');
+    const split = this.fullPath.split(FilerSeparator);
     return split[split.length - 1];
   }
 
@@ -60,12 +67,11 @@ export class Filer {
   }
 
   public exists = async (): Promise<boolean> => {
-    return etn().util.promisify(etn().fs.exists)(this.fullPath);
+    return ipcInvoke(Ipc.FilerExists, this.fullPath);
   }
   
   public isDirectory = async (): Promise<boolean> => {
-    return etn().util.promisify(etn().fs.lstat)(this.fullPath)
-      .then((stats) => stats.isDirectory());
+    return ipcInvoke(Ipc.FilerIsDirectory, this.fullPath);
   }
 
   public deleteRecursive = async (): Promise<void> => {
@@ -75,9 +81,9 @@ export class Filer {
       for (const child of children) {
         await child.deleteRecursive();
       }
-      return etn().util.promisify(etn().fs.rmdir)(this.fullPath);
+      return ipcInvoke(Ipc.FilerRmdir, this.fullPath);
     } else {
-      return etn().util.promisify(etn().fs.unlink)(this.fullPath);
+      return ipcInvoke(Ipc.FilerUnlink, this.fullPath);
     }
   }
 
@@ -88,20 +94,20 @@ export class Filer {
     }
     const parent = this.getParent();
     await parent.mkdirP();
-    return etn().util.promisify(etn().fs.mkdir)(this.fullPath);
+    return ipcInvoke(Ipc.FilerMkdir, this.fullPath);
   }
 
   public readDir = async (): Promise<Filer[]> => {
-    return etn().util.promisify(etn().fs.readdir)(this.fullPath)
-    .then((contents) => contents.map((file) => this.resolve(file)));
+    const files = await ipcInvoke(Ipc.FilerReaddir, this.fullPath);
+    return files.map((file) => this.resolve(file));
   }
 
   public writeFile = async(data: string): Promise<void> => {
-    return etn().util.promisify(etn().fs.writeFile)(this.fullPath, data);
+    return ipcInvoke(Ipc.FilerWriteFile, this.fullPath, data);
   }
 
   public readFile = async(): Promise<string> => {
-    return etn().util.promisify(etn().fs.readFile)(this.fullPath, 'utf8');
+    return ipcInvoke(Ipc.FilerReadFile, this.fullPath);
   }
 
   public copyTo = async(dest: Filer): Promise<void> => {

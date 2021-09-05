@@ -4,68 +4,23 @@ import { getPairs } from "../../utils/array";
 import { curry2Reverse } from '../../utils/functionalSugar';
 import { Indexable } from "../utils/indexable";
 import { Model } from "./ModelTypes";
-import { visitFeature, visitStyle } from "./ModelVisitors";
-import { DefaultSvgStyle } from "./DefaultStyles";
+import { visitGeometry } from "./ModelVisitors";
 
 const SelectionPadding = 8;
 
-function doesPointFeatureContain(
-  feature: Model.Types.Feature<Model.Types.Point>,
-  style: Model.Types.Style,
+function doesRectangleGeometryContain(
+  geometry: Model.Types.Rectangle,
   coordinate: Coordinate,
   padding: number,
 ): boolean {
-  return visitStyle({
-    visitBasicAssetStyle: () => {
-      return false;
-    },
-    visitSvgStyle: (svgStyle) => {
-      const distance = svgStyle.pointRadius + padding;
-      return coordinateDistance(feature.geometry.p, coordinate) < distance;
-    }
-  }, style);
-}
-
-function doesRectangleFeatureContain(
-  feature: Model.Types.Feature<Model.Types.Rectangle>,
-  style: Model.Types.Style,
-  coordinate: Coordinate,
-  padding: number,
-): boolean {
-  return visitStyle({
-    visitBasicAssetStyle: () => {
-      return false;
-    },
-    visitSvgStyle: (svgStyle) => {
-      const totalPadding = padding + svgStyle.strokeWidth / 2;
-      const { p1, p2 } = feature.geometry;
-      const { x, y } = coordinate;
-      return (
-        x > p1.x - totalPadding &&
-        y > p1.y - totalPadding &&
-        x < p2.x + totalPadding &&
-        y < p2.y + totalPadding
-      );
-    }
-  }, style);
-}
-
-function doesCircleFeatureContain(
-  feature: Model.Types.Feature<Model.Types.Circle>,
-  style: Model.Types.Style,
-  coordinate: Coordinate,
-  padding: number,
-): boolean {
-  return visitStyle({
-    visitBasicAssetStyle: () => {
-      return false;
-    },
-    visitSvgStyle: (svgStyle) => {
-      const { p, r } = feature.geometry;
-      const distance = r + padding + svgStyle.strokeWidth / 2;
-      return coordinateDistance(p, coordinate) < distance;
-    },
-  }, style);
+  const { p1, p2 } = geometry;
+  const { x, y } = coordinate;
+  return (
+    x > p1.x - padding &&
+    y > p1.y - padding &&
+    x < p2.x + padding &&
+    y < p2.y + padding
+  );
 }
 
 function doesSegmentContain(
@@ -109,54 +64,41 @@ function doesPolygonContain(
   return intersections % 2 === 1;
 }
 
-function doesPathFeatureContain(
-  feature: Model.Types.Feature<Model.Types.Path>,
-  style: Model.Types.Style,
+function doesPathGeometryContain(
+  geometry: Model.Types.Path,
   coordinate: Coordinate,
   padding: number,
 ): boolean {
-  const totalPadding = visitStyle({
-    visitBasicAssetStyle: () => {
-      return padding;
-    },
-    visitSvgStyle: (svgStyle) => {
-      return padding + svgStyle.strokeWidth / 2;
-    },
-  }, style);
-  for (const p of feature.geometry.path) {
-    if (coordinateDistance(p, coordinate) < totalPadding) {
+  for (const p of geometry.path) {
+    if (coordinateDistance(p, coordinate) < padding) {
       return true;
     } 
   }
-  const segments = getPairs(feature.geometry.path, feature.geometry.closed);
-  const matchesSegment = !!segments.find(({p1, p2}) => doesSegmentContain(coordinate, totalPadding, p1, p2));
+  const segments = getPairs(geometry.path, geometry.closed);
+  const matchesSegment = !!segments.find(({p1, p2}) => doesSegmentContain(coordinate, padding, p1, p2));
   if (matchesSegment) {
     return true;
   }
-  if (!feature.geometry.closed) {
+  if (!geometry.closed) {
     return false;
   }
   return doesPolygonContain(coordinate, segments); 
 }
 
-export function doesFeatureContain(
-  feature: Model.Types.Feature,
-  style: Model.Types.Style,
+export function doesGeometryContain(
+  geometry: Model.Types.Geometry,
   coordinate: Coordinate,
   padding?: number,
 ): boolean {
   const resolvedPadding = padding ?? 0;
-  return visitFeature({
-    visitPoint: curry2Reverse(doesPointFeatureContain)(style, coordinate, resolvedPadding),
-    visitCircle: curry2Reverse(doesCircleFeatureContain)(style, coordinate, resolvedPadding),
-    visitPath: curry2Reverse(doesPathFeatureContain)(style, coordinate, resolvedPadding),
-    visitRectangle: curry2Reverse(doesRectangleFeatureContain)(style, coordinate, resolvedPadding),
-  }, feature);
+  return visitGeometry({
+    visitPath: curry2Reverse(doesPathGeometryContain)(coordinate, resolvedPadding),
+    visitRectangle: curry2Reverse(doesRectangleGeometryContain)(coordinate, resolvedPadding),
+  }, geometry);
 }
 
 export function getHoveredFeatures(
   features: Indexable<Model.Types.Feature>,
-  styles: Indexable<Model.Types.Style>,
   mouseGridCoordinate: Coordinate,
   transform: Transform,
 ) {
@@ -164,8 +106,7 @@ export function getHoveredFeatures(
   const padding = transform.applyScalar(SelectionPadding);
   for (const featureId of features.all) {
     const feature = features.byId[featureId];
-    const style = styles.byId[feature.styleId];
-    if (doesFeatureContain(feature, style, mouseGridCoordinate, padding)) {
+    if (doesGeometryContain(feature.geometry, mouseGridCoordinate, padding)) {
       hoveredFeatures.push(featureId);
     }
   }

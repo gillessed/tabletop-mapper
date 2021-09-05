@@ -12,6 +12,16 @@ export function* assetSaga(context: SagaContext) {
   yield all([
     takeEvery(Asset.Actions.importAssets.type, importAssetsSaga, context),
     takeEvery(Asset.Actions.saveAssetFile.type, saveAssetDataFile, context),
+
+    takeEvery(Asset.Actions.upsertAsset.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.setAssetName.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.removeAsset.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.upsertAssetPack.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.setAssetPackName.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.removeAssetPack.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.upsertTag.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.setTagName.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.removeTag.type, saveAssetDataFile, context),
   ]);
 }
 
@@ -53,10 +63,11 @@ function* importAssetsSaga(context: SagaContext, action: TypedAction<string[]>) 
     id: generateRandomString(),
     name: packName,
     assetIds: [],
-    tagIds: [],
   }
   yield put(Asset.Actions.upsertAssetPack.create(newAssetPack));
+  yield put(Asset.Actions.setViewState.create({ type: 'pack', item: newAssetPack.id }));
   let progress = 0;
+  pauseAssetFileSave = true;
   for (const fileToImport of filesToImport) {
     try {
       const originalExtension = fileToImport.getExtension();
@@ -78,13 +89,19 @@ function* importAssetsSaga(context: SagaContext, action: TypedAction<string[]>) 
       renderProgressToast(appToaster, progress / filesToImport.length, toastKey);
     }
   }
+  pauseAssetFileSave = false;
   yield put(Asset.Actions.saveAssetFile.create());
 }
 
+let pauseAssetFileSave = false;
 let writingAssetFile = false;
 let queuedWrite = false;
 
 function* saveAssetDataFile(context: SagaContext) {
+  if (pauseAssetFileSave) {
+    queuedWrite = false;
+    return;
+  }
   if (writingAssetFile === true) {
     queuedWrite = true;
     return;

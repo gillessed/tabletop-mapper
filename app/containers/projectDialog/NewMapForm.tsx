@@ -17,7 +17,7 @@ export function NewMapForm() {
   const createButton = <Button
     disabled={mapName == null || mapName.length === 0}
     intent={Intent.PRIMARY}
-    text='Create Map'
+    text='Create New Map'
     minimal
     loading={created}
     onClick={onClick}

@@ -1,0 +1,15 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+
+.asset-search-title {
+  margin-top   : 60px;
+  margin-bottom: 40px;
+  color        : $light-gray5;
+  font-size    : 32px;
+  align-self   : center;
+}
+
+.asset-control-group {
+  button {
+    width: 100px;
+  }
+}

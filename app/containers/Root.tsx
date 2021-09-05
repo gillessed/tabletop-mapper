@@ -6,9 +6,14 @@ import { ProjectDialog } from './projectDialog/ProjectDialog';
 import './Root.scss';
 import { MapperNavbar } from './navbar/Navbar';
 import { AssetManager } from './assetManager/AssetManager';
+import { useDispatchers } from '../DispatcherContextProvider';
 
 export const Root = function Root() {
+  const dispatchers = useDispatchers();
   const { currentView, isProjectDialogOpen } = useSelector(Navigation.Selectors.get);
+  const onMouseUp = React.useCallback(() => {
+    dispatchers.grid.stopDraggingAsset();
+  }, [dispatchers]);
   let appView = undefined;
   switch (currentView) {
     case "Blank":
@@ -27,7 +32,7 @@ export const Root = function Root() {
       break;
   }
   return (
-    <div className='container root-container'>
+    <div className='container root-container' onMouseUp={onMouseUp}>
       {appView}
       {isProjectDialogOpen && <ProjectDialog />}
     </div>

@@ -17,6 +17,7 @@ module.exports = {
     publicPath: 'http://localhost:9010/built/',
     port: 9010,
   },
+  devtool: "source-map",
   resolve: {
     extensions: ['.ts', '.tsx', '.js', 'jsx']
   },
@@ -24,6 +25,7 @@ module.exports = {
     rules: [
       { test: /\.(tsx?)$/, loader: 'ts-loader', exclude: /node_modules/ },
       { test: /\.(jsx?)$/, loader: 'babel-loader', exclude: /node_modules/ },
+      { test: /\.js$/, loader: 'source-map-loader', enforce: 'pre' },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader'] },
       { test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file-loader' },
@@ -38,6 +40,6 @@ module.exports = {
     ]
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
   ]
 }

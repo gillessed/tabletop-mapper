@@ -3,8 +3,7 @@ import { Reducer } from 'redux';
 import { newTypedReducer } from '../utils/typedReducer';
 import { Model } from './ModelTypes';
 import { findByName } from "./ModelUtils";
-import { DefaultSvgStyle, DefaultBasicAssetStyle } from './DefaultStyles';
-import { translateFeature } from './FeatureTranslation';
+import { translateGeometry } from './FeatureTranslation';
 
 export function createEmptyModel(): Model.Types.State {
   return{
@@ -24,13 +23,6 @@ export function createEmptyModel(): Model.Types.State {
     features: {
       byId: {},
       all: [],
-    },
-    styles: {
-      byId: { 
-        [DefaultSvgStyle.id]: DefaultSvgStyle,
-        [DefaultBasicAssetStyle.id]: DefaultBasicAssetStyle,
-      },
-      all: [DefaultSvgStyle.id, DefaultBasicAssetStyle.id],
     },
   };
 }
@@ -109,10 +101,19 @@ const translateFeaturesReducer = (
   let newState = state;
   for (const featureId of featureIds) {
     const feature = state.features.byId[featureId];
-    const translatedFeature = translateFeature(feature, translation);
+    const translatedGeometry = translateGeometry(feature.geometry, translation);
+    const translatedFeature = { ...feature, geometry: translatedGeometry } as Model.Types.Feature;
     newState = DotProp.set(newState, `features.byId.${feature.id}`, translatedFeature);
   }
   return newState;
+}
+
+const setFeatureGeometryReducer = (
+  state: Model.Types.State,
+  payload: Model.Payloads.SetFeatureGeometryPayload,
+): Model.Types.State => {
+  const { featureId, geometry } = payload;
+  return DotProp.set(state, `features.byId.${featureId}.geometry`, geometry);
 }
 
 const setFeatureNameReducer = (
@@ -164,27 +165,15 @@ const setPathsClosedReducer = (
   return newState;
 }
 
-const setStyleReducer = (
-  state: Model.Types.State,
-  style: Model.Types.Style,
-): Model.Types.State => {
-  let newState = state;
-  newState = DotProp.set(newState, `styles.byId.${style.id}`, style);
-  if (newState.styles.all.indexOf(style.id) < 0) {
-    newState = DotProp.merge(newState, `styles.all`, [style.id]);
-  }
-  return newState;
-}
-
 export const modelReducer: Reducer<Model.Types.State> = newTypedReducer<Model.Types.State>()
   .handlePayload(Model.Actions.setModel.type, setModelReducer)
   .handlePayload(Model.Actions.createLayer.type, createLayerReducer)
   .handlePayload(Model.Actions.createFeature.type, createFeatureReducer)
   .handlePayload(Model.Actions.translateFeatures.type, translateFeaturesReducer)
+  .handlePayload(Model.Actions.setFeatureGeometry.type, setFeatureGeometryReducer)
   .handlePayload(Model.Actions.setFeatureName.type, setFeatureNameReducer)
   .handlePayload(Model.Actions.setFeatureStyle.type, setFeatureStyleReducer)
   .handlePayload(Model.Actions.setSnapsToGrid.type, snapsToGridReducer)
   .handlePayload(Model.Actions.setPathsClosed.type, setPathsClosedReducer)
-  .handlePayload(Model.Actions.setStyle.type, setStyleReducer)
   .handleDefault((state = TestState) => state)
   .build();

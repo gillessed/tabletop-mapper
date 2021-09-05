@@ -5,6 +5,7 @@ import { ReduxState } from "../AppReducer";
 import { Grid } from "../grid/GridTypes";
 import { Indexable, Identifiable } from "../utils/indexable";
 import { createActionWrapper } from "../utils/typedAction";
+import { visitFeature } from "./ModelVisitors";
 
 export namespace Model {
   export const RootLayerId = 'root-layer';
@@ -13,7 +14,6 @@ export namespace Model {
     export interface State {
       layers: Indexable<Layer>;
       features: Indexable<Feature>;
-      styles: Indexable<Style>;
     }
 
     export interface Layer extends Identifiable {
@@ -23,38 +23,6 @@ export namespace Model {
       parent: string | null;
     }
 
-    export function isLayer(object: Identifiable): object is Layer {
-      return !!(object as Layer).features;
-    }
-
-    export interface Style extends Identifiable {
-      type: 'svg' | 'basic-asset';
-      editable: boolean;
-    }
-
-    export interface SvgStyle extends Style {
-      type: 'svg';
-      fill?: string;
-      fillOpacity?: number;
-      stroke?: string;
-      strokeWidth?: number;
-      strokeOpacity?: number;
-      pointRadius?: number;
-    }
-
-    export interface BasicAssetStyle extends Style {
-      type: 'basic-asset';
-      assetId?: string;
-    }
-
-    export function isSvgStyle(style: Style): style is SvgStyle {
-      return style.type === 'svg';
-    }
-
-    export function isBasicAssetStyle(style: Style): style is BasicAssetStyle {
-      return style.type === 'basic-asset';
-    }
-
     export interface GeometryInfo {
       id: GeometryType;
       name: string;
@@ -62,22 +30,14 @@ export namespace Model {
       mouseMode: Grid.Types.MouseMode;
     }
 
-    export type GeometryType = 'point' | 'rectangle' | 'path' | 'circle';
+    export type GeometryType = 'rectangle' | 'path';
 
     interface GeometryTypeMap {
-      point: GeometryInfo;
       rectangle: GeometryInfo;
       path: GeometryInfo;
-      circle: GeometryInfo;
     }
 
     export const Geometries: GeometryTypeMap & { [key: string]: GeometryInfo } = {
-      point: {
-        id: 'point',
-        name: 'Point',
-        icon: IconNames.DOT,
-        mouseMode: Grid.Types.MouseMode.DrawPoint,
-      },
       rectangle: {
         id: 'rectangle',
         name: 'Rectangle',
@@ -90,17 +50,7 @@ export namespace Model {
         icon: IconNames.LAYOUT_LINEAR,
         mouseMode: Grid.Types.MouseMode.DrawPath,
       },
-      circle: {
-        id: 'circle',
-        name: 'Circle',
-        icon: IconNames.CIRCLE,
-        mouseMode: Grid.Types.MouseMode.DrawCircle,
-      }
     };
-
-    export function isPoint(geometry: Model.Types.Geometry): geometry is Model.Types.Point {
-      return geometry.type === 'point';
-    }
 
     export function isRectangle(geometry: Model.Types.Geometry): geometry is Model.Types.Rectangle {
       return geometry.type === 'rectangle';
@@ -110,45 +60,50 @@ export namespace Model {
       return geometry.type === 'path';
     }
 
-    export function isCircle(geometry: Model.Types.Geometry): geometry is Model.Types.Circle {
-      return geometry.type === 'circle';
+    export type Feature = BasicAssetFeature | PatternFeature;
+
+    export interface BasicAssetFeature extends Identifiable {
+      type: 'basic-asset';
+      layerId: string;
+      geometry: Rectangle;
+      assetId: string;
+      objectCover?: 'contain' | 'stretch' | 'cover';
+      clipRegion?: Rectangle;
     }
 
-    export interface Feature<T extends Geometry = Geometry> extends Identifiable {
+    export interface PatternFeature extends Identifiable {
+      type: 'pattern';
       layerId: string;
-      geometry: T;
-      styleId: string;
+      geometry: Rectangle | Path;
+      assetId?: string;
+    }
+
+    export type FeatureNamesType = { [foo in Feature['type']]: string };
+    export const FeatureNames: FeatureNamesType  = {
+      'basic-asset': 'Asset',
+      'pattern': 'Pattern',
+    }
+
+    export function isLayer(object: Identifiable): object is Layer {
+      return  object != null && !!(object as Layer).features;
     }
 
     export function isFeature(object: Identifiable): object is Feature {
-      return !!(object as Feature).layerId;
+      return object != null && !!(object as Feature).layerId;
     }
 
-    export interface Geometry {
-      type: GeometryType;
-      snapToGrid?: boolean;
-    }
+    export type Geometry = Rectangle | Path;
 
-    export interface Point extends Geometry {
-      type: 'point';
-      p: Coordinate;
-    }
-
-    export interface Rectangle extends Geometry {
+    export interface Rectangle {
       type: 'rectangle';
+      snapToGrid?: boolean;
       p1: Coordinate;
       p2: Coordinate;
     }
 
-    export interface Circle extends Geometry {
-      type: 'circle';
-      p: Coordinate;
-      r: number;
-      stops?: number[];
-    }
-
-    export interface Path extends Geometry {
+    export interface Path {
       type: 'path';
+      snapToGrid?: boolean;
       path: Coordinate[];
       closed?: boolean;
     }
@@ -184,6 +139,11 @@ export namespace Model {
       pathIds: string[];
       closed: boolean;
     }
+
+    export interface SetFeatureGeometryPayload {
+      featureId: string;
+      geometry: Model.Types.Geometry;
+    }
   }
 
   export const DispatchActions = {
@@ -191,11 +151,11 @@ export namespace Model {
     createLayer: createActionWrapper<Payloads.CreateLayer>('model::createLayer'),
     createFeature: createActionWrapper<Types.Feature>('model::createFeature'),
     translateFeatures: createActionWrapper<Payloads.TranslateFeatures>('model::translateFeatures'),
+    setFeatureGeometry: createActionWrapper<Payloads.SetFeatureGeometryPayload>('model::setFeatureGeometry'),
     setFeatureName: createActionWrapper<Payloads.SetFeatureName>('model::setFeatureName'),
     setFeatureStyle: createActionWrapper<Payloads.SetFeatureStyle>('model::setFeatureStyle'),
     setSnapsToGrid: createActionWrapper<Payloads.SnapsToGrid>('model::snapToGrid'),
     setPathsClosed: createActionWrapper<Payloads.SetPathsClosed>('model::setPathsClosed'),
-    setStyle: createActionWrapper<Model.Types.Style>('model::setStyle'),
   }
 
   export const Actions = {
@@ -206,6 +166,6 @@ export namespace Model {
     export const get = (state: ReduxState) => state.model;
     export const getLayers = (state: ReduxState) => get(state).layers;
     export const getFeatures = (state: ReduxState) => get(state).features;
-    export const getStyles = (state: ReduxState) => get(state).styles;
+    export const getFeatureById = (featureId: string) => (state: ReduxState) => get(state).features.byId[featureId];
   }
 }

@@ -39,6 +39,7 @@ export const GridLines = React.memo(function GridLines({
     />);
   }
 
+  
   for (let i = Math.floor(topLeft.y); i <= bottomRight.y; i++) {
     let classNames = "";
     let s = strokeWidth;

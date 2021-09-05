@@ -11,23 +11,9 @@ export interface AddCoordinateResult {
 
 export function addCoordinateToPartialGeometry(geometry: Partial<Model.Types.Geometry>, coordinate: Coordinate): AddCoordinateResult {
   return visitGeometry({
-    visitPoint: curry2(swapArgs2(addCoordinateToPointGeometry))(coordinate),
     visitRectangle: curry2(swapArgs2(addCoordinateToRectangleGeometry))(coordinate),
     visitPath: curry2(swapArgs2(addCoordinateToPathGeometry))(coordinate),
-    visitCircle: curry2(swapArgs2(addCoordinateToCircleGeometry))(coordinate),
   }, geometry as Model.Types.Geometry);
-}
-
-function addCoordinateToPointGeometry(partial: Partial<Model.Types.Point>, coordinate: Coordinate): AddCoordinateResult {
-  const point: Model.Types.Point = {
-    ...partial,
-    type: 'point',
-    p: coordinate,
-  };
-  return {
-    geometry: point,
-    complete: true,
-  };
 }
 
 function addCoordinateToRectangleGeometry(partial: Partial<Model.Types.Rectangle>, coordinate: Coordinate): AddCoordinateResult {
@@ -75,32 +61,6 @@ function addCoordinateToPathGeometry(partial: Partial<Model.Types.Path>, coordin
     return {
       geometry: path,
       complete: false,
-    };
-  }
-}
-
-function addCoordinateToCircleGeometry(partial: Partial<Model.Types.Circle>, coordinate: Coordinate): AddCoordinateResult {
-  if (!partial.p) {
-    const circle: Partial<Model.Types.Circle> = {
-      ...partial,
-      p: coordinate,
-    };
-    return {
-      geometry: circle,
-      complete: false,
-    };
-  } else {
-    const r = coordinateDistance(partial.p, coordinate);
-    if (r === 0) {
-      return { geometry: partial, complete: false };
-    }
-    const circle: Partial<Model.Types.Circle> = {
-      ...partial,
-      r,
-    };
-    return {
-      geometry: circle,
-      complete: true,
     };
   }
 }

@@ -1,0 +1,32 @@
+.app-canvas {
+  &.draggin-asset {
+    cursor: grabbing;
+  }
+  &.dragging-features {
+    cursor: move;
+  }
+  &.nw-resize {
+    cursor: nw-resize;
+  }
+  &.n-resize {
+    cursor: n-resize;
+  }
+  &.ne-resize {
+    cursor: ne-resize;
+  }
+  &.e-resize {
+    cursor: e-resize;
+  }
+  &.se-resize {
+    cursor: se-resize;
+  }
+  &.s-resize {
+    cursor: s-resize;
+  }
+  &.sw-resize {
+    cursor: sw-resize;
+  }
+  &.w-resize {
+    cursor: w-resize;
+  }
+}

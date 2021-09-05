@@ -23,6 +23,7 @@
   ],
   "include": [
     "main.ts",
-    "declarations.d.ts"
+    "ipc.ts",
+    "declarations.d.ts",
   ]
 }

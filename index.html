@@ -18,17 +18,7 @@
 
 <script type="text/javascript">
   const _electronReq = require('electron');
-  const _etn = {
-    path: require('path'),
-    fs: require('fs'),
-    process: require('process'),
-    dialog: _electronReq.remote.dialog,
-    app: _electronReq.remote.app,
-    window: _electronReq.remote.getCurrentWindow(),
-    util: require('util'),
-    exec: _electronReq.remote.require('child_process').exec,
-    panzoom: window.panzoom,
-  };
+  window.ipcRenderer = _electronReq.ipcRenderer;
 </script>
 
 <script src="http://localhost:9010/webpack-dev-server.js"></script>

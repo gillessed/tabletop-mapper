@@ -8,6 +8,7 @@ const InitialState: Asset.Types.State = {
   assetIndex: { byId: {}, all: [] },
   assetPackIndex: { byId: {}, all: [] },
   tagIndex: { byId: {}, all: [] },
+  viewState: { type: 'search' },
 };
 
 const setAssetStateReducer = (
@@ -58,6 +59,11 @@ const simpleTagReducers = createIndexableReducers<Asset.Types.State, Asset.Types
   }),
 );
 
+const setAssetViewStateReducer = (
+  state: Asset.Types.State,
+  viewState: Asset.Types.AssetViewState,
+): Asset.Types.State => ({ ...state, viewState });
+
 export const assetReducer: Reducer<Asset.Types.State> = newTypedReducer<Asset.Types.State>()
   .handlePayload(Asset.Actions.setAssetState.type, setAssetStateReducer)
   .handlePayload(Asset.Actions.upsertAsset.type, upsertAssetReducer)
@@ -69,6 +75,7 @@ export const assetReducer: Reducer<Asset.Types.State> = newTypedReducer<Asset.Ty
   .handlePayload(Asset.Actions.upsertTag.type, simpleTagReducers.upsert)
   .handlePayload(Asset.Actions.setTagName.type, simpleTagReducers.setName)
   .handlePayload(Asset.Actions.removeTag.type, simpleTagReducers.remove)
+  .handlePayload(Asset.Actions.setViewState.type, setAssetViewStateReducer)
   .handleDefault((state = InitialState) => state)
   .build();
 

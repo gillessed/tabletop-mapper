@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useSelector } from "react-redux";
 import { LayerTree } from '../../../redux/layertree/LayerTreeTypes';
-import { getOutlineForFeature } from '../../../redux/model/FeatureOutline';
+import { getOutlineForFeature, OutlinePixelStrokeWidth } from '../../../redux/model/FeatureOutline';
 import { Model } from '../../../redux/model/ModelTypes';
 import { Transform } from '../../../math/Vector';
 import { Grid } from '../../../redux/grid/GridTypes';
@@ -11,13 +11,11 @@ import "./FeatureOutlines.scss";
 import classNames from 'classnames';
 import { getHighestFeatureId } from '../../../redux/model/ModelTree';
 
-const OutlinePixelStrokeWidth = 5;
-const OutlinePixelPadding = 5;
-const SelectionOutlineColor = Colors.ORANGE3;
-const HoverOutlineColor = Colors.COBALT3;
+export const SelectionOutlineColor = Colors.ORANGE3;
+export const HoverOutlineColor = Colors.COBALT3;
 
 function renderOutline(
-  geometry: Model.Types.Geometry,
+  geometry: Model.Types.Rectangle,
   transform: Transform,
   color: string,
   hoverCrosshair?: boolean,
@@ -28,47 +26,24 @@ function renderOutline(
   const classes = classNames({
     ['hover-selected']: hoverCrosshair,
   });
-  if (Model.Types.isRectangle(geometry)) {
-    const strokeWidth = transform.applyScalar(OutlinePixelStrokeWidth);
-    const outlinePadding = transform.applyScalar(OutlinePixelPadding);
-    const totalPadding = outlinePadding + strokeWidth / 2;
-    const { p1, p2 } = geometry;
-    return (
-      <rect
-        x={p1.x - totalPadding}
-        y={p1.y - totalPadding}
-        width={p2.x - p1.x + 2 * totalPadding}
-        height={p2.y - p1.y + 2 * totalPadding}
-        fill='none'
-        stroke={color}
-        strokeWidth={strokeWidth}
-        className={classes}
-      />
-    );
-  } else if (Model.Types.isCircle(geometry)) {
-    const strokeWidth = transform.applyScalar(OutlinePixelStrokeWidth);
-    const outlinePadding = transform.applyScalar(OutlinePixelPadding);
-    const radius = geometry.r + outlinePadding + strokeWidth / 2;
-    return (
-      <circle
-        cx={geometry.p.x}
-        cy={geometry.p.y}
-        r={radius}
-        fill='none'
-        stroke={color}
-        strokeWidth={strokeWidth}
-        className={classes}
-      />
-    )
-  } else {
-    console.error('Outline geometry should only be circles and rectangles', geometry);
-    throw Error();
-  }
+  const strokeWidth = transform.applyScalar(OutlinePixelStrokeWidth);
+  const { p1, p2 } = geometry;
+  return (
+    <rect
+      x={p1.x - strokeWidth / 2}
+      y={p1.y - strokeWidth / 2}
+      width={p2.x - p1.x + strokeWidth}
+      height={p2.y - p1.y + strokeWidth}
+      fill='none'
+      stroke={color}
+      strokeWidth={strokeWidth}
+      className={classes}
+    />
+  );
 }
 
 export const FeatureOutlines = function Features() {
   const features = useSelector(Model.Selectors.getFeatures);
-  const styles = useSelector(Model.Selectors.getStyles);
   const layers = useSelector(Model.Selectors.getLayers);
   const selectedNodes = useSelector(LayerTree.Selectors.getSelectedNodes);
   const transform = useSelector(Grid.Selectors.getTransform);
@@ -83,11 +58,12 @@ export const FeatureOutlines = function Features() {
   }
   const hoveredFeatureIds = useSelector(CompoundSelectors.getHoveredFeaturesMemoized);
   const hoveringSelectedFeature = selectedFeatures.find((feature) => hoveredFeatureIds.indexOf(feature.id) >= 0);
+  const resizing = mouseMode === Grid.Types.MouseMode.ResizePath || mouseMode === Grid.Types.MouseMode.ResizeRectangle;
 
   const selectedFeatureOutlines = selectedFeatures.map((feature) => {
-    const outline = getOutlineForFeature(feature, styles.byId[feature.styleId]);
+    const outline = getOutlineForFeature(feature);
     const hovered = hoveredFeatureIds.indexOf(feature.id) >= 0;
-    const renderedOutline = renderOutline(outline, transform, SelectionOutlineColor, hovered);
+    const renderedOutline = renderOutline(outline, transform, SelectionOutlineColor, hovered && !resizing);
     return renderedOutline;
   });
 
@@ -100,7 +76,7 @@ export const FeatureOutlines = function Features() {
   function HoverOutline(): JSX.Element {
     const highestFeatureId = getHighestFeatureId(features, layers, hoveredFeatureIds);
     const highestFeature = features.byId[highestFeatureId];
-    const highestFeatureOutline = getOutlineForFeature(highestFeature, styles.byId[highestFeature.styleId]);
+    const highestFeatureOutline = getOutlineForFeature(highestFeature);
     const renderedHoverOutline = renderOutline(highestFeatureOutline, transform, HoverOutlineColor);
     return renderedHoverOutline;
   }

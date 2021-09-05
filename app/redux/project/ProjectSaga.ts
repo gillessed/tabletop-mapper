@@ -8,8 +8,9 @@ import { Navigation } from "../navigation/NavigationTypes";
 import { getProjectFile, getProjectDataFile, AppConfig } from "../../config/AppConfig";
 import { createEmptyModel } from "../model/ModelReducers";
 import { asyncLoading, asyncLoaded, isAsyncLoaded } from "../utils/async";
-import { etn } from "../../etn";
-import { Toaster, Classes } from "@blueprintjs/core";
+import { Classes } from "@blueprintjs/core";
+import { ipcInvoke } from "../../ipc/ipcInvoke";
+import { Ipc } from "../../ipc/ipcCommands";
 
 export function* projectSaga(context: SagaContext) {
   yield all([
@@ -95,5 +96,5 @@ function* saveProjectHelper(
 
 function* quitApplicationSaga(context: SagaContext) {
   // TODO: (gcole) check if there are unsaved changes
-  etn().app.quit();
+  ipcInvoke(Ipc.Quit);
 }

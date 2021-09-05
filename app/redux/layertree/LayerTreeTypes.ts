@@ -12,7 +12,7 @@ export namespace LayerTree {
   }
 
   export namespace Payloads {
-
+    
   }
 
   export const DispatchActions = {
@@ -33,7 +33,7 @@ export namespace LayerTree {
       const layerTree = get(state);
       const model = Model.Selectors.get(state);
       if (layerTree.selectedNodes.length > 1) {
-        const layerId = findCommonAncestor(model, layerTree.selectedNodes);
+        const layerId = findCommonAncestor(model.features, model.layers, layerTree.selectedNodes);
         return layerId;
       } else if (layerTree.selectedNodes.length === 0) {
         return Model.RootLayerId;

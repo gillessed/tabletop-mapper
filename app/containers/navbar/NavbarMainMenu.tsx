@@ -19,7 +19,7 @@ export function NavbarMainMenu() {
       <MenuItem text='Map Browser' icon={IconNames.FOLDER_OPEN} onClick={onClickMapBrowser} />
       <MenuItem text='Save Map' icon={IconNames.FLOPPY_DISK} onClick={onClickSave} />
       <MenuDivider />
-      <MenuItem text='Open Asset Manager' icon={IconNames.MEDIA} onClick={onOpenAssetManager}/>
+      <MenuItem text='Open Asset Manager' icon={IconNames.MEDIA} onClick={onOpenAssetManager} label="Ctrl+A"/>
       <MenuDivider />
       <MenuItem text='Exit' icon={IconNames.LOG_OUT} />
     </Menu>

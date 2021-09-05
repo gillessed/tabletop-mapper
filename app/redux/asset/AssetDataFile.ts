@@ -23,6 +23,7 @@ export async function readAssetDataFile(appConfig: AppConfig): Promise<Asset.Typ
     assetIndex: deserializeIndexable(serializedAssets.assets),
     assetPackIndex: deserializeIndexable(serializedAssets.assetPacks),
     tagIndex: deserializeIndexable(serializedAssets.tags),
+    viewState: { type: 'search' },
   };
   return state;
 }

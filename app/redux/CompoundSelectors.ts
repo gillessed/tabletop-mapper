@@ -9,13 +9,11 @@ import { getHoveredFeatures } from "./model/FeatureIntersection";
 const getHoveredFeaturesMemoized = createSelector(
   [
     Model.Selectors.getFeatures,
-    Model.Selectors.getStyles, 
     Grid.Selectors.getMousePosition,
     Grid.Selectors.getTransform,
   ],
   (
     features: Indexable<Model.Types.Feature>, 
-    styles: Indexable<Model.Types.Style>,
     mousePosition: Vector, 
     transform: Transform,
   ) => {
@@ -23,7 +21,7 @@ const getHoveredFeaturesMemoized = createSelector(
       return [];
     }
     const coordinate = transform.applyV(mousePosition).getCoordinate();
-    return getHoveredFeatures(features, styles, coordinate, transform);
+    return getHoveredFeatures(features, coordinate, transform);
   },
 )
 

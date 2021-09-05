@@ -5,7 +5,7 @@ import { Project } from '../redux/project/ProjectTypes';
 import { isAsyncLoading, isAsyncNotLoaded } from '../redux/utils/async';
 import { CanvasContainer } from './canvasContainer/CanvasContainer';
 import { InfoPanel } from './infoPanel/InfoPanel';
-import { Layers } from './layers/Layers';
+import { LeftPanel } from './leftPanel/LeftPanel';
 import { MapperNavbar } from './navbar/Navbar';
 import './Root.scss';
 
@@ -20,7 +20,7 @@ export const ProjectContainer = function Root() {
       <>
         <MapperNavbar />
         <div className='app-container'>
-          <Layers />
+          <LeftPanel />
           <CanvasContainer />
           <InfoPanel />
         </div>
