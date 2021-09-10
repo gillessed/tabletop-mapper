@@ -38,6 +38,7 @@ const FilerWriteFile: IpcCommand2<void, string, string> = { name: 'filer-write-f
 const FilerReadFile: IpcCommand1<string, string> = { name: 'filer-read-file' };
 const CopyFile: IpcCommand2<void, string, string> = { name: 'copy-file' };
 const DialogImport: IpcCommand1<OpenDialogResult, string[]> = { name: 'dialog-import' };
+const SetRequiresSave: IpcCommand1<void, boolean> = { name: 'set-requires-save' };
 
 export const Ipc = {
   Quit,
@@ -52,6 +53,7 @@ export const Ipc = {
   FilerReadFile,
   CopyFile,
   DialogImport,
+  SetRequiresSave,
 }
 
 export type Ipc = typeof Ipc;

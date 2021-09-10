@@ -18,7 +18,7 @@ import { Toaster, Spinner, Colors, Classes, Intent } from '@blueprintjs/core';
 import { readAssetDataFile } from './redux/asset/AssetDataFile';
 import { Asset } from './redux/asset/AssetTypes';
 import { Filer, setFilerSeparator } from './utils/filer';
-import { ipcInvoke } from './ipc/ipcInvoke';
+import { ipcInvoke, registerClientIpcHandlers } from './ipc/ipcInvoke';
 import { Ipc } from './ipc/ipcCommands';
 import './scss/Scrollbar.scss';
 import { registerKeyboardShortcuts } from './KeyboardShortcuts';
@@ -90,6 +90,7 @@ async function initialize() {
       sagaMiddleware,
     ),
   );
+  registerClientIpcHandlers(store);
   registerKeyboardShortcuts(store);
 
   const assets = await readAssetDataFile(appConfig);

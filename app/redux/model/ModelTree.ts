@@ -156,3 +156,33 @@ export function findCommonAncestor(
   }
   return lowestCommonAncestor;
 }
+
+export type ReparentSection = 'top' | 'mid' | 'bottom';
+
+export interface ReparentTarget {
+  nodeId: string;
+  section: ReparentSection;
+}
+
+/**
+ * Returns true iff the reparent target is valid and useful. A reparent is considered invalid
+ * if any of the selected nodes are ancestors of the target layer, or its parent if the target
+ * is a feature. A reparent is useful if it will actually create a new and different state tree.
+ * This lets up avoid a state update if the reparent does nothing. This also includes the case
+ * where the selection list is empty.
+ */
+export function isValidReparent( 
+  featureIndex: Indexable<Model.Types.Feature>,
+  layerIndex: Indexable<Model.Types.Layer>,
+  selection: string[],
+  target: ReparentTarget,
+): boolean {
+  if (selection.length === 0) {
+    return null;
+  }
+  const selectionContainsTarget = selection.indexOf(target.nodeId) >= 0;
+  const targetAncestors = getAncestors(featureIndex, layerIndex, target.nodeId);
+  const selectionContainsTargetAncestor = !!selection.find((nodeId) => targetAncestors.has(nodeId));
+  const invalidReparent = selectionContainsTarget || selectionContainsTargetAncestor;
+  return !invalidReparent;
+}

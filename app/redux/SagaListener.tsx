@@ -1,7 +1,7 @@
 import { Dispatch } from 'react';
 import { Task } from 'redux-saga';
 import { call, cancel, fork, take } from 'redux-saga/effects';
-import { ActionType, createActionCreator, createActionType } from './utils/typedAction';
+import { ActionType, createActionCreator, createActionType, Action } from './utils/typedAction';
 
 export interface SagaListener<PAYLOAD> {
   actionType: ActionType<PAYLOAD>;
@@ -15,7 +15,7 @@ export const ListenerLoop = function*(listeners: Set<SagaListener<any>>) {
     listeners.forEach((listener) => {
       const handler = function*() {
         while (true) {
-          const action = yield take(listener.actionType);
+          const action: Action = yield take(listener.actionType);
           yield call(listener.callback, action.payload);
         }
       };

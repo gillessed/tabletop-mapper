@@ -10,16 +10,10 @@ import { LayerMenuItem } from './LayerMenuItem';
 import './Layers.scss';
 import { IconNames } from '@blueprintjs/icons';
 import { NewFolderButton } from './NewFolderButton';
-import { getAncestors, getNodesBetween } from '../../../redux/model/ModelTree';
+import { isValidReparent, getNodesBetween, ReparentTarget, ReparentSection } from '../../../redux/model/ModelTree';
 import { getTreeMouseDownTarget } from '../utils/TreeMouseDown';
 import { Grid } from '../../../redux/grid/GridTypes';
 
-type HoverSection = 'top' | 'mid' | 'bottom';
-
-interface TreeHoverData {
-  nodeId: string;
-  section: HoverSection;
-}
 
 type LayerNode = ITreeNode<void>;
 
@@ -28,11 +22,12 @@ interface NodeContext {
   layerIndex: Indexable<Model.Types.Layer>;
   featureIndex: Indexable<Model.Types.Feature>;
   mouseMode: Grid.Types.MouseMode;
-  treeHover: TreeHoverData;
+  treeHover: ReparentTarget;
+  validReparent: boolean;
 }
 
 function getTreeNode(context: NodeContext, layerId: string): LayerNode {
-  const { layerTree, layerIndex, mouseMode, treeHover } = context;
+  const { layerTree, layerIndex, mouseMode, treeHover, validReparent } = context;
   const layer = layerIndex.byId[layerId];
   const children: LayerNode[] = [];
   for (const childId of layer.children) {
@@ -44,7 +39,8 @@ function getTreeNode(context: NodeContext, layerId: string): LayerNode {
   const isReparenting = (
     mouseMode === Grid.Types.MouseMode.DragSelectionInTree &&
     treeHover != null &&
-    layerId === treeHover.nodeId
+    layerId === treeHover.nodeId &&
+    validReparent
   );
   const classes = classNames('layer-tree-node', `id:${layer.id}`, {
     'reparent-into': isReparenting && treeHover.section === 'mid',
@@ -68,13 +64,14 @@ function getTreeNode(context: NodeContext, layerId: string): LayerNode {
 }
 
 function getFeatureNode(context: NodeContext, featureId: string): LayerNode {
-  const { layerTree, featureIndex, mouseMode, treeHover } = context;
+  const { layerTree, featureIndex, mouseMode, treeHover, validReparent } = context;
   const feature = featureIndex.byId[featureId];
   const icon = Model.Types.Geometries[feature.geometry.type].icon;
   const isReparenting = (
     mouseMode === Grid.Types.MouseMode.DragSelectionInTree &&
     treeHover != null &&
-    featureId === treeHover.nodeId
+    featureId === treeHover.nodeId &&
+    validReparent
   );
   const classes = classNames('layer-tree-node', `id:${feature.id}`);
   const label = (<>
@@ -104,8 +101,13 @@ export function Layers() {
   const selection = layerTree.selectedNodes;
 
   const [lastClicked, setLastClicked] = React.useState<string | null>(null);
-  const [treeHover, setTreeHover] = React.useState<TreeHoverData | null>(null);
+  const [treeHover, setTreeHover] = React.useState<ReparentTarget | null>(null);
   const [isMouseDown, setIsMouseDown] = React.useState(false);
+
+  
+  const validReparent = React.useMemo(() => {
+    return treeHover != null ? isValidReparent(featureIndex, layerIndex, selection, treeHover) : false
+  }, [featureIndex, layerIndex, selection, treeHover]);
 
   const onMouseDown = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     const nodeId = getTreeMouseDownTarget('layer-tree-node', event);
@@ -116,7 +118,6 @@ export function Layers() {
     } else {
       if (event.shiftKey && lastClicked != null) {
         const nodeIds = getNodesBetween(featureIndex, layerIndex, lastClicked, nodeId);
-        console.log('selecting between ', lastClicked, nodeId, nodeIds);
         dispatchers.layerTree.selectNodes(nodeIds);
       } else if (event.ctrlKey) {
         const newSelection = new Set(selection);
@@ -138,15 +139,19 @@ export function Layers() {
   }, [selection, lastClicked, dispatchers, layerIndex, featureIndex, setIsMouseDown]);
 
   const onMouseUp = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    const nodeId = getTreeMouseDownTarget('layer-tree-node', event);
     event.preventDefault();
-    setIsMouseDown(false);
-    if (mouseMode === Grid.Types.MouseMode.DragSelectionInTree && selection.length > 0) {
+    if (isMouseDown && treeHover != null && validReparent) {
+      dispatchers.model.reparentNodes({
+        nodeIds: selection,
+        target: treeHover,
+      });
     }
-  }, [selection, lastClicked, dispatchers, layerIndex, featureIndex, setIsMouseDown]);
+    setTreeHover(null);
+    setIsMouseDown(false);
+  }, [selection, lastClicked, dispatchers, layerIndex, featureIndex, setIsMouseDown, treeHover]);
 
   const onNodeExpand = React.useCallback((node: LayerNode) => {
-    dispatchers.layerTree.expandNode(`${node.id}`);
+    dispatchers.layerTree.expandNodes([`${node.id}`]);
   }, [dispatchers]);
   const onNodeCollapse = React.useCallback((node: LayerNode) => {
     dispatchers.layerTree.collapseNode(`${node.id}`);
@@ -161,15 +166,14 @@ export function Layers() {
     const totalHeight = element.clientHeight;
     const mouseYAlongElement = e.pageY - element.getBoundingClientRect().top;
     const mouseRatio = mouseYAlongElement / totalHeight;
-    console.log(isLayer, layerIndex, nodeId);
     if (isLayer) {
-      const section: TreeHoverData['section'] =
+      const section: ReparentSection =
         mouseRatio < 0.33 ? 'top' :
           mouseRatio > 0.67 ? 'bottom' :
             'mid';
       setTreeHover({ nodeId: `${nodeId}`, section });
     } else {
-      const section: TreeHoverData['section'] = mouseRatio < 0.5 ? 'top' : 'bottom';
+      const section: ReparentSection = mouseRatio < 0.5 ? 'top' : 'bottom';
       setTreeHover({ nodeId: `${nodeId}`, section });
     }
   }, [setTreeHover, treeRef, layerIndex]);
@@ -188,10 +192,10 @@ export function Layers() {
   }, [setTreeHover]);
 
   const nodes: LayerNode[] = React.useMemo(() => {
-    const context: NodeContext = { layerTree, layerIndex, featureIndex, mouseMode, treeHover };
+    const context: NodeContext = { layerTree, layerIndex, featureIndex, mouseMode, treeHover, validReparent };
     const rootNode = getTreeNode(context, Model.RootLayerId);
     return rootNode.childNodes ?? []
-  }, [layerTree, layerIndex, featureIndex, mouseMode, treeHover]);
+  }, [layerTree, layerIndex, featureIndex, mouseMode, treeHover, selection, validReparent]);
 
   const treeClasses = classNames('layer-tree', Classes.DARK, {
     'reparenting': mouseMode === Grid.Types.MouseMode.DragSelectionInTree && treeHover !== null,

@@ -25,6 +25,6 @@ export const ProjectContainer = function Root() {
           <InfoPanel />
         </div>
       </>
-    )
+    );
   }
 };

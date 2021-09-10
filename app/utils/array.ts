@@ -53,3 +53,14 @@ export function arrayEquals<T>(a1: T[], a2: T[]): boolean {
   }
   return true;
 }
+
+export function last<T>(arr: T[]): T {
+  return arr[arr.length - 1];
+}
+
+export function removeItem<T>(arr: T[], item: T) {
+  const index = arr.indexOf(item);
+  if (index >= 0) {
+    arr.splice(index, 1);
+  }
+}

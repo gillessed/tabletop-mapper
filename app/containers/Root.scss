@@ -6,6 +6,9 @@
   overflow      : hidden;
   display       : flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: 5;
+  background-color: $dark-gray5;
   position: relative;
 
   .blank-container {

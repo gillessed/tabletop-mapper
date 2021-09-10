@@ -1,4 +1,4 @@
-import { Alignment, Button, Classes, Navbar, Popover, PopoverInteractionKind, PopoverPosition } from '@blueprintjs/core';
+import { Alignment, Button, Classes, Icon, Navbar, Popover, PopoverInteractionKind, PopoverPosition } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import * as React from 'react';
 import './Navbar.scss';
@@ -25,7 +25,15 @@ export function MapperNavbar() {
           <>
             <Navbar.Divider />
             <Navbar.Heading>
-              <div className='title navbar-title'>{project.value.name}</div>
+              <div className='navbar-title-container'>
+                <div className='unsaved-icon-container'>
+                  {project.value.requiresSave && <Icon
+                    icon={IconNames.LIFESAVER}
+                    iconSize={14}
+                  />}
+                </div>
+                <div className='title navbar-title'>{project.value.name}</div>
+              </div>
             </Navbar.Heading>
           </>
         }

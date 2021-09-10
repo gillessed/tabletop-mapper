@@ -71,8 +71,8 @@ export const SvgRoot = React.memo(function SvgRoot({
   const createNewFeature = React.useCallback((feature: Model.Types.Feature) => {
     dispatchers.grid.setMouseMode(MouseMode.None);
     dispatchers.model.createFeature(feature);
-    dispatchers.layerTree.expandNode(currentLayer);
     dispatchers.layerTree.selectNodes([feature.id]);
+    dispatchers.layerTree.expandNodes([currentLayer]);
     dispatchers.grid.updatePartialGeometry(undefined);
   }, [dispatchers]);
 
@@ -108,6 +108,7 @@ export const SvgRoot = React.memo(function SvgRoot({
       if (hoveredFeatureIds.length >= 1) {
         const highestFeatureId = getHighestFeatureId(features, layers, hoveredFeatureIds);
         dispatchers.layerTree.selectNodes([highestFeatureId]);
+        dispatchers.layerTree.expandNodes([highestFeatureId]);
       } else {
         dispatchers.layerTree.selectNodes([]);
       }
@@ -211,7 +212,6 @@ export const SvgRoot = React.memo(function SvgRoot({
     if (resizedGeometry == null) {
       return;
     }
-    console.log('setting geometry');
     dispatchers.model.setFeatureGeometry({ featureId: featureToResize.id, geometry: resizedGeometry });
   }, [resizeInfo, featureToResize]);
 

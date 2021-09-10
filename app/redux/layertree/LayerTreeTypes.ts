@@ -16,7 +16,7 @@ export namespace LayerTree {
   }
 
   export const DispatchActions = {
-    expandNode: createActionWrapper<string>('selection::expandNode'),
+    expandNodes: createActionWrapper<string[]>('selection::expandNodes'),
     collapseNode: createActionWrapper<string>('selection::collapseNode'),
     selectNodes: createActionWrapper<string[]>('selection::selectNodes'),
   }

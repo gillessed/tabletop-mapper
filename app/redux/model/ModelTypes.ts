@@ -6,6 +6,7 @@ import { Grid } from "../grid/GridTypes";
 import { Indexable, Identifiable } from "../utils/indexable";
 import { createActionWrapper } from "../utils/typedAction";
 import { visitFeature } from "./ModelVisitors";
+import { ReparentTarget } from "./ModelTree";
 
 export namespace Model {
   export const RootLayerId = 'root-layer';
@@ -144,6 +145,11 @@ export namespace Model {
       featureId: string;
       geometry: Model.Types.Geometry;
     }
+
+    export interface ReparentNodes {
+      nodeIds: string[];
+      target: ReparentTarget;
+    }
   }
 
   export const DispatchActions = {
@@ -156,6 +162,7 @@ export namespace Model {
     setFeatureStyle: createActionWrapper<Payloads.SetFeatureStyle>('model::setFeatureStyle'),
     setSnapsToGrid: createActionWrapper<Payloads.SnapsToGrid>('model::snapToGrid'),
     setPathsClosed: createActionWrapper<Payloads.SetPathsClosed>('model::setPathsClosed'),
+    reparentNodes: createActionWrapper<Payloads.ReparentNodes>('model::reparentNodes'),
   }
 
   export const Actions = {

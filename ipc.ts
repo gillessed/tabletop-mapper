@@ -7,6 +7,8 @@ import { GetIpcArg1, GetIpcArg2, GetIpcReturn, Ipc, OpenDialogResult, PlatformIn
 const app = Electron.app;
 const dialog = Electron.dialog;
 
+let requiresSave = false;
+
 const IpcHandlers: { [key in keyof Ipc]: (arg1: GetIpcArg1<Ipc[key]>, arg2: GetIpcArg2<Ipc[key]>) => Promise<GetIpcReturn<Ipc[key]>> } = {
   Quit: async () => app.quit(),
   GetPlatformInfo,
@@ -18,6 +20,7 @@ const IpcHandlers: { [key in keyof Ipc]: (arg1: GetIpcArg1<Ipc[key]>, arg2: GetI
   FilerReaddir: (path: string) => fs.promises.readdir(path),
   FilerWriteFile: (path: string, data: string) => fs.promises.writeFile(path, data),
   FilerReadFile: (path: string) => fs.promises.readFile(path, 'utf-8'),
+  SetRequiresSave: async (arg: boolean) => { requiresSave = arg; },
   CopyFile,
   DialogImport,
 };
@@ -32,7 +35,7 @@ async function GetPlatformInfo(): Promise<PlatformInfo> {
     );
   console.log('App dir:', hostDataDirName);
   const appDirPath = hostDataDirName + separatorChar + appDirName;
- 
+
   return {
     os: process.platform,
     appDirPath,
@@ -71,12 +74,12 @@ async function DialogImport(imageExtensions: string[]): Promise<OpenDialogResult
       { name: 'Images', extensions: imageExtensions },
     ],
     properties: ['openDirectory', 'openFile', 'multiSelections'],
-  }).then(({ canceled, filePaths}) => {
+  }).then(({ canceled, filePaths }) => {
     return { canceled, filePaths };
   });
 }
 
-export function registerIpcHandlers() {
+export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   for (const untypedKey of Object.keys(Ipc)) {
     const key = untypedKey as keyof Ipc;
     const name: string = Ipc[key].name;
@@ -86,4 +89,24 @@ export function registerIpcHandlers() {
       return handler(...args);
     });
   }
+
+  mainWindow.on('close', (e) => {
+    if (requiresSave) {
+      e.preventDefault();
+      Electron.dialog.showMessageBox(mainWindow, {
+        type: 'warning',
+        title: 'Warning',
+        message: 'Your project has unsaved changes. Are you sure you want to close TabletopMapper?',
+        buttons: ['Save', "Don't Save", 'Cancel']
+      }).then((value) => {
+        const { response } = value;
+        if (response === 0) {
+          mainWindow.webContents.send('save-and-quit');
+        } else if (response === 1) {
+          requiresSave = false;
+          Electron.app.quit();
+        }
+      });
+    }
+  });
 }

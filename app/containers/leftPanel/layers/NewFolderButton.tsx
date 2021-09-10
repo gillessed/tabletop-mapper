@@ -6,7 +6,6 @@ import { generateRandomString } from '../../../utils/randomId';
 import { useSelector } from 'react-redux';
 import { Model } from '../../../redux/model/ModelTypes';
 import { LayerTree } from '../../../redux/layertree/LayerTreeTypes';
-import { findCommonAncestor } from '../../../redux/model/ModelTree';
 
 export const NewFolderButton = () => {
   const dispatchers = useDispatchers();
@@ -36,7 +35,7 @@ export const NewFolderButton = () => {
       layerId,
     });
     dispatchers.layerTree.selectNodes([layerId]);
-    dispatchers.layerTree.expandNode(layerId);
+    dispatchers.layerTree.expandNodes([layerId]);
   }, [targetLayer.id, dispatchers]);
   return (
     <Button

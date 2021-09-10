@@ -17,7 +17,20 @@ export function* projectSaga(context: SagaContext) {
     takeEvery(Project.Actions.createProject.type, createProjectSaga, context),
     takeEvery(Project.Actions.openProject.type, openProjectSaga, context),
     takeEvery(Project.Actions.saveProject.type, saveProjectSaga, context),
+    takeEvery(Project.Actions.saveAndQuit.type, saveAndQuitProjectSaga, context),
     takeEvery(Project.Actions.quitApplication.type, quitApplicationSaga, context),
+
+    // Project edits
+    takeEvery(Model.Actions.createFeature.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.createLayer.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.reparentNodes.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.setFeatureGeometry.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.setFeatureName.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.setFeatureStyle.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.setPathsClosed.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.setSnapsToGrid.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.translateFeatures.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.setPathsClosed.type, setProjectRequiresSaveSaga),
   ]);
 }
 
@@ -31,6 +44,7 @@ function* createProjectSaga(context: SagaContext, action: TypedAction<string>) {
     dateCreated: now,
     lastSaved: now,
     archived: false,
+    requiresSave: false,
   };
   yield call(saveProjectHelper, context, newProject, createEmptyModel());
   yield call(openProjectSaga, context, createPlaceholderAction(newProject.id));
@@ -54,13 +68,14 @@ function* openProjectSaga(context: SagaContext, action: TypedAction<string>) {
   const projectModel: Model.Types.State = JSON.parse(rawModel);
 
   yield put(Model.Actions.setModel.create(projectModel));
+  yield put(Project.Actions.setRequiresSave.create(false));
   yield put(Project.Actions.setProject.create(asyncLoaded(project)));
 }
 
 function* saveProjectSaga(context: SagaContext) {
   const { appConfig, appToaster } = context;
   const asyncProject: ReturnType<typeof Project.Selectors.get> = yield select(Project.Selectors.get);
-  const model = yield select(Model.Selectors.get);
+  const model: ReturnType<typeof Model.Selectors.get> = yield select(Model.Selectors.get);
   if (!isAsyncLoaded(asyncProject)) {
     return;
   }
@@ -69,7 +84,8 @@ function* saveProjectSaga(context: SagaContext) {
     appVersion: appConfig.appVersion,
     lastSaved: Date.now(),
   };
-  yield call(saveProjectHelper, context, project, model);
+  const serializedProject = Project.serialize(project);
+  yield call(saveProjectHelper, context, serializedProject, model);
   appToaster.show({
     className: Classes.DARK,
     message: `Saved ${project.name}`,
@@ -77,9 +93,15 @@ function* saveProjectSaga(context: SagaContext) {
   yield put(Project.Actions.setProject.create(asyncLoaded(project)));
 }
 
+function* saveAndQuitProjectSaga(context: SagaContext) {
+  yield put(Project.Actions.setRequiresSave.create(false));
+  yield call(saveProjectSaga, context);
+  ipcInvoke(Ipc.Quit);
+}
+
 function* saveProjectHelper(
   context: SagaContext,
-  project: Project.Types.Project,
+  project: Project.Types.SerializedProject,
   model?: Model.Types.State,
 ) {
   const { appConfig } = context;
@@ -91,10 +113,15 @@ function* saveProjectHelper(
     const projectDataFile = getProjectDataFile(appConfig, project.id);
     const rawModel = JSON.stringify(model);
     yield call(projectDataFile.writeFile, rawModel);
+    yield put(Project.Actions.setRequiresSave.create(false));
   }
 }
 
 function* quitApplicationSaga(context: SagaContext) {
-  // TODO: (gcole) check if there are unsaved changes
   ipcInvoke(Ipc.Quit);
+}
+
+function* setProjectRequiresSaveSaga() {
+  console.log('project has been modified');
+  yield put(Project.Actions.setRequiresSave.create(true));
 }
