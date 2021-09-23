@@ -1,7 +1,6 @@
-import { Reducer } from 'redux';
 import { Transform, Vector, Coordinate } from '../../math/Vector';
 import { Model } from '../model/ModelTypes';
-import { newTypedReducer } from '../utils/typedReducer';
+import { newTypedReducer, Reducer } from '../utils/typedReducer';
 import { Grid } from './GridTypes';
 
 const INITIAL_STATE: Grid.Types.State = {
@@ -83,7 +82,15 @@ const startResizeFeatureReducer = (
     ...state,
     mouseMode: payload.geometryType === 'path' ? Grid.Types.MouseMode.ResizePath : Grid.Types.MouseMode.ResizeRectangle,
     resizeInfo: payload.info,
+    resizedFeature: undefined,
   };
+}
+
+const setResizeFeatureReducer = (
+  state: Grid.Types.State,
+  resizedFeature: Model.Types.Feature,
+): Grid.Types.State  => {
+  return { ...state, resizedFeature };
 }
 
 const stopResizeFeatureReducer = (
@@ -93,6 +100,7 @@ const stopResizeFeatureReducer = (
     ...state,
     mouseMode: Grid.Types.MouseMode.None,
     resizeInfo: undefined,
+    resizedFeature: undefined,
   };
 }
 
@@ -107,6 +115,7 @@ export const gridReducer: Reducer<Grid.Types.State> = newTypedReducer<Grid.Types
   .handlePayload(Grid.Actions.stopDraggingAsset.type, stopDraggingAssetReducer)
   .handlePayload(Grid.Actions.setMouseOnCanvas.type, setMouseOnCanvasReducer)
   .handlePayload(Grid.Actions.startResizeFeature.type, startResizeFeatureReducer)
+  .handlePayload(Grid.Actions.setResizedFeature.type, setResizeFeatureReducer)
   .handlePayload(Grid.Actions.stopResizeFeature.type, stopResizeFeatureReducer)
   .handleDefault((state = INITIAL_STATE) => state)
   .build();

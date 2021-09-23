@@ -26,6 +26,8 @@ export function loggerPredicate(getState: () => ReduxState, action: TypedAction<
     return enableLogMousePosition;
   } else if (action.type === Grid.Actions.setTransform.type) {
     return enableLogTransform;
+  } else if (action.type === Grid.Actions.setMouseOnCanvas.type) {
+    return false;
   }
   return true;
 }

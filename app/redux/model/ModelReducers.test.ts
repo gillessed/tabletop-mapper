@@ -1,34 +1,9 @@
-import { createEmptyModel, createFeatureReducer, createLayerReducer, reparentNodesReducers } from "./ModelReducers";
+import { Vector } from "../../math/Vector";
+import { copyNodesReducers, createEmptyModel, createFeatureReducer, createLayerReducer, reparentNodesReducers } from "./ModelReducers";
+import { createBasicFeature, createFlatModel, createNestedModel, ModelTestIds } from "./ModelTestUtils";
 import { Model } from "./ModelTypes";
 
-const Feature1 = 'feature-1';
-const Feature2 = 'feature-2';
-const Feature3 = 'feature-3';
-const Layer1 = 'layer-1';
-const Layer2 = 'layer-2';
-const Layer3 = 'layer-3';
-
-const createBasicFeature = (id: string, parent: string): Model.Types.BasicAssetFeature => ({
-  id,
-  name: id,
-  type: 'basic-asset',
-  layerId: parent,
-  geometry: anyRect(),
-  assetId: 'some-asset',
-})
-
-const createBasicModel = (): Model.Types.State => {
-  let model = createEmptyModel();
-  model = createLayerReducer(model, { layerId: Layer1, parentId: Model.RootLayerId });
-  model = createLayerReducer(model, { layerId: Layer2, parentId: Model.RootLayerId });
-  model = createLayerReducer(model, { layerId: Layer3, parentId: Model.RootLayerId });
-  model = createFeatureReducer(model, createBasicFeature(Feature1, Model.RootLayerId));
-  model = createFeatureReducer(model, createBasicFeature(Feature2, Model.RootLayerId));
-  model = createFeatureReducer(model, createBasicFeature(Feature3, Model.RootLayerId));
-  return model;
-}
-
-const anyRect = (): Model.Types.Rectangle => ({ type: 'rectangle', p1: { x: 0, y: 0, }, p2: { x: 1, y: 1 } });
+const { Layer1, Layer2, Layer3, Feature1, Feature2, Feature3 } = ModelTestIds;
 
 describe('Model Reducer Tests', () => {
   describe('Create Layer Tests', () => {
@@ -54,7 +29,7 @@ describe('Model Reducer Tests', () => {
   });
   describe('Reparent Nodes Tests', () => {
     test('Reparent single feature within root layer', () => {
-      const model = createBasicModel();
+      const model = createFlatModel();
       expect(model.layers.byId[Model.RootLayerId].features.indexOf(Feature3)).toBe(2);
       const newModel = reparentNodesReducers(model, {
         nodeIds: [Feature3],
@@ -66,7 +41,7 @@ describe('Model Reducer Tests', () => {
       expect(newModel.layers.byId[Model.RootLayerId].features).toStrictEqual([Feature3, Feature1, Feature2]);
     });
     test('Reparent single layer within root layer', () => {
-      const model = createBasicModel();
+      const model = createFlatModel();
       expect(model.layers.byId[Model.RootLayerId].children.indexOf(Layer3)).toBe(2);
       const newModel = reparentNodesReducers(model, {
         nodeIds: [Layer3],
@@ -78,7 +53,7 @@ describe('Model Reducer Tests', () => {
       expect(newModel.layers.byId[Model.RootLayerId].children).toStrictEqual([Layer3, Layer1, Layer2]);
     });
     test('Reparent layer into folder', () => {
-      const model = createBasicModel();
+      const model = createFlatModel();
       expect(model.layers.byId[Model.RootLayerId].children.indexOf(Layer3)).toBe(2);
       const newModel = reparentNodesReducers(model, {
         nodeIds: [Feature1],
@@ -91,7 +66,7 @@ describe('Model Reducer Tests', () => {
       expect(newModel.layers.byId[Layer1].features).toStrictEqual([Feature1]);
     });
     test('Reparent multiple features', () => {
-      const model = createBasicModel();
+      const model = createFlatModel();
       expect(model.layers.byId[Model.RootLayerId].features.indexOf(Feature3)).toBe(2);
       const newModel = reparentNodesReducers(model, {
         nodeIds: [Feature2, Feature3],
@@ -103,7 +78,7 @@ describe('Model Reducer Tests', () => {
       expect(newModel.layers.byId[Model.RootLayerId].features).toStrictEqual([Feature2, Feature3, Feature1]);
     });
     test('Reparent bottom section', () => {
-      const model = createBasicModel();
+      const model = createFlatModel();
       expect(model.layers.byId[Model.RootLayerId].features.indexOf(Feature3)).toBe(2);
       const newModel = reparentNodesReducers(model, {
         nodeIds: [Feature1, Feature2],
@@ -113,6 +88,71 @@ describe('Model Reducer Tests', () => {
         },
       });
       expect(newModel.layers.byId[Model.RootLayerId].features).toStrictEqual([Feature3, Feature1, Feature2]);
+    });
+  });
+  describe('Copy Nodes Tests', () => {
+    test('Copy single layer', () => {
+      const model = createFlatModel();
+      const newModel = copyNodesReducers(model, {
+        nodeIds: [Layer1],
+        translation: new Vector(0, 0),
+      });
+      const newRootLayer = newModel.layers.byId[Model.RootLayerId];
+      expect(newRootLayer.children.length).toBe(4);
+      const newId = newRootLayer.children[3];
+      expect(newRootLayer.children[0]).not.toBe(newId);
+      expect(newModel.layers.byId[newId].id).toBe(newId);
+      expect(newModel.layers.byId[newId].name).toBe(`Copy of New Layer`);
+      expect(newModel.features === model.features);
+    });
+    test('Copy single feature', () => { 
+      const model = createFlatModel();
+      const newModel = copyNodesReducers(model, {
+        nodeIds: [Feature1],
+        translation: new Vector(0, 0),
+      });
+      const newRootLayer = newModel.layers.byId[Model.RootLayerId];
+      expect(newRootLayer.features.length).toBe(4);
+      const newId = newRootLayer.features[3];
+      expect(newRootLayer.features[0]).not.toBe(newId);
+      expect(newModel.features.byId[newId].id).toBe(newId);
+      expect(newModel.features.byId[newId].name).toBe(`Copy of ${Feature1}`);
+      expect(newModel.layers === model.layers);
+    });
+    test('Layer with feature', () => {
+      const model = createNestedModel();
+      const newModel = copyNodesReducers(model, {
+        nodeIds: [Layer3],
+        translation: new Vector(0, 0),
+      });
+      const newLayer1 = newModel.layers.byId[Layer1];
+      expect(newLayer1.features.length).toBe(2);
+      const copiedLayerId = newLayer1.children[1];
+      const copiedLayer = newModel.layers.byId[copiedLayerId];
+      expect(copiedLayer.features.length).toBe(1);
+      expect(copiedLayer.children.length).toBe(0);
+      expect(copiedLayer.parent).toBe(Layer1);
+      const copiedFeatureId = copiedLayer.features[0];
+      const copiedFeature = newModel.features.byId[copiedFeatureId];
+      expect(copiedFeature.layerId).toBe(copiedLayerId);
+    });
+    test('Complex case', () => {
+      const model = createNestedModel();
+      const newModel = copyNodesReducers(model, {
+        nodeIds: [Layer1],
+        translation: new Vector(0, 0),
+      });
+      const newRootLayer = newModel.layers.byId[Model.RootLayerId];
+      expect(newRootLayer.children.length).toBe(2);
+      const newLayer1Id = newRootLayer.children[1];
+      const newLayer1 = newModel.layers.byId[newLayer1Id];
+      expect(newLayer1.features.length).toBe(4);
+      expect(newLayer1.children.length).toBe(4);
+      const newLayer2Id = newLayer1.children[2];
+      const newLayer2 = newModel.layers.byId[newLayer2Id];
+      expect(newLayer2.children.length).toBe(0);
+      expect(newLayer2.features.length).toBe(2);
+      expect(newLayer2.parent).toBe(newLayer2Id);
     });
   });
 });

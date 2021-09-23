@@ -22,10 +22,43 @@
     padding-bottom: 20px;
   }
 
-  .asset-tree-thumbnail {
-    width       : 20px;
-    height      : 20px;
-    margin-right: 10px;
-    pointer-events: none;
+  .asset-tree-thumbnail-backdrop {
+    display         : flex;
+    justify-content : center;
+    align-items     : center;
+    width           : 24px;
+    height          : 24px;
+    background-color: white;
+    margin-right    : 10px;
+    border-radius   : 4px;
+
+    .asset-tree-thumbnail {
+      width         : 20px;
+      height        : 20px;
+      pointer-events: none;
+      object-fit    : contain;
+    }
+  }
+}
+
+.asset-hover-image-container {
+  display        : flex;
+  justify-content: center;
+  align-items    : center;
+
+  .asset-hover-image-backdrop {
+    margin          : 4px;
+    border-radius   : 12px;
+    padding         : 12px;
+    background-color: white;
+    display         : flex;
+    justify-content : center;
+    align-items     : center;
+
+    .asset-hover-image-preview {
+      width     : 200px;
+      height    : 200px;
+      object-fit: contain;
+    }
   }
 }

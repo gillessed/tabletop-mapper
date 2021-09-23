@@ -1,12 +1,15 @@
 import { IconName } from "@blueprintjs/core";
 import { IconNames } from '@blueprintjs/icons';
-import { Coordinate } from '../../math/Vector';
+import { Coordinate, Vector } from '../../math/Vector';
 import { ReduxState } from "../AppReducer";
 import { Grid } from "../grid/GridTypes";
-import { Indexable, Identifiable } from "../utils/indexable";
+import { getStateFromUndoable } from "../undo/UndoState";
+import { namedAction } from "../utils/actionName";
+import { Identifiable, Indexable } from "../utils/indexable";
 import { createActionWrapper } from "../utils/typedAction";
-import { visitFeature } from "./ModelVisitors";
 import { ReparentTarget } from "./ModelTree";
+
+const name = namedAction('model');
 
 export namespace Model {
   export const RootLayerId = 'root-layer';
@@ -114,6 +117,7 @@ export namespace Model {
     export interface CreateLayer {
       parentId: string;
       layerId: string;
+      name?: string;
     }
 
     export interface SnapsToGrid {
@@ -150,19 +154,24 @@ export namespace Model {
       nodeIds: string[];
       target: ReparentTarget;
     }
+
+    export interface CopyNodes {
+      nodeIds: string[];
+      translation: Vector;
+    }
   }
 
   export const DispatchActions = {
-    setModel: createActionWrapper<Model.Types.State>('model::setModel'),
-    createLayer: createActionWrapper<Payloads.CreateLayer>('model::createLayer'),
-    createFeature: createActionWrapper<Types.Feature>('model::createFeature'),
-    translateFeatures: createActionWrapper<Payloads.TranslateFeatures>('model::translateFeatures'),
-    setFeatureGeometry: createActionWrapper<Payloads.SetFeatureGeometryPayload>('model::setFeatureGeometry'),
-    setFeatureName: createActionWrapper<Payloads.SetFeatureName>('model::setFeatureName'),
-    setFeatureStyle: createActionWrapper<Payloads.SetFeatureStyle>('model::setFeatureStyle'),
-    setSnapsToGrid: createActionWrapper<Payloads.SnapsToGrid>('model::snapToGrid'),
-    setPathsClosed: createActionWrapper<Payloads.SetPathsClosed>('model::setPathsClosed'),
-    reparentNodes: createActionWrapper<Payloads.ReparentNodes>('model::reparentNodes'),
+    createLayer: createActionWrapper<Payloads.CreateLayer>(name('createLayer')),
+    createFeature: createActionWrapper<Types.Feature>(name('createFeature')),
+    translateFeatures: createActionWrapper<Payloads.TranslateFeatures>(name('translateFeatures')),
+    setFeatureGeometry: createActionWrapper<Payloads.SetFeatureGeometryPayload>(name('setFeatureGeometry')),
+    setFeatureName: createActionWrapper<Payloads.SetFeatureName>(name('setFeatureName')),
+    setFeatureStyle: createActionWrapper<Payloads.SetFeatureStyle>(name('setFeatureStyle')),
+    setSnapsToGrid: createActionWrapper<Payloads.SnapsToGrid>(name('snapToGrid')),
+    setPathsClosed: createActionWrapper<Payloads.SetPathsClosed>(name('setPathsClosed')),
+    reparentNodes: createActionWrapper<Payloads.ReparentNodes>(name('reparentNodes')),
+    copyNodes: createActionWrapper<Payloads.CopyNodes>(name('copyNodes')),
   }
 
   export const Actions = {
@@ -170,7 +179,8 @@ export namespace Model {
   }
 
   export namespace Selectors {
-    export const get = (state: ReduxState) => state.model;
+    export const getUndoable = (state: ReduxState) => state.model;
+    export const get = (state: ReduxState): Types.State => getStateFromUndoable(getUndoable(state));
     export const getLayers = (state: ReduxState) => get(state).layers;
     export const getFeatures = (state: ReduxState) => get(state).features;
     export const getFeatureById = (featureId: string) => (state: ReduxState) => get(state).features.byId[featureId];

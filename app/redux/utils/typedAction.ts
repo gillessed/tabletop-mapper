@@ -18,7 +18,7 @@ export type ActionType<T> = string & {
 };
 
 export interface ActionMetadata {
-  undoCheckpoint?: boolean;
+  ignoreUndo?: boolean;
 }
 
 export function createActionType<T>(type: string): ActionType<T> {

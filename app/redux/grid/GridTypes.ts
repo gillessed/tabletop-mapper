@@ -17,12 +17,13 @@ export namespace Grid {
     export interface State {
       transform: Transform;
       mouseMode: MouseMode;
+      mouseOnCanvas: boolean;
       partialGeometry?: Partial<Model.Types.Geometry>;
       mousePosition?: Vector;
       mouseDragOrigin?: Coordinate;
       draggingAsset?: string;
-      mouseOnCanvas: boolean;
       resizeInfo?: ResizeInfo;
+      resizedFeature?: Model.Types.Feature;
     }
 
     export enum MouseMode {
@@ -30,7 +31,7 @@ export namespace Grid {
       Drag,
       DrawRectangle,
       DrawPath,
-      DragFeatures,
+      TransformFeatures,
       DragAsset,
       ResizeRectangle,
       ResizePath,
@@ -56,6 +57,7 @@ export namespace Grid {
     stopDraggingAsset: createActionWrapper<void>('grid::stopDraggingAsset'),
     setMouseOnCanvas: createActionWrapper<boolean>('grid::setMouseOnCanvas'),
     startResizeFeature: createActionWrapper<Payloads.ResizeFeaturePayload>('grid::startResizeFeature'),
+    setResizedFeature: createActionWrapper<Model.Types.Feature>('grid::setResizedFeature'),
     stopResizeFeature: createActionWrapper<void>('grid::stopResizeFeature'),
   }
 
@@ -73,5 +75,6 @@ export namespace Grid {
     export const getAssetDropId = (state: ReduxState) => get(state).draggingAsset;
     export const getMouseOnCanvas = (state: ReduxState) => get(state).mouseOnCanvas;
     export const getResizeInfo = (state: ReduxState) => get(state).resizeInfo;
+    export const getResizedFeature = (state: ReduxState) => get(state).resizedFeature;
   }
 }

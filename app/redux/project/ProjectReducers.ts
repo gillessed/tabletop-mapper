@@ -1,5 +1,4 @@
-import { Reducer } from 'redux';
-import { newTypedReducer } from '../utils/typedReducer';
+import { newTypedReducer, Reducer } from '../utils/typedReducer';
 import { Project } from './ProjectTypes';
 import { Async, isAsyncLoaded } from '../utils/async';
 import { ipcInvoke } from '../../ipc/ipcInvoke';

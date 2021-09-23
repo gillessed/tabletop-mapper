@@ -1,0 +1,1 @@
+export const namedAction = (prefix: string) => (name: string) => `${prefix}::${name}`;

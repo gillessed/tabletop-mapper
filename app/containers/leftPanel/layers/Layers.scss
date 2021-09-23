@@ -22,8 +22,16 @@
     padding-bottom: 20px;
 
     .layer-tree-node {
-      & > .bp3-tree-node-content {
+      &>.bp3-tree-node-content {
         position: relative;
+      }
+
+      &.selected-cover>.bp3-tree-node-content {
+        background-color: rgba($blue3, 0.7);
+      }
+
+      &.selected-child>.bp3-tree-node-content {
+        background-color: rgba($blue3, 0.3);
       }
 
       .bp3-tree-node-label {

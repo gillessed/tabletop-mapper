@@ -22,6 +22,7 @@ import { ipcInvoke, registerClientIpcHandlers } from './ipc/ipcInvoke';
 import { Ipc } from './ipc/ipcCommands';
 import './scss/Scrollbar.scss';
 import { registerKeyboardShortcuts } from './KeyboardShortcuts';
+import { registerDebugCommands } from './DebugCommands';
 
 const AppVersion = '0.1.0';
 
@@ -92,12 +93,12 @@ async function initialize() {
   );
   registerClientIpcHandlers(store);
   registerKeyboardShortcuts(store);
+  registerDebugCommands(store);
 
   const assets = await readAssetDataFile(appConfig);
   store.dispatch(Asset.Actions.setAssetState.create(assets));
 
   console.log('Initialized asset state', assets);
-
 
   const sagaListeners: Set<SagaListener<any>> = new Set();
   const sagaRegister = createRegister(store.dispatch);

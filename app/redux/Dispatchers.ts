@@ -8,6 +8,7 @@ import { useContext } from 'react';
 import { Project } from './project/ProjectTypes';
 import { Navigation } from './navigation/NavigationTypes';
 import { Asset } from './asset/AssetTypes';
+import { Clipboard } from './clipboard/ClipboardTypes';
 
 export interface Dispatchers {
   model: TypedDispatcher<typeof Model.DispatchActions>;
@@ -16,6 +17,7 @@ export interface Dispatchers {
   project: TypedDispatcher<typeof Project.DispatchActions>;
   navigation: TypedDispatcher<typeof Navigation.DispatchActions>;
   assets: TypedDispatcher<typeof Asset.DispatchActions>;
+  clipboard: TypedDispatcher<typeof Clipboard.DispatchActions>;
 }
 
 export const dispatcherCreators = (store: Store<ReduxState>): Dispatchers => {
@@ -26,5 +28,6 @@ export const dispatcherCreators = (store: Store<ReduxState>): Dispatchers => {
     project: createDispatcher(store, Project.DispatchActions),
     navigation: createDispatcher(store, Navigation.DispatchActions),
     assets: createDispatcher(store, Asset.DispatchActions),
+    clipboard: createDispatcher(store, Clipboard.DispatchActions),
   };
 };

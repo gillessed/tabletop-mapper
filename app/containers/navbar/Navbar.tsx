@@ -6,6 +6,7 @@ import { NavbarMainMenu } from './NavbarMainMenu';
 import { useSelector } from 'react-redux';
 import { Project } from '../../redux/project/ProjectTypes';
 import { isAsyncLoaded } from '../../redux/utils/async';
+import { NavbarEditMenu } from './NavbarEditMenu';
 
 export function MapperNavbar() {
   const project = useSelector(Project.Selectors.get);
@@ -18,6 +19,10 @@ export function MapperNavbar() {
         <Popover interactionKind={PopoverInteractionKind.CLICK} position={PopoverPosition.BOTTOM}>
           <Button minimal icon={IconNames.MENU} />
           <NavbarMainMenu />
+        </Popover>
+        <Popover interactionKind={PopoverInteractionKind.CLICK} position={PopoverPosition.BOTTOM}>
+          <Button minimal icon={IconNames.EDIT} />
+          <NavbarEditMenu />
         </Popover>
         <Button minimal icon={IconNames.GRID} />
         <Button minimal icon={IconNames.COG} />

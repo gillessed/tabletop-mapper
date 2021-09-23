@@ -1,8 +1,8 @@
-import { Reducer } from 'redux';
-import { newTypedReducer } from '../utils/typedReducer';
+import { newTypedReducer, Reducer } from '../utils/typedReducer';
 import { LayerTree } from './LayerTreeTypes';
 import { Model } from '../model/ModelTypes';
 import { arrayEquals } from '../../utils/array';
+import { ModelSet } from '../model/ModelReducers';
 
 const INITIAL_STATE: LayerTree.Types.State = {
   expandedNodes: {
@@ -32,7 +32,7 @@ const collapseNodeReducer = (state: LayerTree.Types.State, layerId: string) => {
   };
 }
 
-const selectNodesReducers = (state: LayerTree.Types.State, objectIds: string[]): LayerTree.Types.State => {
+const setSelectNodesReducers = (state: LayerTree.Types.State, objectIds: string[]): LayerTree.Types.State => {
   if (arrayEquals(state.selectedNodes, objectIds)) {
     return state;
   }
@@ -41,6 +41,8 @@ const selectNodesReducers = (state: LayerTree.Types.State, objectIds: string[]):
     selectedNodes: objectIds,
   };
 }
+
+const clearSelectedNodesReducer = (state: LayerTree.Types.State): LayerTree.Types.State => setSelectNodesReducers(state, []);
 
 const setModelReducer = (): LayerTree.Types.State => {
   return {
@@ -54,8 +56,9 @@ const setModelReducer = (): LayerTree.Types.State => {
 export const layerTreeReducer: Reducer<LayerTree.Types.State> = newTypedReducer<LayerTree.Types.State>()
   .handlePayload(LayerTree.Actions.setNodesExpanded.type, setNodesExpandedReducer)
   .handlePayload(LayerTree.Actions.collapseNode.type, collapseNodeReducer)
-  .handlePayload(LayerTree.Actions.selectNodes.type, selectNodesReducers)
-  .handlePayload(Model.Actions.setModel.type, setModelReducer)
+  .handlePayload(LayerTree.Actions.setSelectedNodes.type, setSelectNodesReducers)
+  .handlePayload(LayerTree.Actions.clearSelectedNodes.type, clearSelectedNodesReducer)
+  .handlePayload(ModelSet.type, setModelReducer)
   .handleDefault((state = INITIAL_STATE) => state)
   .build();
 

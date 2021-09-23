@@ -6,7 +6,7 @@ import { Project } from "./ProjectTypes";
 import { generateRandomString } from "../../utils/randomId";
 import { Navigation } from "../navigation/NavigationTypes";
 import { getProjectFile, getProjectDataFile, AppConfig } from "../../config/AppConfig";
-import { createEmptyModel } from "../model/ModelReducers";
+import { createEmptyModel, ModelSet } from "../model/ModelReducers";
 import { asyncLoading, asyncLoaded, isAsyncLoaded } from "../utils/async";
 import { Classes } from "@blueprintjs/core";
 import { ipcInvoke } from "../../ipc/ipcInvoke";
@@ -67,7 +67,7 @@ function* openProjectSaga(context: SagaContext, action: TypedAction<string>) {
   const rawModel: string = yield call(projectDataFile.readFile);
   const projectModel: Model.Types.State = JSON.parse(rawModel);
 
-  yield put(Model.Actions.setModel.create(projectModel));
+  yield put(ModelSet.create(projectModel));
   yield put(Project.Actions.setRequiresSave.create(false));
   yield put(Project.Actions.setProject.create(asyncLoaded(project)));
 }
@@ -122,6 +122,5 @@ function* quitApplicationSaga(context: SagaContext) {
 }
 
 function* setProjectRequiresSaveSaga() {
-  console.log('project has been modified');
   yield put(Project.Actions.setRequiresSave.create(true));
 }

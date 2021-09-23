@@ -1,4 +1,4 @@
-import { Classes, ITreeNode, Tree } from '@blueprintjs/core';
+import { Classes, ITreeNode, Popover, PopoverInteractionKind, Position, Tree } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import * as classNames from 'classnames';
 import * as React from 'react';
@@ -45,10 +45,28 @@ export function AssetPanel() {
       for (const assetId of assetPack.assetIds) {
         const asset = assetIndex.byId[assetId];
         const file = appConfig.getAssetFileById(asset.id, asset.extension);
+        const popoverPreview = (
+          <div className='asset-hover-image-container'>
+            <div className='asset-hover-image-backdrop'>
+              <img className='asset-hover-image-preview' src={file.fullPath} />
+            </div>
+          </div>
+        );
         assetNodes.push({
           id: asset.id,
           label: asset.name,
-          icon: <img className='asset-tree-thumbnail' src={file.fullPath} />,
+          icon: (
+            <Popover
+              position={Position.LEFT}
+              interactionKind={PopoverInteractionKind.HOVER}
+              content={popoverPreview}
+            >
+              <div className='asset-tree-thumbnail-backdrop'>
+                <img className='asset-tree-thumbnail' src={file.fullPath} />
+
+              </div>
+            </Popover>
+          ),
           className: `asset-tree-node id:${assetId}`,
         });
       }

@@ -10,13 +10,14 @@ export const Features = function Features() {
 
   const renderedFeatures = React.useMemo(() => {
     const elements: JSX.Element[] = [];
-    treeWalk(features, layers, (feature) => {
-      elements.push(<Feature
-        key={feature.id}
-        feature={feature}
-      />);
+    treeWalk(features, layers, {
+      visitFeature: (feature) => {
+        elements.push(<Feature
+          key={feature.id}
+          feature={feature}
+        />);
+      }
     });
-    elements.reverse();
     return elements;
   }, [features, layers]);
 

@@ -10,13 +10,23 @@ export function reverseArray<T>(array: T[]): T[] {
   return reversed;
 }
 
+export interface TreeWalkOptions {
+  visitFeature?: (feature: Model.Types.Feature) => void;
+  visitLayer?: (layer: Model.Types.Layer) => void;
+  startingNode?: string;
+}
+
 export function treeWalk(
   features: Indexable<Model.Types.Feature>,
   layers: Indexable<Model.Types.Layer>,
-  visitFeature: (feature: Model.Types.Feature) => void,
-  visitLayer?: (layer: Model.Types.Layer) => void,
+  { visitFeature, visitLayer, startingNode }: TreeWalkOptions,
 ) {
-  const stack: Array<Model.Types.Feature | Model.Types.Layer> = [layers.byId[Model.RootLayerId]];
+  const startingItemId = startingNode ?? Model.RootLayerId;
+  const startingItem = layers.byId[startingItemId] ?? features.byId[startingItemId];
+  if (startingItemId == null) {
+    return;
+  }
+  const stack: Array<Model.Types.Feature | Model.Types.Layer> = [startingItem];
   while (stack.length !== 0) {
     const object = stack.pop();
     if (Model.Types.isFeature(object)) {
@@ -27,10 +37,12 @@ export function treeWalk(
       const featureChildren = object.features.map((featureId) => {
         return features.byId[featureId];
       });
+      featureChildren.reverse();
       stack.push(...featureChildren);
       const layerChildren = object.children.map((layerId) => {
         return layers.byId[layerId];
       });
+      layerChildren.reverse();
       stack.push(...layerChildren);
     }
   }
@@ -41,7 +53,7 @@ export function getOrderedFeatures(
   layers: Indexable<Model.Types.Layer>,
 ): Model.Types.Feature[] {
   const orderedFeatures: Model.Types.Feature[] = [];
-  treeWalk(features, layers, (feature) => orderedFeatures.push(feature));
+  treeWalk(features, layers, { visitFeature: (feature) => orderedFeatures.push(feature) });
   return orderedFeatures;
 }
 
@@ -53,8 +65,11 @@ export function getOrderedObjectIds(
   treeWalk(
     features,
     layers,
-    (feature) => objects.push(feature),
-    (layer) => objects.push(layer));
+    {
+      visitFeature: (feature) => objects.push(feature),
+      visitLayer: (layer) => objects.push(layer),
+    },
+  );
   return objects.map((object) => object.id);
 }
 
@@ -65,7 +80,6 @@ export function getHighestFeatureId(
 ): string {
   const orderedFeatures = getOrderedFeatures(features, layers);
   // highest feature is lowest in the tree
-  orderedFeatures.reverse();
   const indexedFeatures: { [featureId: string]: number } = {};
   orderedFeatures.forEach((feature, index) => {
     indexedFeatures[feature.id] = index;
@@ -111,7 +125,7 @@ export function getAncestors(
     ancestors.add(startingLayerId);
   }
   let layer = layerIndex.byId[startingLayerId];
-  while(layer.parent != null) {
+  while(layer?.parent != null) {
     ancestors.add(layer.parent);
     layer = layerIndex.byId[layer.parent];
   }
@@ -185,4 +199,55 @@ export function isValidReparent(
   const selectionContainsTargetAncestor = !!selection.find((nodeId) => targetAncestors.has(nodeId));
   const invalidReparent = selectionContainsTarget || selectionContainsTargetAncestor;
   return !invalidReparent;
+}
+
+/**
+ * Returns the ids of all descendant nodes of the input id, non-inclusive.
+ */
+export function getDecscendants(
+  id: string,
+  featureIndex: Indexable<Model.Types.Feature>,
+  layerIndex: Indexable<Model.Types.Layer>,
+): Set<string> {
+  const descendantIds = new Set<string>();
+  treeWalk(featureIndex, layerIndex, {
+    visitFeature: (feature) => descendantIds.add(feature.id),
+    visitLayer: (layer) => descendantIds.add(layer.id),
+    startingNode: id,
+  });
+  descendantIds.delete(id);
+  return descendantIds;
+}
+
+export function getAllDescendants(
+  ids: Iterable<string>,
+  featureIndex: Indexable<Model.Types.Feature>,
+  layerIndex: Indexable<Model.Types.Layer>,
+): Set<string> {
+  const coverSet = new Set(ids);
+  for (const id of ids) {
+    const descendants = getDecscendants(id, featureIndex, layerIndex);
+    for (const descendant of descendants) {
+      coverSet.add(descendant);
+    }
+  }
+  return coverSet;
+}
+
+/**
+ * Returns the set of all nodes of the input who contains no ancestors also within the input.
+ */
+export function getCoverSet(
+  ids: Iterable<string>,
+  featureIndex: Indexable<Model.Types.Feature>,
+  layerIndex: Indexable<Model.Types.Layer>,
+): Set<string> {
+  const coverSet = new Set(ids);
+  for (const id of ids) {
+    const descendants = getDecscendants(id, featureIndex, layerIndex);
+    for (const descendant of descendants) {
+      coverSet.delete(descendant);
+    }
+  }
+  return coverSet;
 }

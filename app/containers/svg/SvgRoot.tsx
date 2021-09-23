@@ -10,7 +10,7 @@ import { Model } from '../../redux/model/ModelTypes';
 import { addCoordinateToPartialGeometry } from '../../redux/model/PartialGeometry';
 import { MouseButtons } from '../../utils/mouse';
 import { generateRandomString } from '../../utils/randomId';
-import { FeatureDragShadows } from './features/shadows/FeatureDragShadows';
+import { FeatureResizeShadows } from './features/shadows/FeatureResizeShadows';
 import { FeatureOutlines } from './features/FeatureOutlines';
 import { FeaturePartialGeometries } from './features/partials/FeaturePartialGeometries';
 import { Features } from './features/Features';
@@ -26,6 +26,9 @@ import { ControlPointsOverlay } from './features/ControlPointsOverlay';
 import { getControlPoints, getHoveredControlPoint } from '../../redux/model/ControlPoints';
 import { resizeGeometry } from '../../redux/model/Resize';
 import { compact } from '../../utils/array';
+import { FeatureDragShadows } from './features/shadows/FeatureDragShadows';
+import { useWorker } from '../../redux/utils/workers';
+import { selectAndExpandNodesWorker } from '../../redux/layertree/LayerTreeWorkers';
 
 type MouseMode = Grid.Types.MouseMode;
 const MouseMode = Grid.Types.MouseMode;
@@ -61,23 +64,23 @@ export const SvgRoot = React.memo(function SvgRoot({
   const currentLayer = useSelector(LayerTree.Selectors.getCurrentLayer);
   const features = useSelector(Model.Selectors.getFeatures);
   const layers = useSelector(Model.Selectors.getLayers);
-  const selectedFeatureIds = useSelector(LayerTree.Selectors.getSelectedNodes);
+  const selectedFeatureIds = useSelector(LayerTree.Selectors.getSelectedFeatureIds);
   const mouseDragOrigin = useSelector(Grid.Selectors.getMouseDragOrigin);
   const assetDropId = useSelector(Grid.Selectors.getAssetDropId);
   const draggingAsset = useSelector(Asset.Selectors.getAssetById(assetDropId ?? ''));
   const resizeInfo = useSelector(Grid.Selectors.getResizeInfo);
   const featureToResize = useSelector(Model.Selectors.getFeatureById(resizeInfo?.featureId ?? ''));
+  const selectAndExpandNodes = useWorker(selectAndExpandNodesWorker);
 
   const createNewFeature = React.useCallback((feature: Model.Types.Feature) => {
     dispatchers.grid.setMouseMode(MouseMode.None);
     dispatchers.model.createFeature(feature);
-    dispatchers.layerTree.selectNodes([feature.id]);
-    dispatchers.layerTree.expandNodes([currentLayer]);
+    selectAndExpandNodes([feature.id]);
     dispatchers.grid.updatePartialGeometry(undefined);
   }, [dispatchers]);
 
-  const onLeftMouseDownModeNone = React.useCallback((newMousePosition: Vector, coordinate: Coordinate) => {
-    const selectedFeatures = compact(selectedFeatureIds.map((featureId) => features.byId[featureId]));
+  const onLeftMouseDownModeNone = React.useCallback((e: React.MouseEvent<SVGElement>, newMousePosition: Vector, coordinate: Coordinate) => {
+    const selectedFeatures = selectedFeatureIds.map((featureId) => features.byId[featureId]);
     const controlPoints = getControlPoints(transform, selectedFeatures);
     const hoveredControlPoint = getHoveredControlPoint(controlPoints, coordinate);
     if (hoveredControlPoint) {
@@ -107,22 +110,28 @@ export const SvgRoot = React.memo(function SvgRoot({
     if (!hoveringSelectedFeature) {
       if (hoveredFeatureIds.length >= 1) {
         const highestFeatureId = getHighestFeatureId(features, layers, hoveredFeatureIds);
-        dispatchers.layerTree.selectNodes([highestFeatureId]);
-        dispatchers.layerTree.expandNodes([highestFeatureId]);
+        if (e.shiftKey && selectedFeatureIds.indexOf(highestFeatureId) < 0) {
+          const newSelection = [...selectedFeatureIds, highestFeatureId];
+          selectAndExpandNodes(newSelection);
+        } else {
+          selectAndExpandNodes([highestFeatureId]);
+        }
+        dispatchers.grid.setMouseMode(MouseMode.TransformFeatures);
       } else {
-        dispatchers.layerTree.selectNodes([]);
+        dispatchers.layerTree.clearSelectedNodes();
       }
+    } else {
+      dispatchers.grid.setMouseMode(MouseMode.TransformFeatures);
     }
     dispatchers.grid.setMouseDragOrigin(newMousePosition);
-    dispatchers.grid.setMouseMode(MouseMode.DragFeatures);
-  }, [dispatchers, features, transform, selectedFeatureIds]);
+  }, [dispatchers, features, transform, selectedFeatureIds, selectAndExpandNodes]);
 
   const onLeftMouseDown = React.useCallback((e: React.MouseEvent<SVGElement>) => {
     const newMousePosition = new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     const coordinate = transform.applyV(newMousePosition).getCoordinate();
     switch (mouseMode) {
       case MouseMode.None:
-        onLeftMouseDownModeNone(newMousePosition, coordinate);
+        onLeftMouseDownModeNone(e, newMousePosition, coordinate);
         break;
       case MouseMode.DrawRectangle:
       case MouseMode.DrawPath:
@@ -167,7 +176,7 @@ export const SvgRoot = React.memo(function SvgRoot({
       case MouseMode.Drag:
         dispatchers.grid.setMouseMode(MouseMode.None);
         break;
-      case MouseMode.DragFeatures:
+      case MouseMode.TransformFeatures:
         const selectedFeatures = selectedFeatureIds.map((id) => features.byId[id]);
         const translation = getFeatureTranslation(
           mousePosition,
@@ -199,6 +208,15 @@ export const SvgRoot = React.memo(function SvgRoot({
         break;
       case MouseMode.ResizeRectangle:
       case MouseMode.ResizePath:
+        if (resizeInfo == null || featureToResize == null) {
+          return;
+        }
+        const resizedGeometry = resizeGeometry(transform, featureToResize.geometry, resizeInfo, mousePosition);
+        if (resizedGeometry == null) {
+          return;
+        }
+        const resizedFeature = { ...featureToResize, geometry: resizedGeometry } as Model.Types.Feature;
+        dispatchers.model.setFeatureGeometry({ featureId: featureToResize.id, geometry: resizedGeometry });
         dispatchers.grid.stopResizeFeature();
         break;
     }
@@ -212,7 +230,8 @@ export const SvgRoot = React.memo(function SvgRoot({
     if (resizedGeometry == null) {
       return;
     }
-    dispatchers.model.setFeatureGeometry({ featureId: featureToResize.id, geometry: resizedGeometry });
+    const resizedFeature = { ...featureToResize, geometry: resizedGeometry } as Model.Types.Feature;
+    dispatchers.grid.setResizedFeature(resizedFeature);
   }, [resizeInfo, featureToResize]);
 
   const onMouseMove = React.useCallback((e: React.MouseEvent<SVGElement>) => {
@@ -265,7 +284,7 @@ export const SvgRoot = React.memo(function SvgRoot({
     'app-canvas',
     resizeInfo?.cursor,
     {
-      'dragging-features': mouseMode === MouseMode.DragFeatures,
+      'dragging-features': mouseMode === MouseMode.TransformFeatures,
       'dragging-asset': mouseMode === MouseMode.DragAsset,
     }
   );
@@ -290,6 +309,7 @@ export const SvgRoot = React.memo(function SvgRoot({
         <FeatureOutlines />
         <ControlPointsOverlay />
         <FeatureDragShadows />
+        <FeatureResizeShadows />
         <AssetDropShadow />
       </g>
     </svg>

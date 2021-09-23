@@ -14,7 +14,7 @@ import { getHighestFeatureId } from '../../../redux/model/ModelTree';
 export const SelectionOutlineColor = Colors.ORANGE3;
 export const HoverOutlineColor = Colors.COBALT3;
 
-function renderOutline(
+export function renderOutline(
   geometry: Model.Types.Rectangle,
   transform: Transform,
   color: string,

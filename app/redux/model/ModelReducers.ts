@@ -1,9 +1,11 @@
 import * as DotProp from 'dot-prop-immutable';
-import { Reducer } from 'redux';
-import { newTypedReducer } from '../utils/typedReducer';
+import { newTypedReducer, Reducer } from '../utils/typedReducer';
 import { Model } from './ModelTypes';
 import { translateGeometry } from './FeatureTranslation';
 import { removeItem } from '../../utils/array';
+import { undoable, Undoable } from '../undo/UndoState';
+import { getCoverSet, treeWalk } from './ModelTree';
+import { generateRandomString } from '../../utils/randomId';
 
 export function createEmptyModel(): Model.Types.State {
   return {
@@ -18,7 +20,7 @@ export function createEmptyModel(): Model.Types.State {
           features: [],
         }
       },
-      all: [ Model.RootLayerId],
+      all: [Model.RootLayerId],
     },
     features: {
       byId: {},
@@ -62,14 +64,13 @@ const TestState: Model.Types.State = {
   },
 };
 
-const setModelReducer = (_: Model.Types.State, newState: Model.Types.State): Model.Types.State => newState;
-
 export const createLayerReducer = (state: Model.Types.State, payload: Model.Payloads.CreateLayer): Model.Types.State => {
+  const { layerId, parentId, name } = payload;
   const newLayer: Model.Types.Layer = {
-    id: payload.layerId,
+    id: layerId,
     visible: true,
-    parent: payload.parentId,
-    name: `New Layer`,
+    parent: parentId,
+    name: name ?? 'New Layer',
     children: [],
     features: [],
   };
@@ -219,8 +220,66 @@ export const reparentNodesReducers = (
   return newState;
 }
 
+export const copyNodesReducers = (
+  state: Model.Types.State,
+  payload: Model.Payloads.CopyNodes,
+): Model.Types.State => {
+
+  const { nodeIds, translation } = payload;
+  const { features: featureIndex, layers: layerIndex } = state;
+  const coverSet = getCoverSet(nodeIds, featureIndex, layerIndex);
+
+  let newState = state;
+
+  const newFeatureIds: string[] = [];
+
+  for (const sourceId of coverSet) {
+    const rootParentLayerId = layerIndex.byId[sourceId]?.parent ?? featureIndex.byId[sourceId]?.layerId;
+    const copiedIds = new Map<string, string>();
+    treeWalk(
+      featureIndex,
+      layerIndex,
+      {
+        visitLayer: (layer) => {
+          const newId = generateRandomString();
+          copiedIds.set(layer.id, newId);
+          const parentId = layer.id === sourceId ?
+            rootParentLayerId :
+            copiedIds.get(layer.parent);
+          newState = createLayerReducer(newState, {
+            layerId: newId,
+            name: `Copy of ${layer.name}`,
+            parentId,
+          });
+          newFeatureIds.push(newId);
+        },
+        visitFeature: (feature) => {
+          const parentId = feature.id === sourceId ?
+            rootParentLayerId :
+            copiedIds.get(feature.layerId);
+          const newId = generateRandomString();
+          const newFeature: Model.Types.Feature = {
+            ...feature,
+            id: newId,
+            name: `Copy of ${feature.name}`,
+            layerId: parentId,
+          }
+          newState = createFeatureReducer(newState, newFeature);
+        },
+        startingNode: sourceId,
+      },
+    );
+  }
+
+  newState = translateFeaturesReducer(newState, {
+    featureIds: newFeatureIds,
+    translation,
+  });
+
+  return newState;
+}
+
 export const modelReducer: Reducer<Model.Types.State> = newTypedReducer<Model.Types.State>()
-  .handlePayload(Model.Actions.setModel.type, setModelReducer)
   .handlePayload(Model.Actions.createLayer.type, createLayerReducer)
   .handlePayload(Model.Actions.createFeature.type, createFeatureReducer)
   .handlePayload(Model.Actions.translateFeatures.type, translateFeaturesReducer)
@@ -230,5 +289,21 @@ export const modelReducer: Reducer<Model.Types.State> = newTypedReducer<Model.Ty
   .handlePayload(Model.Actions.setSnapsToGrid.type, snapsToGridReducer)
   .handlePayload(Model.Actions.setPathsClosed.type, setPathsClosedReducer)
   .handlePayload(Model.Actions.reparentNodes.type, reparentNodesReducers)
-  .handleDefault((state = TestState) => state)
+  .handlePayload(Model.Actions.copyNodes.type, copyNodesReducers)
+  .handleDefault((state = InitialState) => state)
   .build();
+
+const modelUndoable = undoable(
+  modelReducer,
+  {
+    denominator: "model",
+    comparator: (oldState, newState) => oldState !== newState,
+    initialState: InitialState,
+  },
+);
+
+export const ModelUndo = modelUndoable.actions.undo;
+export const ModelRedo = modelUndoable.actions.redo;
+export const ModelSet = modelUndoable.actions.set;
+
+export const undoableModelReducer = modelUndoable.reducer;
