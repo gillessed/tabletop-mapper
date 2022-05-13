@@ -202,6 +202,8 @@ export const SvgRoot = React.memo(function SvgRoot({
             geometry,
             assetId: assetDropId,
             objectCover: 'contain',
+            rotation: 0,
+            flipped: true,
           }
           createNewFeature(newAssetFeature);
         }

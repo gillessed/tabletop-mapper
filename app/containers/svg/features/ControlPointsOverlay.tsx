@@ -8,10 +8,6 @@ import { Model } from '../../../redux/model/ModelTypes';
 import { SelectionOutlineColor } from './FeatureOutlines';
 import { compact } from '../../../utils/array';
 
-interface Props {
-  feature: Model.Types.BasicAssetFeature;
-}
-
 export const ControlPointsOverlay = () => {
   const selection = useSelector(LayerTree.Selectors.getSelectedNodes);
   const featureIndex = useSelector(Model.Selectors.getFeatures);

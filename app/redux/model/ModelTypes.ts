@@ -73,6 +73,8 @@ export namespace Model {
       assetId: string;
       objectCover?: 'contain' | 'stretch' | 'cover';
       clipRegion?: Rectangle;
+      rotation: number;
+      flipped: boolean;
     }
 
     export interface PatternFeature extends Identifiable {

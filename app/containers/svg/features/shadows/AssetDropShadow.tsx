@@ -33,6 +33,8 @@ export const AssetDropShadow = () => {
     geometry,
     assetId: assetDropId,
     objectCover: 'contain',
+    rotation: 0,
+    flipped: false,
   }
 
   return (
