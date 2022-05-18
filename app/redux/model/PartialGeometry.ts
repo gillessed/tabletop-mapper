@@ -1,5 +1,5 @@
 import { rectifyRectangle } from '../../math/RectifyGeometry';
-import { Coordinate, same, coordinateDistance } from '../../math/Vector';
+import { Coordinate, coordinateEquals, coordinateDistance } from '../../math/Vector';
 import { Model } from './ModelTypes';
 import { curry2, swapArgs2 } from '../../utils/functionalSugar';
 import { visitGeometry } from './ModelVisitors';
@@ -27,7 +27,7 @@ function addCoordinateToRectangleGeometry(partial: Partial<Model.Types.Rectangle
       complete: false,
     };
   } else {
-    if (same(partial.p1, coordinate)) {
+    if (coordinateEquals(partial.p1, coordinate)) {
       return { geometry: partial, complete: false };
     }
     const rectangle: Partial<Model.Types.Rectangle> = {
@@ -43,7 +43,7 @@ function addCoordinateToRectangleGeometry(partial: Partial<Model.Types.Rectangle
 
 function addCoordinateToPathGeometry(partial: Partial<Model.Types.Path>, coordinate: Coordinate): AddCoordinateResult {
   const currentPath = partial.path ?? [];
-  if (currentPath.length > 1 && same(currentPath[0], coordinate)) {
+  if (currentPath.length > 1 && coordinateEquals(currentPath[0], coordinate)) {
     const path: Partial<Model.Types.Path> = {
       ...partial,
       closed: true,

@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { useSelector } from 'react-redux';
 import { Transform } from '../../../math/Vector';
-import './Gridlines.scss';
+import './GridLines.scss';
+import { Model } from '../../../redux/model/ModelTypes';
 
 export namespace GridLines {
   export interface Props {
@@ -18,6 +20,12 @@ export const GridLines = React.memo(function GridLines({
   height,
   transform,
 }: GridLines.Props) {
+  const { gridColor, showGrid, majorAxisStep } = useSelector(Model.Selectors.getSettings);
+  
+  if (!showGrid) {
+    return null;
+  }
+
   const topLeft = transform.apply(0, 0);
   const bottomRight = transform.apply(width, height);
 
@@ -27,7 +35,7 @@ export const GridLines = React.memo(function GridLines({
   for (let i = Math.floor(topLeft.x); i <= bottomRight.x; i++) {
     let classNames = "";
     let s = strokeWidth;
-    if (i == 0) {
+    if (i % majorAxisStep == 0) {
       s *= 2;
       classNames = "axis-gridline";
     }
@@ -43,7 +51,7 @@ export const GridLines = React.memo(function GridLines({
   for (let i = Math.floor(topLeft.y); i <= bottomRight.y; i++) {
     let classNames = "";
     let s = strokeWidth;
-    if (i == 0) {
+    if (i % majorAxisStep == 0) {
       s *= 2;
       classNames = "axis-gridline";
     }
@@ -56,7 +64,7 @@ export const GridLines = React.memo(function GridLines({
   }
 
   return (
-    <g fill="transparent" stroke={GridLineColor} opacity={GridLineOpacity}>
+    <g fill="transparent" stroke={gridColor} opacity={GridLineOpacity}>
       {lines}
     </g>
   );

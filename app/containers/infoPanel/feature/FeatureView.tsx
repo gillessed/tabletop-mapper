@@ -17,7 +17,6 @@ export const FeatureView = React.memo(function FeatureView({
 }: FeatureView.Props) {
   const features = useSelector(Model.Selectors.getFeatures);
   const feature = features.byId[featureId];
-  const geometryType = Model.Types.Geometries[feature.geometry.type];
   const properties = getFeatureProperties(feature);
   return (
     <div className='feature-view-container'>
@@ -42,7 +41,6 @@ export const FeatureView = React.memo(function FeatureView({
           );
         })}
       </div>
-      <div className='feature-style-header title'>Style</div>
     </div>
   );
 });

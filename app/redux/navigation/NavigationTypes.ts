@@ -1,20 +1,25 @@
 import { ReduxState } from "../AppReducer";
+import { namedAction } from "../utils/actionName";
 import { createActionWrapper } from "../utils/typedAction";
 
+const name = namedAction('navigation');
 export namespace Navigation {
   export namespace Types {
 
     export type State = {
       currentView: ViewKey;
       isProjectDialogOpen: boolean;
+      isGridDialogOpen: boolean;
     };
 
     export type ViewKey = 'Blank' | 'Project' | 'AssetManager';
   }
 
   export const DispatchActions = {
-    setCurrentView: createActionWrapper<Navigation.Types.ViewKey>('navigation::setCurrentView'),
-    setProjectDialogOpen: createActionWrapper<boolean>('navigation::setProjectDialogOpen'),
+    setCurrentView: createActionWrapper<Navigation.Types.ViewKey>(name('setCurrentView')),
+    setProjectDialogOpen: createActionWrapper<boolean>(name('setProjectDialogOpen')),
+    setGridDialogOpen: createActionWrapper<boolean>(name('setGridDialogOpen')),
+    closeDialogs: createActionWrapper<boolean>(name('closeDialogs')),
   }
 
   export const Actions = {
@@ -25,5 +30,6 @@ export namespace Navigation {
     export const get = (state: ReduxState) => state.navigation;
     export const getCurrentView = (state: ReduxState) => get(state).currentView;
     export const isProjectDialogOpen = (state: ReduxState) => get(state).isProjectDialogOpen;
+    export const isGridDialogOpen = (state: ReduxState) => get(state).isGridDialogOpen;
   }
 }

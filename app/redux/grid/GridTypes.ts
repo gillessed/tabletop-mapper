@@ -15,6 +15,7 @@ export namespace Grid {
     }
 
     export interface State {
+      transformSet: boolean;
       transform: Transform;
       mouseMode: MouseMode;
       mouseOnCanvas: boolean;
@@ -70,6 +71,7 @@ export namespace Grid {
     export const getPartialGeometry = (state: ReduxState) => get(state).partialGeometry;
     export const getMousePosition = (state: ReduxState) => get(state).mousePosition;
     export const getTransform = (state: ReduxState) => get(state).transform;
+    export const getTransformSet = (state: ReduxState) => get(state).transformSet;
     export const getMouseMode = (state: ReduxState) => get(state).mouseMode;
     export const getMouseDragOrigin = (state: ReduxState) => get(state).mouseDragOrigin;
     export const getAssetDropId = (state: ReduxState) => get(state).draggingAsset;

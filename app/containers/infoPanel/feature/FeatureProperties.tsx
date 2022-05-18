@@ -2,28 +2,36 @@ import * as React from 'react';
 import { Coordinate } from "../../../math/Vector";
 import { Model } from "../../../redux/model/ModelTypes";
 import { visitFeature } from "../../../redux/model/ModelVisitors";
-import { SnapsToGridSwitch } from "./SnapsToGridSwitch";
+import { SnapToGridSwitch } from "./components/SnapToGridSwitch";
+import { MirroredSwitch } from "./components/MirroredSwitch";
+import { OpacitySlider } from './components/OpacitySlider';
+import { RotationSlider } from './components/RotationSlider';
+import { ImageFillDropdown } from './components/ImageFillDropdown';
 
 export interface DisplayProperty {
   name: string;
   row: React.ReactNode;
 }
 
-const Center = 'Center';
-const Radius = 'Radius';
 const Grid = 'Grid';
-const TopLeft = 'Top Left';
 const Dimensions = 'Dimensions';
-const Closed = 'Closed';
 const Vertices = 'Vertices';
 const Length = 'Length';
+const Orientation = 'Orientation';
+const Opacity = 'Opacity';
+const Rotation = 'Rotation';
+const Image = 'Image';
 
 function createSimpleProperty(name: string, value: string | number) {
   return { name, row: <div className='property-value'>{value}</div> };
 }
 
-function gridSnapProperty(feature: Model.Types.Feature) {
-  return { name: Grid, row: <SnapsToGridSwitch feature={feature} /> };
+function getGridSnapProperty(feature: Model.Types.Feature) {
+  return { name: Grid, row: <SnapToGridSwitch featureId={feature.id} snapToGrid={!!feature.geometry.snapToGrid} /> };
+}
+
+function getOpacityProperty(feature: Model.Types.Feature) {
+  return { name: Opacity, row: <OpacitySlider featureId={feature.id} opacity={feature.opacity} /> };
 }
 
 function cutNumber(n: number, digits: number = 2) {
@@ -36,14 +44,46 @@ function cutCoordinate(coordinate: Coordinate, digits: number = 2) {
   return { x: cutNumber(x, digits), y: cutNumber(y, digits) };
 }
 
-function getBasicAssetFeatureProperties(pathFeature: Model.Types.BasicAssetFeature) {
-  const gridSnap = gridSnapProperty(pathFeature);
-  return [gridSnap];
+function getBasicAssetFeatureProperties(basicAssetFeature: Model.Types.BasicAssetFeature) {
+  const { id, mirrored, geometry, rotation, objectCover } = basicAssetFeature;
+  const snapToGrid = !!geometry.snapToGrid;
+  const gridSnapProperty = getGridSnapProperty(basicAssetFeature);
+  const mirroredProperty = {
+    name: Orientation, row:
+      <MirroredSwitch
+        featureId={id}
+        mirrored={mirrored}
+      />
+  };
+  const rotationProperty = {
+    name: Rotation, row:
+      <RotationSlider
+        featureId={id}
+        rotation={rotation}
+        snapToGrid={snapToGrid}
+      />
+  };
+  const opacityProperty = getOpacityProperty(basicAssetFeature);
+  const imageProperty = {
+    name: Image, row:
+      <ImageFillDropdown
+        featureId={id}
+        imageFill={objectCover}
+      />
+  };
+  return [
+    gridSnapProperty,
+    mirroredProperty,
+    rotationProperty,
+    opacityProperty,
+    imageProperty,
+  ];
 }
 
 function getPatternFeatureProperties(pathFeature: Model.Types.PatternFeature) {
-  const gridSnap = gridSnapProperty(pathFeature);
-  return [gridSnap];
+  const gridSnap = getGridSnapProperty(pathFeature);
+  const opacity = getOpacityProperty(pathFeature);
+  return [gridSnap, opacity];
 }
 
 

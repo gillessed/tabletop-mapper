@@ -21,7 +21,7 @@ import * as classNames from 'classnames';
 import "./SvgRoot.scss";
 import { AssetDropShadow } from './features/shadows/AssetDropShadow';
 import { Asset } from '../../redux/asset/AssetTypes';
-import { getGeometryForBasicAssetFeature } from '../../redux/model/ModelUtils';
+import { getBoundingBox, getGeometryForBasicAssetFeature } from '../../redux/model/ModelUtils';
 import { ControlPointsOverlay } from './features/ControlPointsOverlay';
 import { getControlPoints, getHoveredControlPoint } from '../../redux/model/ControlPoints';
 import { resizeGeometry } from '../../redux/model/Resize';
@@ -29,6 +29,8 @@ import { compact } from '../../utils/array';
 import { FeatureDragShadows } from './features/shadows/FeatureDragShadows';
 import { useWorker } from '../../redux/utils/workers';
 import { selectAndExpandNodesWorker } from '../../redux/layertree/LayerTreeWorkers';
+import { geometryEquals } from '../../math/CompareGeometry';
+import { expandRectangle } from '../../math/ExpandGeometry';
 
 type MouseMode = Grid.Types.MouseMode;
 const MouseMode = Grid.Types.MouseMode;
@@ -50,20 +52,15 @@ export const SvgRoot = React.memo(function SvgRoot({
   height,
 }: SvgRoot.Props) {
   const dispatchers = useDispatchers();
-  React.useEffect(() => {
-    const initialVector = new Vector(
-      width / (2 * InitialScale),
-      height / (2 * InitialScale)
-    );
-    dispatchers.grid.setTransform(new Transform(initialVector, InitialScale));
-  }, [dispatchers]);
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
   const mousePosition = useSelector(Grid.Selectors.getMousePosition);
   const partialGeometry = useSelector(Grid.Selectors.getPartialGeometry);
+  const transformSet = useSelector(Grid.Selectors.getTransformSet);
   const transform = useSelector(Grid.Selectors.getTransform);
   const currentLayer = useSelector(LayerTree.Selectors.getCurrentLayer);
   const features = useSelector(Model.Selectors.getFeatures);
   const layers = useSelector(Model.Selectors.getLayers);
+  const { backgroundColor } = useSelector(Model.Selectors.getSettings);
   const selectedFeatureIds = useSelector(LayerTree.Selectors.getSelectedFeatureIds);
   const mouseDragOrigin = useSelector(Grid.Selectors.getMouseDragOrigin);
   const assetDropId = useSelector(Grid.Selectors.getAssetDropId);
@@ -71,6 +68,41 @@ export const SvgRoot = React.memo(function SvgRoot({
   const resizeInfo = useSelector(Grid.Selectors.getResizeInfo);
   const featureToResize = useSelector(Model.Selectors.getFeatureById(resizeInfo?.featureId ?? ''));
   const selectAndExpandNodes = useWorker(selectAndExpandNodesWorker);
+  
+  React.useEffect(() => {
+    if (transformSet) {
+      return;
+    }
+    let transformVector = new Vector(
+      width / (2 * InitialScale),
+      height / (2 * InitialScale),
+    );
+    let transformScale = InitialScale;
+    if (features.all.length > 0) {
+      const geometries: Model.Types.Geometry[] = [];
+      for (const featureId of features.all) {
+        const feature = features.byId[featureId];
+        geometries.push(feature.geometry);
+      }
+      const boundingBox: Model.Types.Rectangle = getBoundingBox(geometries);
+      const expanded = expandRectangle(boundingBox, 2);
+      const bboxWidth = (expanded.p2.x - expanded.p1.x);
+      const bboxHeight = (expanded.p2.y - expanded.p1.y);
+      const midx = expanded.p1.x + bboxWidth / 2;
+      const midy = expanded.p1.y + bboxHeight / 2;
+      const boundingOffset = new Vector(-midx, -midy);
+
+      const xAspect = width / bboxWidth;
+      const yAspect = height / bboxHeight;
+      const minAspect = Math.min(xAspect, yAspect);
+      transformScale = minAspect;
+      transformVector = new Vector(
+        width / (2 * transformScale),
+        height / (2 * transformScale),
+      ).add(boundingOffset);
+    }
+    dispatchers.grid.setTransform(new Transform(transformVector, transformScale));
+  }, [transformSet]);
 
   const createNewFeature = React.useCallback((feature: Model.Types.Feature) => {
     dispatchers.grid.setMouseMode(MouseMode.None);
@@ -144,6 +176,7 @@ export const SvgRoot = React.memo(function SvgRoot({
             name: 'New Pattern',
             layerId: currentLayer,
             geometry: geometry as Model.Types.Geometry,
+            opacity: 1,
           };
           createNewFeature(newFeature);
         } else {
@@ -203,7 +236,8 @@ export const SvgRoot = React.memo(function SvgRoot({
             assetId: assetDropId,
             objectCover: 'contain',
             rotation: 0,
-            flipped: true,
+            mirrored: false,
+            opacity: 1,
           }
           createNewFeature(newAssetFeature);
         }
@@ -214,10 +248,9 @@ export const SvgRoot = React.memo(function SvgRoot({
           return;
         }
         const resizedGeometry = resizeGeometry(transform, featureToResize.geometry, resizeInfo, mousePosition);
-        if (resizedGeometry == null) {
+        if (resizedGeometry == null || geometryEquals(featureToResize.geometry, resizedGeometry)) {
           return;
         }
-        const resizedFeature = { ...featureToResize, geometry: resizedGeometry } as Model.Types.Feature;
         dispatchers.model.setFeatureGeometry({ featureId: featureToResize.id, geometry: resizedGeometry });
         dispatchers.grid.stopResizeFeature();
         break;
@@ -303,7 +336,7 @@ export const SvgRoot = React.memo(function SvgRoot({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <rect x={0} y={0} width={width} height={height} fill={Colors.LIGHT_GRAY5} />
+      <rect x={0} y={0} width={width} height={height} fill={backgroundColor} />
       <g transform={transformString}>
         <Features />
         <GridLines transform={transform} width={width} height={height} />

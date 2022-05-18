@@ -92,7 +92,7 @@ async function initialize() {
     ),
   );
   registerClientIpcHandlers(store);
-  registerKeyboardShortcuts(store);
+  registerKeyboardShortcuts(store, platformInfo);
   registerDebugCommands(store);
 
   const assets = await readAssetDataFile(appConfig);

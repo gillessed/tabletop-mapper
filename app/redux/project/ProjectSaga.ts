@@ -26,9 +26,8 @@ export function* projectSaga(context: SagaContext) {
     takeEvery(Model.Actions.reparentNodes.type, setProjectRequiresSaveSaga),
     takeEvery(Model.Actions.setFeatureGeometry.type, setProjectRequiresSaveSaga),
     takeEvery(Model.Actions.setFeatureName.type, setProjectRequiresSaveSaga),
-    takeEvery(Model.Actions.setFeatureStyle.type, setProjectRequiresSaveSaga),
     takeEvery(Model.Actions.setPathsClosed.type, setProjectRequiresSaveSaga),
-    takeEvery(Model.Actions.setSnapsToGrid.type, setProjectRequiresSaveSaga),
+    takeEvery(Model.Actions.setSnapToGrid.type, setProjectRequiresSaveSaga),
     takeEvery(Model.Actions.translateFeatures.type, setProjectRequiresSaveSaga),
     takeEvery(Model.Actions.setPathsClosed.type, setProjectRequiresSaveSaga),
   ]);

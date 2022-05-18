@@ -1,72 +1,43 @@
-import * as React from 'react';
-import './ProjectDialog.scss';
-import { NonIdealState, Classes, Button, Icon, Colors, Tooltip, PopoverInteractionKind } from '@blueprintjs/core';
+import { Colors, Icon, Tooltip } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
-import { NewMapForm } from './NewMapForm';
-import { ProjectList } from './ProjectList';
+import * as React from 'react';
 import { useSelector } from 'react-redux';
-import { Project } from '../../redux/project/ProjectTypes';
 import { useDispatchers } from '../../DispatcherContextProvider';
+import { Project } from '../../redux/project/ProjectTypes';
 import { isAsyncLoaded } from '../../redux/utils/async';
-
-function CloseButton() {
-  const dispatchers = useDispatchers();
-  const onClick = React.useCallback(() => {
-    dispatchers.navigation.setProjectDialogOpen(false);
-  }, [dispatchers]);
-  return (
-    <Tooltip content='Close project browser'>
-      <Icon
-        className='close-icon'
-        icon={IconNames.CROSS}
-        iconSize={36}
-        onClick={onClick}
-      />
-    </Tooltip>
-  );
-}
-
-function QuitButton() {
-  const dispatchers = useDispatchers();
-  const onClick = React.useCallback(() => {
-    dispatchers.project.quitApplication();
-  }, [dispatchers]);
-  return (
-    <Tooltip content='Close Tabletop Mapper'>
-      <Icon
-        className='close-icon'
-        icon={IconNames.LOG_OUT}
-        iconSize={24}
-        onClick={onClick}
-      />
-    </Tooltip>
-  );
-}
+import { NewMapForm } from './NewMapForm';
+import './ProjectDialog.scss';
+import { ProjectList } from './ProjectList';
+import { Dialog } from '../dialog/Dialog';
+import { Navigation } from '../../redux/navigation/NavigationTypes';
 
 export function ProjectDialog() {
+  const { isProjectDialogOpen } = useSelector(Navigation.Selectors.get);
+  const dispatchers = useDispatchers();
   const project = useSelector(Project.Selectors.get);
+  const closeDialog = React.useCallback(() => {
+    dispatchers.navigation.setProjectDialogOpen(false);
+  }, [dispatchers]);
+  const closeApp = React.useCallback(() => {
+    dispatchers.project.quitApplication();
+  }, [dispatchers]);
+  const onClose = isAsyncLoaded(project) ? closeDialog : closeApp ;
+  const closeIcon = isAsyncLoaded(project) ? IconNames.CROSS : IconNames.LOG_OUT;
+  const content = (
+    <>
+      <NewMapForm />
+      <div className='project-dialog-separator' />
+      <ProjectList />
+    </>
+  )
   return (
-    <div className='project-dialog-container'>
-      <div className='project-dialog'>
-        <div className='dialog-header'>
-          <Icon
-            className='header-icon'
-            color={Colors.LIGHT_GRAY1}
-            icon={IconNames.MAP_CREATE}
-            iconSize={24}
-          />
-          <h1 className='project-title title'>Tabletop Mapper</h1>
-          <div className='right-align'>
-            {isAsyncLoaded(project) && <CloseButton />}
-            {project == null && <QuitButton />}
-          </div>
-        </div>
-        <div className='dialog-body'>
-          <NewMapForm />
-          <div className='separator' />
-          <ProjectList />
-        </div>
-      </div>
-    </div>
+    <Dialog
+      isOpen={isProjectDialogOpen}
+      icon={IconNames.MAP_CREATE}
+      title='Tabletop Mapper'
+      content={content}
+      closeIcon={closeIcon}
+      onClose={onClose}
+    />
   );
 }

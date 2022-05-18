@@ -1,0 +1,64 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+
+.dialog-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog {
+  background-color: $dark-gray1;
+  border-radius: 20px;
+  box-shadow: 0 0px 5px 2px $dark-gray3;
+
+  .dialog-header {
+    background-color: $dark-gray2;
+    padding: 20px;
+    border-radius: 20px 20px 0px 0px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .header-icon {
+      margin-right: 10px;
+    }
+    
+    .right-align {
+      display: flex;
+      flex-grow: 1;
+      justify-content: flex-end;
+    }
+
+    .close-icon {
+      color: $gray5;
+      cursor: pointer;
+
+      &:hover {
+        color: $light-gray5;
+      }
+    }
+    
+    .project-title {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      color: $light-gray1;
+    }
+  }
+
+  .dialog-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .separator {
+      width: 2px;
+      height: 400px;
+      margin: 10px;
+      background-color: $gray1;
+    }
+  }
+}

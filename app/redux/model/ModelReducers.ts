@@ -3,9 +3,10 @@ import { newTypedReducer, Reducer } from '../utils/typedReducer';
 import { Model } from './ModelTypes';
 import { translateGeometry } from './FeatureTranslation';
 import { removeItem } from '../../utils/array';
-import { undoable, Undoable } from '../undo/UndoState';
+import { undoable } from '../undo/UndoState';
 import { getCoverSet, treeWalk } from './ModelTree';
 import { generateRandomString } from '../../utils/randomId';
+import { Colors } from '@blueprintjs/core';
 
 export function createEmptyModel(): Model.Types.State {
   return {
@@ -26,6 +27,12 @@ export function createEmptyModel(): Model.Types.State {
       byId: {},
       all: [],
     },
+    settings: {
+      backgroundColor: Colors.LIGHT_GRAY5,
+      gridColor: '#394B59',
+      showGrid: true,
+      majorAxisStep: 50,
+    }
   };
 }
 
@@ -63,6 +70,22 @@ const TestState: Model.Types.State = {
     all: ['root-layer', '1', '2'],
   },
 };
+
+const createFeaturePropertyReducer = <T extends Model.Payloads.SetValue<any>>(
+  key: keyof Model.Types.BasicAssetFeature | keyof Model.Types.PatternFeature,
+) => {
+  return (
+    state: Model.Types.State,
+    payload: T,
+  ) => {
+    const { featureIds, value } = payload;
+    let newState = state;
+    for (const featureId of featureIds) {
+      newState = DotProp.set(newState, `features.byId.${featureId}.${key}`, value);
+    }
+    return newState;
+  }
+}
 
 export const createLayerReducer = (state: Model.Types.State, payload: Model.Payloads.CreateLayer): Model.Types.State => {
   const { layerId, parentId, name } = payload;
@@ -123,44 +146,48 @@ const setFeatureNameReducer = (
   return newState;
 }
 
-const setFeatureStyleReducer = (
+const setLayerNameReducer = (
   state: Model.Types.State,
-  payload: Model.Payloads.SetFeatureStyle,
+  payload: Model.Payloads.SetLayerName,
 ): Model.Types.State => {
-  const { featureIds, styleId } = payload;
+  const { layerId, name } = payload;
   let newState = state;
+  newState = DotProp.set(newState, `layers.byId.${layerId}.name`, name);
+  return newState;
+}
+
+const setSnapToGridReducer = (
+  state: Model.Types.State,
+  payload: Model.Payloads.SetBoolean,
+): Model.Types.State => {
+  let newState = state;
+  const { featureIds, value } = payload;
   for (const featureId of featureIds) {
-    newState = DotProp.set(newState, `features.byId.${featureId}.styleId`, styleId);
+    newState = DotProp.set(newState, `features.byId.${featureId}.geometry.snapToGrid`, value);
   }
   return newState;
 }
 
-const snapsToGridReducer = (
-  state: Model.Types.State,
-  payload: Model.Payloads.SnapsToGrid,
-): Model.Types.State => {
-  let newState = state;
-  const { featureIds, snapsToGrid } = payload;
-  for (const featureId of featureIds) {
-    newState = DotProp.set(newState, `features.byId.${featureId}.geometry.snapToGrid`, snapsToGrid);
-  }
-  return newState;
-}
+const setMirroredReducer = createFeaturePropertyReducer("mirrored");
 
 const setPathsClosedReducer = (
   state: Model.Types.State,
-  payload: Model.Payloads.SetPathsClosed,
+  payload: Model.Payloads.SetBoolean,
 ): Model.Types.State => {
   let newState = state;
-  const { pathIds, closed } = payload;
-  for (const pathId of pathIds) {
-    if (state.features.byId[pathId].geometry.type !== 'path') {
+  const { featureIds, value } = payload;
+  for (const featureId of featureIds) {
+    if (state.features.byId[featureId].geometry.type !== 'path') {
       continue;
     }
-    newState = DotProp.set(newState, `features.byId.${pathId}.geometry.closed`, closed);
+    newState = DotProp.set(newState, `features.byId.${featureId}.geometry.closed`, value);
   }
   return newState;
 }
+
+const setOpacityReducer = createFeaturePropertyReducer("opacity");
+const setRotationReducer = createFeaturePropertyReducer("rotation");
+const setObjectCoverReducer = createFeaturePropertyReducer("objectCover");
 
 export const reparentNodesReducers = (
   state: Model.Types.State,
@@ -192,9 +219,9 @@ export const reparentNodesReducers = (
   const layersLeft = parentLayer.children.slice(0, layerIndex + 1);
   const layersRight = parentLayer.children.slice(layerIndex + 1);
   for (const nodeId of nodeIds) {
-    const maybeFeature = state.features.byId[nodeId];
+    const maybeFeature = newState.features.byId[nodeId];
     if (maybeFeature != null) {
-      const sourceParent = state.layers.byId[maybeFeature.layerId];
+      const sourceParent = newState.layers.byId[maybeFeature.layerId];
       const sourceFeatureIndex = sourceParent.features.indexOf(nodeId);
       newState = DotProp.delete(newState, `layers.byId.${sourceParent.id}.features.${sourceFeatureIndex}`) as Model.Types.State;
       removeItem(featuresLeft, nodeId);
@@ -202,8 +229,8 @@ export const reparentNodesReducers = (
       featuresLeft.push(nodeId);
       newState = DotProp.set(newState, `features.byId.${nodeId}.layerId`, parentLayer.id) as Model.Types.State;
     } else {
-      const maybeLayer = state.layers.byId[nodeId];
-      const sourceParent = state.layers.byId[maybeLayer.parent];
+      const maybeLayer = newState.layers.byId[nodeId];
+      const sourceParent = newState.layers.byId[maybeLayer.parent];
       const sourceFeatureIndex = sourceParent.children.indexOf(nodeId);
       newState = DotProp.delete(newState, `layers.byId.${sourceParent.id}.children.${sourceFeatureIndex}`) as Model.Types.State;
       removeItem(layersLeft, nodeId);
@@ -251,7 +278,6 @@ export const copyNodesReducers = (
             name: `Copy of ${layer.name}`,
             parentId,
           });
-          newFeatureIds.push(newId);
         },
         visitFeature: (feature) => {
           const parentId = feature.id === sourceId ?
@@ -265,6 +291,7 @@ export const copyNodesReducers = (
             layerId: parentId,
           }
           newState = createFeatureReducer(newState, newFeature);
+          newFeatureIds.push(newId);
         },
         startingNode: sourceId,
       },
@@ -279,17 +306,45 @@ export const copyNodesReducers = (
   return newState;
 }
 
+const setBackgroundColorReducer = (
+  state: Model.Types.State,
+  backgroundColor: string,
+): Model.Types.State => DotProp.set(state, 'settings.backgroundColor', backgroundColor);
+
+const setGridColorReducer = (
+  state: Model.Types.State,
+  gridColor: string,
+): Model.Types.State => DotProp.set(state, 'settings.gridColor', gridColor);
+
+const setShowGridReducer = (
+  state: Model.Types.State,
+  showGrid: boolean,
+): Model.Types.State => DotProp.set(state, 'settings.showGrid', showGrid);
+
+const setMajorAxisStepReducer = (
+  state: Model.Types.State,
+  majorAxisStep: number,
+): Model.Types.State => DotProp.set(state, 'settings.majorAxisStep', majorAxisStep);
+
 export const modelReducer: Reducer<Model.Types.State> = newTypedReducer<Model.Types.State>()
   .handlePayload(Model.Actions.createLayer.type, createLayerReducer)
   .handlePayload(Model.Actions.createFeature.type, createFeatureReducer)
   .handlePayload(Model.Actions.translateFeatures.type, translateFeaturesReducer)
   .handlePayload(Model.Actions.setFeatureGeometry.type, setFeatureGeometryReducer)
   .handlePayload(Model.Actions.setFeatureName.type, setFeatureNameReducer)
-  .handlePayload(Model.Actions.setFeatureStyle.type, setFeatureStyleReducer)
-  .handlePayload(Model.Actions.setSnapsToGrid.type, snapsToGridReducer)
+  .handlePayload(Model.Actions.setLayerName.type, setLayerNameReducer)
+  .handlePayload(Model.Actions.setSnapToGrid.type, setSnapToGridReducer)
+  .handlePayload(Model.Actions.setMirrored.type, setMirroredReducer)
+  .handlePayload(Model.Actions.setOpacity.type, setOpacityReducer)
+  .handlePayload(Model.Actions.setRotation.type, setRotationReducer)
   .handlePayload(Model.Actions.setPathsClosed.type, setPathsClosedReducer)
+  .handlePayload(Model.Actions.setObjectCover.type, setObjectCoverReducer)
   .handlePayload(Model.Actions.reparentNodes.type, reparentNodesReducers)
   .handlePayload(Model.Actions.copyNodes.type, copyNodesReducers)
+  .handlePayload(Model.Actions.setBackgroundColor.type, setBackgroundColorReducer)
+  .handlePayload(Model.Actions.setGridColor.type, setGridColorReducer)
+  .handlePayload(Model.Actions.setShowGrid.type, setShowGridReducer)
+  .handlePayload(Model.Actions.setMajorAxisStep.type, setMajorAxisStepReducer)
   .handleDefault((state = InitialState) => state)
   .build();
 

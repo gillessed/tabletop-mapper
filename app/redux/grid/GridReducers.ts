@@ -1,10 +1,16 @@
+import { expandRectangle } from '../../math/ExpandGeometry';
 import { Transform, Vector, Coordinate } from '../../math/Vector';
+import { modelReducer, ModelSet } from '../model/ModelReducers';
 import { Model } from '../model/ModelTypes';
+import { getBoundingBox } from '../model/ModelUtils';
+import { visitGeometry } from '../model/ModelVisitors';
+import { Project } from '../project/ProjectTypes';
 import { newTypedReducer, Reducer } from '../utils/typedReducer';
 import { Grid } from './GridTypes';
 
 const INITIAL_STATE: Grid.Types.State = {
   mouseMode: Grid.Types.MouseMode.None,
+  transformSet: false,
   transform: new Transform(new Vector(1, 1), 1),
   mouseOnCanvas: false,
 };
@@ -14,7 +20,7 @@ const setMousePositionReducer = (state: Grid.Types.State, mousePosition: Vector)
 }
 
 const setTransformReducer = (state: Grid.Types.State, transform: Transform): Grid.Types.State => {
-  return { ...state, transform };
+  return { ...state, transform, transformSet: true };
 }
 
 const setMouseModeReducer = (state: Grid.Types.State, mouseMode: Grid.Types.MouseMode): Grid.Types.State => {
@@ -89,7 +95,7 @@ const startResizeFeatureReducer = (
 const setResizeFeatureReducer = (
   state: Grid.Types.State,
   resizedFeature: Model.Types.Feature,
-): Grid.Types.State  => {
+): Grid.Types.State => {
   return { ...state, resizedFeature };
 }
 
@@ -102,6 +108,28 @@ const stopResizeFeatureReducer = (
     resizeInfo: undefined,
     resizedFeature: undefined,
   };
+}
+
+const unsetTransformReducer = (state: Grid.Types.State): Grid.Types.State => ({ ...state, transformSet: false });
+
+const setInitialTransformReducer = (
+  state: Grid.Types.State,
+  payload: Model.Types.State,
+): Grid.Types.State => {
+  if (payload.features.all.length === 0) {
+    return state;
+  }
+  const geometries: Model.Types.Geometry[] = [];
+  for (const featureId of payload.features.all) {
+    const feature = payload.features.byId[featureId];
+    geometries.push(feature.geometry);
+  }
+  const boundingBox: Model.Types.Rectangle = getBoundingBox(geometries);
+  const expanded = expandRectangle(boundingBox, 1);
+  const midx = expanded.p1.x + (expanded.p2.x - expanded.p1.x) / 2;
+  const midy = expanded.p1.y + (expanded.p2.y - expanded.p1.y) / 2;
+  const transform = new Transform(new Vector(-midx, -midy), 30);
+  return { ...state, transform };
 }
 
 export const gridReducer: Reducer<Grid.Types.State> = newTypedReducer<Grid.Types.State>()
@@ -117,5 +145,7 @@ export const gridReducer: Reducer<Grid.Types.State> = newTypedReducer<Grid.Types
   .handlePayload(Grid.Actions.startResizeFeature.type, startResizeFeatureReducer)
   .handlePayload(Grid.Actions.setResizedFeature.type, setResizeFeatureReducer)
   .handlePayload(Grid.Actions.stopResizeFeature.type, stopResizeFeatureReducer)
+  .handlePayload(Project.Actions.openProject.type, unsetTransformReducer)
+  .handlePayload(ModelSet.type, setInitialTransformReducer)
   .handleDefault((state = INITIAL_STATE) => state)
   .build();

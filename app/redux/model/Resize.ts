@@ -48,7 +48,7 @@ function resizeRectangleGeometry(
 }
   newRectangle = rectifyRectangle(newRectangle);
   if (rectEquals(rectangle, newRectangle)) {
-    return null;
+    return rectangle;
   }
   return newRectangle;
 }

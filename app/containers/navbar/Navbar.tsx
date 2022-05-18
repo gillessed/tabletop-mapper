@@ -7,9 +7,14 @@ import { useSelector } from 'react-redux';
 import { Project } from '../../redux/project/ProjectTypes';
 import { isAsyncLoaded } from '../../redux/utils/async';
 import { NavbarEditMenu } from './NavbarEditMenu';
+import { useDispatchers } from '../../DispatcherContextProvider';
 
 export function MapperNavbar() {
   const project = useSelector(Project.Selectors.get);
+  const dispatchers = useDispatchers();
+  const openGridDialog = React.useCallback(() => {
+    dispatchers.navigation.setGridDialogOpen(true);
+  }, [dispatchers]);
   return (
     <Navbar className={Classes.DARK}>
       <Navbar.Group align={Alignment.LEFT}>
@@ -24,7 +29,7 @@ export function MapperNavbar() {
           <Button minimal icon={IconNames.EDIT} />
           <NavbarEditMenu />
         </Popover>
-        <Button minimal icon={IconNames.GRID} />
+        <Button minimal icon={IconNames.GRID} onClick={openGridDialog} />
         <Button minimal icon={IconNames.COG} />
         {isAsyncLoaded(project) &&
           <>

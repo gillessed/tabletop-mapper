@@ -139,7 +139,7 @@ export function Layers() {
         setLastClicked(nodeId);
         selectNodes([...newSelection]);
       } else {
-        if (selection.indexOf(nodeId) < 0) {
+        if (!selectionCoverSet.has(nodeId)) {
           setLastClicked(nodeId);
           selectNodes([nodeId]);
         }

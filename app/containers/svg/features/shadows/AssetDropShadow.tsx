@@ -34,14 +34,13 @@ export const AssetDropShadow = () => {
     assetId: assetDropId,
     objectCover: 'contain',
     rotation: 0,
-    flipped: false,
+    mirrored: false,
+    opacity: 0.5,
   }
 
   return (
-    <g opacity={0.5}>
-      <Feature
-        feature={assetFeature}
-      />
-    </g>
+    <Feature
+      feature={assetFeature}
+    />
   )
 };

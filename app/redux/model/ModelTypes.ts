@@ -18,6 +18,14 @@ export namespace Model {
     export interface State {
       layers: Indexable<Layer>;
       features: Indexable<Feature>;
+      settings: Settings;
+    }
+
+    export interface Settings {
+      gridColor: string;
+      backgroundColor: string;
+      showGrid: boolean;
+      majorAxisStep: number;
     }
 
     export interface Layer extends Identifiable {
@@ -66,15 +74,18 @@ export namespace Model {
 
     export type Feature = BasicAssetFeature | PatternFeature;
 
+    export type ImageFill = 'contain' | 'stretch' | 'cover';
+
     export interface BasicAssetFeature extends Identifiable {
       type: 'basic-asset';
       layerId: string;
       geometry: Rectangle;
       assetId: string;
-      objectCover?: 'contain' | 'stretch' | 'cover';
-      clipRegion?: Rectangle;
+      objectCover: ImageFill;
       rotation: number;
-      flipped: boolean;
+      mirrored: boolean;
+      opacity: number;
+      clipRegion?: Rectangle;
     }
 
     export interface PatternFeature extends Identifiable {
@@ -82,6 +93,7 @@ export namespace Model {
       layerId: string;
       geometry: Rectangle | Path;
       assetId?: string;
+      opacity: number;
     }
 
     export type FeatureNamesType = { [foo in Feature['type']]: string };
@@ -122,14 +134,23 @@ export namespace Model {
       name?: string;
     }
 
-    export interface SnapsToGrid {
-      featureIds: string[],
-      snapsToGrid: boolean,
+    export interface SetValue<T> {
+      featureIds: Iterable<string>;
+      value: T;
     }
+    
+    export type SetBoolean = SetValue<boolean>;
+    export type SetNumber = SetValue<number>;
+    export type SetString = SetValue<string>;
 
     export interface TranslateFeatures {
       featureIds: Iterable<string>;
       translation: Coordinate;
+    }
+
+    export interface SetLayerName {
+      layerId: string;
+      name: string;
     }
 
     export interface SetFeatureName {
@@ -140,11 +161,6 @@ export namespace Model {
     export interface SetFeatureStyle {
       featureIds: Iterable<string>;
       styleId: string;
-    }
-
-    export interface SetPathsClosed {
-      pathIds: string[];
-      closed: boolean;
     }
 
     export interface SetFeatureGeometryPayload {
@@ -169,11 +185,19 @@ export namespace Model {
     translateFeatures: createActionWrapper<Payloads.TranslateFeatures>(name('translateFeatures')),
     setFeatureGeometry: createActionWrapper<Payloads.SetFeatureGeometryPayload>(name('setFeatureGeometry')),
     setFeatureName: createActionWrapper<Payloads.SetFeatureName>(name('setFeatureName')),
-    setFeatureStyle: createActionWrapper<Payloads.SetFeatureStyle>(name('setFeatureStyle')),
-    setSnapsToGrid: createActionWrapper<Payloads.SnapsToGrid>(name('snapToGrid')),
-    setPathsClosed: createActionWrapper<Payloads.SetPathsClosed>(name('setPathsClosed')),
+    setLayerName: createActionWrapper<Payloads.SetLayerName>(name('setLayerName')),
+    setSnapToGrid: createActionWrapper<Payloads.SetBoolean>(name('setSnapToGrid')),
+    setMirrored: createActionWrapper<Payloads.SetBoolean>(name('setMirrored')),
+    setOpacity: createActionWrapper<Payloads.SetNumber>(name('setOpacity')),
+    setRotation: createActionWrapper<Payloads.SetNumber>(name('setRotation')),
+    setPathsClosed: createActionWrapper<Payloads.SetBoolean>(name('setPathsClosed')),
+    setObjectCover: createActionWrapper<Payloads.SetValue<Model.Types.ImageFill>>(name('setObjectCover')),
     reparentNodes: createActionWrapper<Payloads.ReparentNodes>(name('reparentNodes')),
     copyNodes: createActionWrapper<Payloads.CopyNodes>(name('copyNodes')),
+    setBackgroundColor: createActionWrapper<string>(name('setBackgroundColor')),
+    setGridColor: createActionWrapper<string>(name('setGridColor')),
+    setShowGrid: createActionWrapper<boolean>(name('setShowGrid')),
+    setMajorAxisStep: createActionWrapper<number>(name('setMajorAxisStep')),
   }
 
   export const Actions = {
@@ -186,5 +210,6 @@ export namespace Model {
     export const getLayers = (state: ReduxState) => get(state).layers;
     export const getFeatures = (state: ReduxState) => get(state).features;
     export const getFeatureById = (featureId: string) => (state: ReduxState) => get(state).features.byId[featureId];
+    export const getSettings = (state: ReduxState) => get(state).settings;
   }
 }

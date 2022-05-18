@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useSelector } from 'react-redux';
-import { same } from '../../../../math/Vector';
+import { coordinateEquals } from '../../../../math/Vector';
 import { Grid } from '../../../../redux/grid/GridTypes';
 import { LayerTree } from '../../../../redux/layertree/LayerTreeTypes';
 import { getOutlineForFeature } from '../../../../redux/model/FeatureOutline';
@@ -22,7 +22,7 @@ export const FeatureDragShadows = function FeatureDragShadows() {
     mouseMode != Grid.Types.MouseMode.TransformFeatures ||
     mouseDragOrigin == null ||
     mousePosition == null ||
-    same(mouseDragOrigin, mousePosition) ||
+    coordinateEquals(mouseDragOrigin, mousePosition) ||
     selectedFeatureIds.length === 0 ||
     !mouseOnCanvas
   ) {

@@ -7,10 +7,11 @@ import './Root.scss';
 import { MapperNavbar } from './navbar/Navbar';
 import { AssetManager } from './assetManager/AssetManager';
 import { useDispatchers } from '../DispatcherContextProvider';
+import { GridDialog } from './gridDialog/GridDialog';
 
 export const Root = function Root() {
   const dispatchers = useDispatchers();
-  const { currentView, isProjectDialogOpen } = useSelector(Navigation.Selectors.get);
+  const { currentView } = useSelector(Navigation.Selectors.get);
   const onMouseUp = React.useCallback(() => {
     dispatchers.grid.stopDraggingAsset();
   }, [dispatchers]);
@@ -34,7 +35,8 @@ export const Root = function Root() {
   return (
     <div className='container root-container' onMouseUp={onMouseUp}>
       {appView}
-      {isProjectDialogOpen && <ProjectDialog />}
+      <ProjectDialog />
+      <GridDialog />
     </div>
   );
 };

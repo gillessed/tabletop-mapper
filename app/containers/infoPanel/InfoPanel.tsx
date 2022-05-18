@@ -17,9 +17,10 @@ export namespace InfoPanel {
 }
 
 export const InfoPanel = React.memo(function InfoPanel() {
-  const dispatchers = useDispatchers();
   const model = useSelector(Model.Selectors.get);
   const layerTree = useSelector(LayerTree.Selectors.get);
+
+  console.log(layerTree.selectedNodes);
 
   let view = null;
   const { selectedNodes } = layerTree;
@@ -27,11 +28,10 @@ export const InfoPanel = React.memo(function InfoPanel() {
   if (model.features.all.indexOf(selectedNode) >= 0) {
     view = <FeatureView featureId={selectedNode} />;
   } else if (model.layers.all.indexOf(selectedNode) >= 0 && selectedNode !== Model.RootLayerId) {
+    console.log('Rendering new view for ', selectedNode);
     view = (
       <LayerView
-        layer={model.layers.byId[selectedNode]}
-        model={model}
-        dispatchers={dispatchers}
+        layerId={selectedNode}
       />
     );
   }

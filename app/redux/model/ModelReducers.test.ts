@@ -79,7 +79,6 @@ describe('Model Reducer Tests', () => {
     });
     test('Reparent bottom section', () => {
       const model = createFlatModel();
-      expect(model.layers.byId[Model.RootLayerId].features.indexOf(Feature3)).toBe(2);
       const newModel = reparentNodesReducers(model, {
         nodeIds: [Feature1, Feature2],
         target: {
@@ -88,6 +87,34 @@ describe('Model Reducer Tests', () => {
         },
       });
       expect(newModel.layers.byId[Model.RootLayerId].features).toStrictEqual([Feature3, Feature1, Feature2]);
+    });
+    test('Reparent single feature into layer', () => {
+      const model = createFlatModel();
+      const newModel = reparentNodesReducers(model, {
+        nodeIds: [Feature1],
+        target: {
+          nodeId: Layer1,
+          section: 'mid',
+        },
+      });
+      expect(newModel.layers.byId[Model.RootLayerId].features).toStrictEqual([Feature2, Feature3]);
+      expect(newModel.layers.byId[Layer1].features).toStrictEqual([Feature1]);
+      expect(newModel.features.byId[Feature1].layerId).toBe(Layer1);
+    });
+    test('Reparent multiple features into layer', () => {
+      const model = createFlatModel();
+      const newModel = reparentNodesReducers(model, {
+        nodeIds: [Feature1, Feature2, Feature3],
+        target: {
+          nodeId: Layer1,
+          section: 'mid',
+        },
+      });
+      expect(newModel.layers.byId[Model.RootLayerId].features).toStrictEqual([]);
+      expect(newModel.layers.byId[Layer1].features).toStrictEqual([Feature1, Feature2, Feature3]);
+      expect(newModel.features.byId[Feature1].layerId).toBe(Layer1);
+      expect(newModel.features.byId[Feature2].layerId).toBe(Layer1);
+      expect(newModel.features.byId[Feature3].layerId).toBe(Layer1);
     });
   });
   describe('Copy Nodes Tests', () => {
@@ -146,13 +173,13 @@ describe('Model Reducer Tests', () => {
       expect(newRootLayer.children.length).toBe(2);
       const newLayer1Id = newRootLayer.children[1];
       const newLayer1 = newModel.layers.byId[newLayer1Id];
-      expect(newLayer1.features.length).toBe(4);
-      expect(newLayer1.children.length).toBe(4);
-      const newLayer2Id = newLayer1.children[2];
+      expect(newLayer1.features.length).toBe(2);
+      expect(newLayer1.children.length).toBe(2);
+      const newLayer2Id = newLayer1.children[0];
       const newLayer2 = newModel.layers.byId[newLayer2Id];
       expect(newLayer2.children.length).toBe(0);
       expect(newLayer2.features.length).toBe(2);
-      expect(newLayer2.parent).toBe(newLayer2Id);
+      expect(newLayer2.parent).toBe(newLayer1Id);
     });
   });
 });

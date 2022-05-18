@@ -32,6 +32,10 @@ export const createBasicFeature = (id: string, parent: string): Model.Types.Basi
   layerId: parent,
   geometry: anyRect(),
   assetId: 'some-asset',
+  rotation: 0,
+  mirrored: false,
+  opacity: 1,
+  objectCover: 'contain',
 })
 
 export const createFlatModel = (): Model.Types.State => {

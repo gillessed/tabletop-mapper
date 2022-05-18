@@ -3,7 +3,7 @@ export interface Coordinate {
   y: number;
 }
 
-export function same(c1: Coordinate, c2: Coordinate) {
+export function coordinateEquals(c1: Coordinate, c2: Coordinate) {
   return c1.x === c2.x && c1.y === c2.y;
 }
 
