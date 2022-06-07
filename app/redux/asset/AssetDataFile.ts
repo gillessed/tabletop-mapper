@@ -19,10 +19,23 @@ function createEmptySerializedState(): SerializedAssetState {
 
 export async function readAssetDataFile(appConfig: AppConfig): Promise<Asset.Types.State> {
   const serializedAssets = await readSerializedAssets(appConfig);
+  const assetIndex = deserializeIndexable(serializedAssets.assets);
+  const assetPackIndex = deserializeIndexable(serializedAssets.assetPacks);
+  const tagIndex = deserializeIndexable(serializedAssets.tags);
+  const tagToAssetPackMap = new Map();
+  for (const assetPackId of assetPackIndex.all) {
+    const { tagIds } = assetPackIndex.byId[assetPackId];
+    for (const tagId of tagIds) {
+      const assetPackSet: Set<string> = tagToAssetPackMap.get(tagId) ?? new Set();
+      assetPackSet.add(assetPackId);
+      tagToAssetPackMap.set(tagId, assetPackSet);
+    }
+  }
   const state: Asset.Types.State = {
-    assetIndex: deserializeIndexable(serializedAssets.assets),
-    assetPackIndex: deserializeIndexable(serializedAssets.assetPacks),
-    tagIndex: deserializeIndexable(serializedAssets.tags),
+    assetIndex,
+    assetPackIndex,
+    tagIndex,
+    tagToAssetPackMap,
     viewState: { type: 'search' },
   };
   return state;
@@ -41,7 +54,7 @@ async function readSerializedAssets(appConfig: AppConfig): Promise<SerializedAss
   const { assetDataFile } = appConfig;
   const exists = await assetDataFile.exists();
   if (!exists) {
-    assetDataFile.writeFile(JSON.stringify(createEmptySerializedState()));
+    await assetDataFile.writeFile(JSON.stringify(createEmptySerializedState()));
   }
 
   const rawAssetData = await assetDataFile.readFile();

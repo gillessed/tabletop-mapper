@@ -20,8 +20,6 @@ export const InfoPanel = React.memo(function InfoPanel() {
   const model = useSelector(Model.Selectors.get);
   const layerTree = useSelector(LayerTree.Selectors.get);
 
-  console.log(layerTree.selectedNodes);
-
   let view = null;
   const { selectedNodes } = layerTree;
   const selectedNode = selectedNodes[0];

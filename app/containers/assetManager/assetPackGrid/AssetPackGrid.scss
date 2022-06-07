@@ -3,7 +3,7 @@
 
 .asset-pack-grid {
   width: 100%;
-  height: calc(100vh - 200px);
+  max-height: calc(100vh - 240px);
   overflow-x: hidden;
   overflow-y: scroll;
   display: flex;

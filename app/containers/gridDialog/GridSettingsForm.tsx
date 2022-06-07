@@ -63,7 +63,7 @@ export function GridSettingsForm() {
         <div className='title'>Major Grid Axis</div>
         <NumericInput
           value={majorAxisStep}
-          onChange={setMajorAxis}
+          onValueChange={setMajorAxis}
         />
       </div>
     </div >

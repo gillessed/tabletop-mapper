@@ -9,6 +9,8 @@ import { Asset } from '../../../redux/asset/AssetTypes';
 import './AssetPanel.scss';
 import { Grid } from '../../../redux/grid/GridTypes';
 import { getTreeMouseDownTarget } from '../utils/TreeMouseDown';
+import { SearchKey } from './SearchKey';
+import { AssetSearchBar } from './AssetSearchBar';
 
 export function AssetPanel() {
   const appConfig = useAppConfig();
@@ -16,6 +18,7 @@ export function AssetPanel() {
   const assetIndex = useSelector(Asset.Selectors.getAssetIndex);
   const assetPackIndex = useSelector(Asset.Selectors.getAssetPackIndex);
   const [expandedNodes, setExpandedNodes] = React.useState<Set<string>>(new Set());
+  const [searchKeys, setSearchKeys] = React.useState<SearchKey[]>([]);
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
 
   const onMouseDown = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
@@ -86,6 +89,7 @@ export function AssetPanel() {
       className={classNames('asset-tree-container', { 'dragging-asset': mouseMode === Grid.Types.MouseMode.DragAsset })}
       onMouseDown={onMouseDown}
     >
+      <AssetSearchBar searchKeys={searchKeys} setSearchKeys={setSearchKeys}   />
       <Tree
         className={classNames('asset-tree', Classes.DARK)}
         contents={nodes}

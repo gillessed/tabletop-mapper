@@ -2,7 +2,7 @@
 
 .asset-pack-grid-item {
   width         : 200px;
-  height        : 266px;
+  height        : 280px;
   margin-right  : 10px;
   margin-top    : 10px;
   background    : $dark-gray4;
@@ -18,20 +18,20 @@
   }
 
   .asset-pack-image-preview-container {
-    padding: 5px;
-    background-color: $light-gray5;
-    width: 170px;
-    height: 170px;
-    display: grid;
+    padding              : 5px;
+    background-color     : $light-gray5;
+    width                : 170px;
+    height               : 170px;
+    display              : grid;
     grid-template-columns: repeat(3, auto);
-    grid-template-rows: repeat(3, auto);
-    gap: 5px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 3px 1px $light-gray3;
+    grid-template-rows   : repeat(3, auto);
+    gap                  : 5px;
+    border-radius        : 5px;
+    box-shadow           : 0px 0px 3px 1px $light-gray3;
 
     .asset-pack-image-preview {
-      width: 50px;
-      height: 50px;
+      width     : 50px;
+      height    : 50px;
       object-fit: contain;
     }
   }
@@ -39,10 +39,19 @@
   .asset-pack-title {
     margin-top   : 10px;
     max-width    : 100%;
-    white-space  : nowrap;
     overflow     : hidden;
     text-overflow: ellipsis;
     font-size    : 18px;
+
+    display           : -webkit-box;
+    -webkit-line-clamp: 2;
+    /* number of lines to show */
+    line-clamp        : 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .asset-pack-asset-separator {
+    flex-grow: 1;
   }
 
   .asset-pack-subtitle {

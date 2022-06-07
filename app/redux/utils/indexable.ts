@@ -96,6 +96,10 @@ export function createSetIndexableNameReducer<State, I extends Identifiable>(
     const current = getter(state);
     const object = current.byId[payload.id];
 
+    if (object == null) {
+      return state;
+    }
+
     const newById = { ...current.byId, [payload.id]: { ...object, name: payload.name } };
     const newIndexable = { ...current, byId: newById };
 

@@ -13,6 +13,7 @@ export namespace Asset {
       assetIndex: Indexable<Asset>;
       assetPackIndex: Indexable<AssetPack>;
       tagIndex: Indexable<Tag>;
+      tagToAssetPackMap: Map<string, Set<string>>;
       viewState: AssetViewState;
     }
 
@@ -24,16 +25,28 @@ export namespace Asset {
     export interface Asset extends Identifiable {
       extension: string;
       gridDimensions?: Dimensions;
-      tagIds: string[];
       assetPackId: string;
     }
 
     export interface AssetPack extends Identifiable {
       assetIds: string[];
       source?: string;
+      tagIds: string[];
     }
 
     export interface Tag extends Identifiable { }
+  }
+
+  export namespace Payloads {
+    export interface TagToAssetPackPayload {
+      assetPackId: string;
+      tagId: string;
+    }
+
+    export interface CreateAndAddTagPayload {
+      tag: Asset.Types.Tag;
+      assetPackId: string;
+    }
   }
 
   export const DispatchActions = {
@@ -47,6 +60,9 @@ export namespace Asset {
     removeAsset: createActionWrapper<DeleteIndexablePayload>('asset::removeAsset'),
     removeAssetPack: createActionWrapper<DeleteIndexablePayload>('asset::removeAssetPack'),
     removeTag: createActionWrapper<DeleteIndexablePayload>('asset::removeTag'),
+    addTagToAssetPack: createActionWrapper<Payloads.TagToAssetPackPayload>('asset::addTagToAssetPack'),
+    removeTagFromAssetPack: createActionWrapper<Payloads.TagToAssetPackPayload>('asset::removeTagFromAssetPack'),
+    createAndAddTag: createActionWrapper<Payloads.CreateAndAddTagPayload>('asset::createAndAddTag'),
     setViewState: createActionWrapper<Types.AssetViewState>('asset::setViewState'),
   }
 

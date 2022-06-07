@@ -22,6 +22,9 @@ export function* assetSaga(context: SagaContext) {
     takeEvery(Asset.Actions.upsertTag.type, saveAssetDataFile, context),
     takeEvery(Asset.Actions.setTagName.type, saveAssetDataFile, context),
     takeEvery(Asset.Actions.removeTag.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.addTagToAssetPack.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.removeTagFromAssetPack.type, saveAssetDataFile, context),
+    takeEvery(Asset.Actions.createAndAddTag.type, saveAssetDataFile, context),
   ]);
 }
 
@@ -32,7 +35,7 @@ async function getFilesToImport(paths: string[]): Promise<Filer[]> {
     await fileToImport.treeWalk({
       onFile: (file: Filer) => {
         if (file.isImage()) {
-          filesToImport.push(file);
+          filesToImport.unshift(file);
         }
       }
     });
@@ -63,6 +66,7 @@ function* importAssetsSaga(context: SagaContext, action: TypedAction<string[]>) 
     id: generateRandomString(),
     name: packName,
     assetIds: [],
+    tagIds: [],
   }
   yield put(Asset.Actions.upsertAssetPack.create(newAssetPack));
   yield put(Asset.Actions.setViewState.create({ type: 'pack', item: newAssetPack.id }));
@@ -75,7 +79,6 @@ function* importAssetsSaga(context: SagaContext, action: TypedAction<string[]>) 
         id: generateRandomString(),
         name: fileToImport.getFilenameNoExtension(),
         extension: originalExtension,
-        tagIds: [],
         assetPackId: newAssetPack.id,
       };
       const target = appConfig.getAssetFileById(newAsset.id, originalExtension);

@@ -40,6 +40,7 @@ export const AssetPackGridItem = React.memo(function AssetPackGridItem({
         })}
       </div>
       <div className='asset-pack-title'>{assetPack.name}</div>
+      <div className='asset-pack-asset-separator' />
       <div className='asset-pack-subtitle'>{assetPack.assetIds.length} assets</div>
     </div>
   );

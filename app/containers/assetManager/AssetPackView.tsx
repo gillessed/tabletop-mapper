@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { useDispatchers } from '../../DispatcherContextProvider';
 import { Asset } from '../../redux/asset/AssetTypes';
 import { AssetList } from './assetList/AssetList';
+import { AssetPackTags } from './AssetPackTags';
 import './AssetPackView.scss';
 
 export const NoPack = 'No Pack';
@@ -43,32 +44,34 @@ export const AssetPackView = React.memo(({
   }, [assetPack.id, dispatchers]);
   return (
     <>
-      <EditableText
-        className='title asset-pack-view-title'
-        value={editTitleValue}
-        onChange={setEditTitleValue}
-        onConfirm={handleSaveAssetPackTitle}
-      />
-      
-      <ControlGroup className='asset-control-group' fill>
-        <InputGroup
-          value={filter}
-          placeholder='Filter assets...'
-          leftIcon={IconNames.SEARCH}
-          onChange={onChangeAssetFilter}
-          fill
+      <div className='asset-pack-header'>
+        <EditableText
+          className='title asset-pack-view-title'
+          value={editTitleValue}
+          onChange={setEditTitleValue}
+          onConfirm={handleSaveAssetPackTitle}
         />
-        <Tooltip
-          content={`Tabletop Mapper will import all image files within the selected folder and add them to ${assetPack.name}`}
-          hoverOpenDelay={1000}
-        >
-          <Button
-            text='Import'
-            icon={IconNames.CUBE_ADD}
-            intent={Intent.PRIMARY}
+        <AssetPackTags assetPack={assetPack} />
+        <ControlGroup className='asset-control-group' fill>
+          <InputGroup
+            value={filter}
+            placeholder='Filter assets...'
+            leftIcon={IconNames.SEARCH}
+            onChange={onChangeAssetFilter}
+            fill
           />
-        </Tooltip>
-      </ControlGroup>
+          <Tooltip
+            content={`Tabletop Mapper will import all image files within the selected folder and add them to ${assetPack.name}`}
+            hoverOpenDelay={1000}
+          >
+            <Button
+              text='Import'
+              icon={IconNames.CUBE_ADD}
+              intent={Intent.PRIMARY}
+            />
+          </Tooltip>
+        </ControlGroup>
+      </div>
       <AssetList assetIds={filteredAssetIds} />
     </>
   );
