@@ -5,7 +5,7 @@ import { useDispatchers } from '../../DispatcherContextProvider';
 import { Transform, Vector, Coordinate } from '../../math/Vector';
 import { Grid } from '../../redux/grid/GridTypes';
 import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
-import { getHoveredFeatures } from '../../redux/model/FeatureIntersection';
+import { doesGeometryContain, getHoveredFeatures } from '../../redux/model/FeatureIntersection';
 import { Model } from '../../redux/model/ModelTypes';
 import { addCoordinateToPartialGeometry } from '../../redux/model/PartialGeometry';
 import { MouseButtons } from '../../utils/mouse';
@@ -23,7 +23,7 @@ import { AssetDropShadow } from './features/shadows/AssetDropShadow';
 import { Asset } from '../../redux/asset/AssetTypes';
 import { getBoundingBox, getGeometryForBasicAssetFeature } from '../../redux/model/ModelUtils';
 import { ControlPointsOverlay } from './features/ControlPointsOverlay';
-import { getControlPoints, getHoveredControlPoint } from '../../redux/model/ControlPoints';
+import { getControlPoints, getHoveredControlPoint, getRectangleControlPoints } from '../../redux/model/ControlPoints';
 import { resizeGeometry } from '../../redux/model/Resize';
 import { compact } from '../../utils/array';
 import { FeatureDragShadows } from './features/shadows/FeatureDragShadows';
@@ -64,11 +64,12 @@ export const SvgRoot = React.memo(function SvgRoot({
   const selectedFeatureIds = useSelector(LayerTree.Selectors.getSelectedFeatureIds);
   const mouseDragOrigin = useSelector(Grid.Selectors.getMouseDragOrigin);
   const assetDropId = useSelector(Grid.Selectors.getAssetDropId);
+  const editingFeatureClipRegion = useSelector(Grid.Selectors.getEditingFeatureClipRegion);
   const draggingAsset = useSelector(Asset.Selectors.getAssetById(assetDropId ?? ''));
   const resizeInfo = useSelector(Grid.Selectors.getResizeInfo);
   const featureToResize = useSelector(Model.Selectors.getFeatureById(resizeInfo?.featureId ?? ''));
   const selectAndExpandNodes = useWorker(selectAndExpandNodesWorker);
-  
+
   React.useEffect(() => {
     if (transformSet) {
       return;
@@ -155,18 +156,56 @@ export const SvgRoot = React.memo(function SvgRoot({
     } else {
       dispatchers.grid.setMouseMode(MouseMode.TransformFeatures);
     }
+
+    // TODO: box select should go here
+    
     dispatchers.grid.setMouseDragOrigin(newMousePosition);
   }, [dispatchers, features, transform, selectedFeatureIds, selectAndExpandNodes]);
+
+  const clipRegionFeature = editingFeatureClipRegion != null ? features.byId[editingFeatureClipRegion] : undefined;
+  const onLeftMouseDownClipRegionEdit = React.useCallback((
+    e: React.MouseEvent<SVGElement>,
+    newMousePosition: Vector,
+    coordinate: Coordinate
+  ) => {
+    if (clipRegionFeature == null || clipRegionFeature.type !== 'basic-asset') {
+      return;
+    }
+    const { clipRegion } = clipRegionFeature;
+    if (clipRegion == null) {
+      return;
+    }
+    const controlPoints = getRectangleControlPoints(transform, clipRegionFeature.id, clipRegion);
+    const hoveredControlPoint = getHoveredControlPoint(controlPoints, coordinate);
+    if (hoveredControlPoint != null) {
+      dispatchers.grid.setMouseMode(MouseMode.ResizeClipRegion);
+      dispatchers.grid.setMouseDragOrigin(newMousePosition);
+      return;
+    }
+
+    const hoveringClipRegion = doesGeometryContain(clipRegion, coordinate);
+    if (hoveringClipRegion) {
+      dispatchers.grid.setMouseMode(MouseMode.DragClipRegion);
+      dispatchers.grid.setMouseDragOrigin(newMousePosition);
+    }
+  }, [clipRegionFeature, transform]);
 
   const onLeftMouseDown = React.useCallback((e: React.MouseEvent<SVGElement>) => {
     const newMousePosition = new Vector(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     const coordinate = transform.applyV(newMousePosition).getCoordinate();
     switch (mouseMode) {
       case MouseMode.None:
-        onLeftMouseDownModeNone(e, newMousePosition, coordinate);
+        if (editingFeatureClipRegion != null) {
+          onLeftMouseDownClipRegionEdit(e, newMousePosition, coordinate);
+        } else {
+          onLeftMouseDownModeNone(e, newMousePosition, coordinate);
+        }
         break;
       case MouseMode.DrawRectangle:
       case MouseMode.DrawPath:
+        if (editingFeatureClipRegion != null) {
+          break;
+        }
         const rounded = transform.applyV(newMousePosition).round().getCoordinate();
         const { complete, geometry } = addCoordinateToPartialGeometry(partialGeometry, partialGeometry.snapToGrid ? rounded : coordinate);
         if (complete) {

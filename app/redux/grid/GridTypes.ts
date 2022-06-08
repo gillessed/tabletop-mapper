@@ -25,6 +25,8 @@ export namespace Grid {
       draggingAsset?: string;
       resizeInfo?: ResizeInfo;
       resizedFeature?: Model.Types.Feature;
+      editingFeatureClipRegion?: string;
+      resizedClipRegion?: Model.Types.Geometry;
     }
 
     export enum MouseMode {
@@ -37,6 +39,8 @@ export namespace Grid {
       ResizeRectangle,
       ResizePath,
       DragSelectionInTree,
+      DragClipRegion,
+      ResizeClipRegion,
     }
   }
 
@@ -60,6 +64,9 @@ export namespace Grid {
     startResizeFeature: createActionWrapper<Payloads.ResizeFeaturePayload>('grid::startResizeFeature'),
     setResizedFeature: createActionWrapper<Model.Types.Feature>('grid::setResizedFeature'),
     stopResizeFeature: createActionWrapper<void>('grid::stopResizeFeature'),
+    startResizeClipRegion: createActionWrapper<void>('grid::startResizeClipRegion'),
+    setResizedClipRegion: createActionWrapper<Model.Types.Rectangle>('grid::setResizedClipRegion'),
+    stopResizeClipRegion: createActionWrapper<Types.ResizeInfo>('grid::stopResizeClipRegion'),
   }
 
   export const Actions = {
@@ -78,5 +85,6 @@ export namespace Grid {
     export const getMouseOnCanvas = (state: ReduxState) => get(state).mouseOnCanvas;
     export const getResizeInfo = (state: ReduxState) => get(state).resizeInfo;
     export const getResizedFeature = (state: ReduxState) => get(state).resizedFeature;
+    export const getEditingFeatureClipRegion = (state: ReduxState) => get(state).editingFeatureClipRegion;
   }
 }
