@@ -7,6 +7,7 @@ import { getControlPoints } from '../../../redux/model/ControlPoints';
 import { Model } from '../../../redux/model/ModelTypes';
 import { SelectionOutlineColor } from './FeatureOutlines';
 import { compact } from '../../../utils/array';
+import { ControlPointsComponent } from './ControlPointsComponent';
 
 export const ControlPointsOverlay = () => {
   const selection = useSelector(LayerTree.Selectors.getSelectedNodes);
@@ -14,22 +15,15 @@ export const ControlPointsOverlay = () => {
   const transform = useSelector(Grid.Selectors.getTransform);
   const features = compact(selection.map((featureId) => featureIndex.byId[featureId]));
   const controlPoints = getControlPoints(transform, features);
-
-  const strokeWidth = transform.applyScalar(1);
-  const controlPointSvgs = [];
-  for (const controlPoint of controlPoints) {
-    const { p1, p2 } = controlPoint.rectangle;
-    controlPointSvgs.push(<rect
-      id={controlPoint.id}
-      x={p1.x}
-      y={p1.y}
-      width={p2.x - p1.x}
-      height={p2.y - p1.y}
-      stroke={SelectionOutlineColor}
-      strokeWidth={strokeWidth}
-      fill={Colors.WHITE}
-      cursor={controlPoint.cursor}
-    />);
+  const editingFeatureClipRegion = useSelector(Grid.Selectors.getEditingFeatureClipRegion);
+  if (editingFeatureClipRegion) {
+    return null;
   }
-  return <g>{controlPointSvgs}</g>;
+
+  return (
+    <ControlPointsComponent
+      controlPoints={controlPoints}
+      strokeColor={SelectionOutlineColor}
+    />
+  );
 };

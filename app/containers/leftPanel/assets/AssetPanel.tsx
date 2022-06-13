@@ -1,4 +1,4 @@
-import { Classes, ITreeNode, Popover, PopoverInteractionKind, Position, Tree } from '@blueprintjs/core';
+import { Classes, TreeNodeInfo, Popover, PopoverInteractionKind, Position, Tree } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import * as classNames from 'classnames';
 import * as React from 'react';
@@ -11,41 +11,53 @@ import { Grid } from '../../../redux/grid/GridTypes';
 import { getTreeMouseDownTarget } from '../utils/TreeMouseDown';
 import { SearchKey } from './SearchKey';
 import { AssetSearchBar } from './AssetSearchBar';
+import { filterAssets } from '../../../redux/asset/AssetUtils';
 
 export function AssetPanel() {
   const appConfig = useAppConfig();
   const dispatchers = useDispatchers();
-  const assetIndex = useSelector(Asset.Selectors.getAssetIndex);
-  const assetPackIndex = useSelector(Asset.Selectors.getAssetPackIndex);
+  const assetState = useSelector(Asset.Selectors.get);
   const [expandedNodes, setExpandedNodes] = React.useState<Set<string>>(new Set());
   const [searchKeys, setSearchKeys] = React.useState<SearchKey[]>([]);
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
+  const editingFeatureClipRegion = useSelector(Grid.Selectors.getEditingFeatureClipRegion);
+
+  const filteredState = React.useMemo(() => filterAssets(assetState, searchKeys), [assetState, searchKeys]);
+  const { assetIndex, assetPackIndex } = filteredState;
 
   const onMouseDown = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (editingFeatureClipRegion != null) {
+      return null;
+    }
     const assetId = getTreeMouseDownTarget('asset-tree-node', event);
     if (assetId == null) {
       return;
     }
     event.preventDefault();
     dispatchers.grid.startDraggingAsset(assetId);
-  }, []);
-  const onNodeExpand = React.useCallback((node: ITreeNode) => {
+  }, [dispatchers, editingFeatureClipRegion]);
+
+  const onNodeExpand = React.useCallback((node: TreeNodeInfo) => {
     const newNodes = new Set(expandedNodes);
     newNodes.add(node.id as string);
     setExpandedNodes(newNodes);
   }, [dispatchers, expandedNodes, setExpandedNodes]);
-  const onNodeCollapse = React.useCallback((node: ITreeNode) => {
+
+  const onNodeCollapse = React.useCallback((node: TreeNodeInfo) => {
     const newNodes = new Set(expandedNodes);
     newNodes.delete(node.id as string);
     setExpandedNodes(newNodes);
   }, [dispatchers, expandedNodes, setExpandedNodes]);
 
-  const nodes: ITreeNode[] = React.useMemo(() => {
-    const assetPackNodes: ITreeNode[] = [];
+  const nodes: TreeNodeInfo[] = React.useMemo(() => {
+    const assetPackNodes: TreeNodeInfo[] = [];
     for (const assetPackId of assetPackIndex.all) {
       const assetPack = assetPackIndex.byId[assetPackId];
-      const assetNodes: ITreeNode[] = [];
+      const assetNodes: TreeNodeInfo[] = [];
       for (const assetId of assetPack.assetIds) {
+        if (assetIndex.byId[assetId] == null) {
+          continue;
+        }
         const asset = assetIndex.byId[assetId];
         const file = appConfig.getAssetFileById(asset.id, asset.extension);
         const popoverPreview = (

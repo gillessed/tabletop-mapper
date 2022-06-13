@@ -6,8 +6,9 @@ import { LayerTree } from '../../../../redux/layertree/LayerTreeTypes';
 import { getOutlineForFeature } from '../../../../redux/model/FeatureOutline';
 import { getFeatureTranslation, translateFeature } from '../../../../redux/model/FeatureTranslation';
 import { Model } from '../../../../redux/model/ModelTypes';
+import { SvgRectOutline } from '../components/SvgRectOutline';
 import { Feature } from '../Feature';
-import { renderOutline, SelectionOutlineColor } from '../FeatureOutlines';
+import { SelectionOutlineColor } from '../FeatureOutlines';
 
 export const FeatureDragShadows = function FeatureDragShadows() {
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
@@ -38,7 +39,7 @@ export const FeatureDragShadows = function FeatureDragShadows() {
   );
 
   const renderedItems = [];
-  const featureOutlines: { [key: string]: Model.Types.Rectangle } = { };
+  const featureOutlines: { [key: string]: Model.Types.Rectangle } = {};
   for (const feature of selectedFeatures) {
     const translatedFeature = translateFeature(feature, translation);
     renderedItems.push(
@@ -51,7 +52,15 @@ export const FeatureDragShadows = function FeatureDragShadows() {
   }
   for (const featureId of Object.keys(featureOutlines)) {
     const outline = featureOutlines[featureId];
-    renderedItems.push(<g key={`outline-${featureId}`}>{renderOutline(outline, transform, SelectionOutlineColor)}</g>);
+    renderedItems.push(
+      <g key={`outline-${featureId}`}>
+        <SvgRectOutline
+          geometry={outline}
+          transform={transform}
+          color={SelectionOutlineColor}
+        />
+      </g>
+    );
   }
   return (
     <g opacity={0.5}>

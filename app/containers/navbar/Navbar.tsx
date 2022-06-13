@@ -36,13 +36,13 @@ export function MapperNavbar() {
             <Navbar.Divider />
             <Navbar.Heading>
               <div className='navbar-title-container'>
+                <div className='title navbar-title'>{project.value.name}</div>
                 <div className='unsaved-icon-container'>
                   {project.value.requiresSave && <Icon
                     icon={IconNames.LIFESAVER}
                     iconSize={14}
                   />}
                 </div>
-                <div className='title navbar-title'>{project.value.name}</div>
               </div>
             </Navbar.Heading>
           </>

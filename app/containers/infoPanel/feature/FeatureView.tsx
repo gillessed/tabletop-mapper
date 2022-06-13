@@ -2,8 +2,8 @@ import { Colors } from '@blueprintjs/core';
 import * as React from 'react';
 import { useSelector } from 'react-redux';
 import { Model } from '../../../redux/model/ModelTypes';
+import { BasicAssetFeatureProperties } from './BasicAssetFeatureProperties';
 import { FeatureIcon } from './FeatureIcon';
-import { getFeatureProperties } from './FeatureProperties';
 import './FeatureView.scss';
 
 export namespace FeatureView {
@@ -17,7 +17,6 @@ export const FeatureView = React.memo(function FeatureView({
 }: FeatureView.Props) {
   const features = useSelector(Model.Selectors.getFeatures);
   const feature = features.byId[featureId];
-  const properties = getFeatureProperties(feature);
   return (
     <div className='feature-view-container'>
       <div className='feature-header'>
@@ -30,16 +29,7 @@ export const FeatureView = React.memo(function FeatureView({
         <div className='subtitle'>{Model.Types.FeatureNames[feature.type]}</div>
       </div>
       <div className='feature-body'>
-        {properties.map((property) => {
-          return (
-            <div className='feature-property' key={property.name}>
-              <div className='feature-name label'>{property.name}</div>
-              <div className='feature-row'>
-                {property.row}
-              </div>
-            </div>
-          );
-        })}
+        {feature.type === 'basic-asset' && <BasicAssetFeatureProperties feature={feature}/>}
       </div>
     </div>
   );

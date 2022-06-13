@@ -22,19 +22,19 @@
     padding-bottom: 20px;
 
     .layer-tree-node {
-      &>.bp3-tree-node-content {
+      &>.#{$ns}-tree-node-content {
         position: relative;
       }
 
-      &.selected-cover>.bp3-tree-node-content {
+      &.selected-cover>.#{$ns}-tree-node-content {
         background-color: rgba($blue3, 0.7);
       }
 
-      &.selected-child>.bp3-tree-node-content {
+      &.selected-child>.#{$ns}-tree-node-content {
         background-color: rgba($blue3, 0.3);
       }
 
-      .bp3-tree-node-label {
+      .#{$ns}-tree-node-label {
         position: static;
       }
 
@@ -60,8 +60,8 @@
       }
     }
 
-    &.reparenting .bp3-tree-node:not(.bp3-tree-node-selected) {
-      .bp3-tree-node-content {
+    &.reparenting .#{$ns}-tree-node:not(.bp3-tree-node-selected) {
+      .#{$ns}-tree-node-content {
         background-color: rgba(black, 0);
       }
     }

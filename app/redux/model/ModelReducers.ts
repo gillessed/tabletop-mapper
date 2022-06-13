@@ -163,7 +163,11 @@ const setSnapToGridReducer = (
   let newState = state;
   const { featureIds, value } = payload;
   for (const featureId of featureIds) {
+    const feature = newState.features.byId[featureId];
     newState = DotProp.set(newState, `features.byId.${featureId}.geometry.snapToGrid`, value);
+    if (feature.type === 'basic-asset' && feature.clipRegion != null) {
+      newState = DotProp.set(newState, `features.byId.${featureId}.clipRegion.snapToGrid`, value);
+    }
   }
   return newState;
 }
@@ -188,6 +192,7 @@ const setPathsClosedReducer = (
 const setOpacityReducer = createFeaturePropertyReducer("opacity");
 const setRotationReducer = createFeaturePropertyReducer("rotation");
 const setObjectCoverReducer = createFeaturePropertyReducer("objectCover");
+const setClipRegionReducer = createFeaturePropertyReducer("clipRegion");
 
 export const reparentNodesReducers = (
   state: Model.Types.State,
@@ -339,6 +344,7 @@ export const modelReducer: Reducer<Model.Types.State> = newTypedReducer<Model.Ty
   .handlePayload(Model.Actions.setRotation.type, setRotationReducer)
   .handlePayload(Model.Actions.setPathsClosed.type, setPathsClosedReducer)
   .handlePayload(Model.Actions.setObjectCover.type, setObjectCoverReducer)
+  .handlePayload(Model.Actions.setClipRegion.type, setClipRegionReducer)
   .handlePayload(Model.Actions.reparentNodes.type, reparentNodesReducers)
   .handlePayload(Model.Actions.copyNodes.type, copyNodesReducers)
   .handlePayload(Model.Actions.setBackgroundColor.type, setBackgroundColorReducer)

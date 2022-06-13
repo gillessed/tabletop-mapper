@@ -26,7 +26,8 @@ export namespace Grid {
       resizeInfo?: ResizeInfo;
       resizedFeature?: Model.Types.Feature;
       editingFeatureClipRegion?: string;
-      resizedClipRegion?: Model.Types.Geometry;
+      resizedClipRegion?: Model.Types.Rectangle;
+      clipRegionResizeInfo?: ResizeInfo;
     }
 
     export enum MouseMode {
@@ -64,9 +65,11 @@ export namespace Grid {
     startResizeFeature: createActionWrapper<Payloads.ResizeFeaturePayload>('grid::startResizeFeature'),
     setResizedFeature: createActionWrapper<Model.Types.Feature>('grid::setResizedFeature'),
     stopResizeFeature: createActionWrapper<void>('grid::stopResizeFeature'),
-    startResizeClipRegion: createActionWrapper<void>('grid::startResizeClipRegion'),
+    editClipRegion: createActionWrapper<string>('grid::editClipRegion'),
+    startResizeClipRegion: createActionWrapper<Types.ResizeInfo>('grid::startResizeClipRegion'),
     setResizedClipRegion: createActionWrapper<Model.Types.Rectangle>('grid::setResizedClipRegion'),
-    stopResizeClipRegion: createActionWrapper<Types.ResizeInfo>('grid::stopResizeClipRegion'),
+    stopResizeClipRegion: createActionWrapper<void>('grid::stopResizeClipRegion'),
+    finishEditClipRegion: createActionWrapper<void>('grid::finishEditClipRegion'),
   }
 
   export const Actions = {
@@ -86,5 +89,7 @@ export namespace Grid {
     export const getResizeInfo = (state: ReduxState) => get(state).resizeInfo;
     export const getResizedFeature = (state: ReduxState) => get(state).resizedFeature;
     export const getEditingFeatureClipRegion = (state: ReduxState) => get(state).editingFeatureClipRegion;
+    export const getClipRegionResizeInfo = (state: ReduxState) => get(state).clipRegionResizeInfo;
+    export const getResizedClipRegion = (state: ReduxState) => get(state).resizedClipRegion;
   }
 }

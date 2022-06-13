@@ -2,7 +2,7 @@
   &.draggin-asset {
     cursor: grabbing;
   }
-  &.dragging-features {
+  &.dragging-features, .dragging-clip-region {
     cursor: move;
   }
   &.nw-resize {

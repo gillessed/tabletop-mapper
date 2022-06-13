@@ -75,7 +75,7 @@ export const AssetTagSelect = React.memo(function AssetTagSelect({
   const createNewTag = React.useCallback((query: string): Asset.Types.Tag => {
     return { id: generateRandomString(), name: query };
   }, []);
-  const removeTag = React.useCallback((_: string, index: number) => {
+  const removeTag = React.useCallback((_: React.ReactNode, index: number) => {
     const tag = selectedTags[index];
     dispatchers.assets.removeTagFromAssetPack({ tagId: tag.id, assetPackId: assetPack.id });
   }, [dispatchers, assetPack.id]);

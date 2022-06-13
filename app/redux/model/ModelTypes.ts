@@ -198,6 +198,7 @@ export namespace Model {
     setGridColor: createActionWrapper<string>(name('setGridColor')),
     setShowGrid: createActionWrapper<boolean>(name('setShowGrid')),
     setMajorAxisStep: createActionWrapper<number>(name('setMajorAxisStep')),
+    setClipRegion: createActionWrapper<Payloads.SetValue<Model.Types.Rectangle>>(name('setClipRegion')),
   }
 
   export const Actions = {

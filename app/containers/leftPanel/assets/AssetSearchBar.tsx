@@ -1,10 +1,11 @@
-import { Button, Intent, MenuItem } from '@blueprintjs/core';
+import { Button, Icon, Intent, MenuItem } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import { IItemRendererProps, MultiSelect } from '@blueprintjs/select';
 import * as React from 'react';
 import { useSelector } from 'react-redux';
 import { Asset } from '../../../redux/asset/AssetTypes';
 import { SearchKey } from './SearchKey';
+import "./AssetSearchBar.scss";
 
 export interface AssetSearchBarProps {
   searchKeys: SearchKey[];
@@ -22,7 +23,7 @@ export const AssetSearchBar = React.memo(function AssetTagSelect({
   setSearchKeys,
 }: AssetSearchBarProps) {
   const tagIndex = useSelector(Asset.Selectors.getTagIndex);
-  const allTagKeys: SearchKey[] = React.useMemo(() => tagIndex.all.map((tagId) => ({ query: tagIndex.byId[tagId].name, type: 'tag' })), [tagIndex]);
+  const allTagKeys: SearchKey[] = React.useMemo(() => tagIndex.all.map((tagId) => ({ query: tagIndex.byId[tagId].name, type: 'tag', tagId })), [tagIndex]);
 
   const searchKeyListPredicate = React.useCallback((query: string, items: SearchKey[]): SearchKey[] => {
     const tagList = items.filter((key) => key.query.toLocaleLowerCase().indexOf(query.toLocaleLowerCase()) >= 0).slice(0, 20);
@@ -52,7 +53,14 @@ export const AssetSearchBar = React.memo(function AssetTagSelect({
       />
     );
   }, [searchKeys]);
-  const renderSearchKey = React.useCallback((key: SearchKey) => key.query, []);
+  const renderSearchKey = React.useCallback((key: SearchKey) => {
+    return (
+      <>
+        {key.type === 'tag' && <Icon className='asset-search-bar-tag-icon' icon={IconNames.TAG} size={12} />}
+        {key.query}
+      </>
+    );
+  }, []);
   const onSelectSearchKey = React.useCallback((item: SearchKey) => {
     const newSearchKeys = [...searchKeys];
     const itemIndex = searchKeys.indexOf(item);
@@ -66,7 +74,7 @@ export const AssetSearchBar = React.memo(function AssetTagSelect({
   const createNewSearchKey = React.useCallback((query: string): SearchKey => {
     return { query, type: 'keyword' };
   }, []);
-  const removeSearchKey = React.useCallback((_: string, index: number) => {
+  const removeSearchKey = React.useCallback((_: React.ReactNode, index: number) => {
     const newSearchKeys = [...searchKeys];
     newSearchKeys.splice(index, 1);
     setSearchKeys(newSearchKeys);

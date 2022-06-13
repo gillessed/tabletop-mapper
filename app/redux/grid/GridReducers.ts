@@ -132,6 +132,58 @@ const setInitialTransformReducer = (
   return { ...state, transform };
 }
 
+const startResizeClipRegionReducer = (
+  state: Grid.Types.State,
+  resizeInfo: Grid.Types.ResizeInfo,
+): Grid.Types.State => {
+  return {
+    ...state,
+    clipRegionResizeInfo: resizeInfo,
+  };
+}
+
+const editClipRegionReducer = (
+  state: Grid.Types.State,
+  featureId: string,
+): Grid.Types.State => {
+  return {
+    ...state,
+    editingFeatureClipRegion: featureId,
+    resizedClipRegion: undefined,
+  };
+}
+
+const stopResizeClipRegionReducer = (
+  state: Grid.Types.State,
+): Grid.Types.State => {
+  return {
+    ...state,
+    mouseMode: Grid.Types.MouseMode.None,
+    clipRegionResizeInfo: undefined,
+  };
+}
+
+const setResizeClipRegionReducer = (
+  state: Grid.Types.State,
+  clipRegion: Model.Types.Rectangle,
+): Grid.Types.State => {
+  return {
+    ...state,
+    resizedClipRegion: clipRegion,
+  }
+}
+
+const finishEditClipRegionReducer = (
+  state: Grid.Types.State
+): Grid.Types.State => {
+  return {
+    ...state,
+    resizedClipRegion: undefined,
+    editingFeatureClipRegion: undefined,
+    clipRegionResizeInfo: undefined,
+  }
+}
+
 export const gridReducer: Reducer<Grid.Types.State> = newTypedReducer<Grid.Types.State>()
   .handlePayload(Grid.Actions.setMousePosition.type, setMousePositionReducer)
   .handlePayload(Grid.Actions.setTransform.type, setTransformReducer)
@@ -145,6 +197,11 @@ export const gridReducer: Reducer<Grid.Types.State> = newTypedReducer<Grid.Types
   .handlePayload(Grid.Actions.startResizeFeature.type, startResizeFeatureReducer)
   .handlePayload(Grid.Actions.setResizedFeature.type, setResizeFeatureReducer)
   .handlePayload(Grid.Actions.stopResizeFeature.type, stopResizeFeatureReducer)
+  .handlePayload(Grid.Actions.editClipRegion.type, editClipRegionReducer)
+  .handlePayload(Grid.Actions.startResizeClipRegion.type, startResizeClipRegionReducer)
+  .handlePayload(Grid.Actions.setResizedClipRegion.type, setResizeClipRegionReducer)
+  .handlePayload(Grid.Actions.stopResizeClipRegion.type, stopResizeClipRegionReducer)
+  .handlePayload(Grid.Actions.finishEditClipRegion.type, finishEditClipRegionReducer)
   .handlePayload(Project.Actions.openProject.type, unsetTransformReducer)
   .handlePayload(ModelSet.type, setInitialTransformReducer)
   .handleDefault((state = INITIAL_STATE) => state)

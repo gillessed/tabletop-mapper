@@ -105,6 +105,7 @@ export function Layers() {
   const featureIndex = useSelector(Model.Selectors.getFeatures);
   const layerTree = useSelector(LayerTree.Selectors.get);
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
+  const editingFeatureClipRegion = useSelector(Grid.Selectors.getEditingFeatureClipRegion);
   const treeRef = React.useRef<Tree<void>>();
   const selection = layerTree.selectedNodes;
   const selectionCoverSet = React.useMemo(() => getCoverSet(selection, featureIndex, layerIndex), [selection]);
@@ -120,6 +121,9 @@ export function Layers() {
   }, [featureIndex, layerIndex, selection, treeHover]);
 
   const onMouseDown = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (editingFeatureClipRegion != null) {
+      return;
+    }
     const nodeId = getTreeMouseDownTarget('layer-tree-node', event);
     event.preventDefault();
     if (nodeId == null) {
@@ -146,7 +150,7 @@ export function Layers() {
       }
       setIsMouseDown(true);
     }
-  }, [selection, lastClicked, dispatchers, layerIndex, featureIndex, setIsMouseDown, selectNodes]);
+  }, [selection, lastClicked, dispatchers, layerIndex, featureIndex, editingFeatureClipRegion, setIsMouseDown, selectNodes]);
 
   const onMouseUp = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();

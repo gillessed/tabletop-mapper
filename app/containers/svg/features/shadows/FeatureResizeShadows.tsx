@@ -2,8 +2,9 @@ import * as React from 'react';
 import { useSelector } from 'react-redux';
 import { Grid } from '../../../../redux/grid/GridTypes';
 import { getOutlineForFeature } from '../../../../redux/model/FeatureOutline';
+import { SvgRectOutline } from '../components/SvgRectOutline';
 import { Feature } from '../Feature';
-import { renderOutline, SelectionOutlineColor } from '../FeatureOutlines';
+import { SelectionOutlineColor } from '../FeatureOutlines';
 
 export const FeatureResizeShadows = function FeatureDragShadows() {
   const resizedFeature = useSelector(Grid.Selectors.getResizedFeature);
@@ -16,12 +17,15 @@ export const FeatureResizeShadows = function FeatureDragShadows() {
   }
 
   const outline = getOutlineForFeature(resizedFeature);
-  const renderedOutline = renderOutline(outline, transform, SelectionOutlineColor);
 
   return (
     <g opacity={0.5}>
       <Feature feature={resizedFeature} />
-      {renderedOutline}
+      <SvgRectOutline
+        geometry={outline}
+        transform={transform}
+        color={SelectionOutlineColor}
+      />
     </g>
   )
 };

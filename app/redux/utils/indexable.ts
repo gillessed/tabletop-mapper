@@ -107,3 +107,10 @@ export function createSetIndexableNameReducer<State, I extends Identifiable>(
     return newState;
   };
 }
+
+export function copyIndexable<I extends Identifiable>(index: Indexable<I>): Indexable<I> {
+  return {
+    byId: { ...index.byId },
+    all: [...index.all],
+  };
+}

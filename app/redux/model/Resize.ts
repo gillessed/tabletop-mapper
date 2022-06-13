@@ -5,7 +5,7 @@ import { Grid } from "../grid/GridTypes";
 import { rectEquals } from "./ModelUtils";
 import { rectifyRectangle } from "../../math/RectifyGeometry";
 
-function resizeRectangleGeometry(
+export function resizeRectangleGeometry(
   rectangle: Model.Types.Rectangle,
   resizeInfo: Grid.Types.ResizeInfo,
   newCoordinate: Coordinate,

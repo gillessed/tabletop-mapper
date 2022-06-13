@@ -82,6 +82,7 @@ function* saveProjectSaga(context: SagaContext) {
     ...asyncProject.value,
     appVersion: appConfig.appVersion,
     lastSaved: Date.now(),
+    requiresSave: false,
   };
   const serializedProject = Project.serialize(project);
   yield call(saveProjectHelper, context, serializedProject, model);

@@ -55,7 +55,7 @@
   }
 
   .grid-dimension-input {
-    .bp3-input-group {
+    .#{$ns}-input-group {
       width: 36px;
     }
 

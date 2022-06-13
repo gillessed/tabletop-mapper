@@ -1,4 +1,9 @@
-export interface SearchKey {
+export type SearchKey = 
+{
   query: string;
-  type: 'tag' | 'keyword';
+  type: 'keyword';
+} | {
+  tagId: string;
+  query: string;
+  type: 'tag';
 }

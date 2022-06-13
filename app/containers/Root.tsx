@@ -8,12 +8,16 @@ import { MapperNavbar } from './navbar/Navbar';
 import { AssetManager } from './assetManager/AssetManager';
 import { useDispatchers } from '../DispatcherContextProvider';
 import { GridDialog } from './gridDialog/GridDialog';
+import { Grid } from '../redux/grid/GridTypes';
 
 export const Root = function Root() {
   const dispatchers = useDispatchers();
   const { currentView } = useSelector(Navigation.Selectors.get);
+  const currentDragginAsset = useSelector(Grid.Selectors.getAssetDropId)
   const onMouseUp = React.useCallback(() => {
-    dispatchers.grid.stopDraggingAsset();
+    if (currentDragginAsset != null) {
+      dispatchers.grid.stopDraggingAsset();
+    }
   }, [dispatchers]);
   let appView = undefined;
   switch (currentView) {

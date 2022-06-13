@@ -1,7 +1,6 @@
 import { Classes, Switch } from '@blueprintjs/core';
 import * as React from 'react';
 import { useDispatchers } from '../../../../DispatcherContextProvider';
-import { Model } from '../../../../redux/model/ModelTypes';
 
 export interface MirroredSwitchProps {
   featureId: string;
