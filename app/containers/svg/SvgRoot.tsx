@@ -24,7 +24,7 @@ import { Asset } from '../../redux/asset/AssetTypes';
 import { getBoundingBox, getGeometryForBasicAssetFeature } from '../../redux/model/ModelUtils';
 import { ControlPointsOverlay } from './features/ControlPointsOverlay';
 import { getControlPoints, getHoveredControlPoint, getRectangleControlPoints } from '../../redux/model/ControlPoints';
-import { resizeGeometry } from '../../redux/model/Resize';
+import { resizeRectangle } from '../../redux/model/Resize';
 import { compact } from '../../utils/array';
 import { FeatureDragShadows } from './features/shadows/FeatureDragShadows';
 import { useWorker } from '../../redux/utils/workers';
@@ -33,6 +33,7 @@ import { geometryEquals } from '../../math/CompareGeometry';
 import { expandRectangle } from '../../math/ExpandGeometry';
 import { ClipRegionOverlay } from './features/overlay/ClipRegionOverlay';
 import { rectifyRectangle } from '../../math/RectifyGeometry';
+import { boundRectangleWithin } from '../../math/BoundRectangle';
 
 type MouseMode = Grid.Types.MouseMode;
 const MouseMode = Grid.Types.MouseMode;
@@ -305,26 +306,45 @@ export const SvgRoot = React.memo(function SvgRoot({
         }
         break;
       case MouseMode.ResizeRectangle:
-      case MouseMode.ResizePath:
-        if (resizeInfo == null || featureToResize == null) {
+        if (resizeInfo == null || featureToResize == null || featureToResize.type != 'basic-asset') {
           return;
         }
-        const resizedGeometry = resizeGeometry(transform, featureToResize.geometry, resizeInfo, mousePosition);
+        const resizedGeometry = resizeRectangle(transform, featureToResize.geometry, resizeInfo, mousePosition);
         if (resizedGeometry != null && !geometryEquals(featureToResize.geometry, resizedGeometry)) {
           dispatchers.model.setFeatureGeometry({ featureId: featureToResize.id, geometry: resizedGeometry });
         }
         dispatchers.grid.stopResizeFeature();
         break;
       case MouseMode.ResizeClipRegion:
+        const clipRegion = clipRegionFeature?.clipRegion
+        if (clipRegion == null || clipRegionResizeInfo == null) {
+          return;
+        }
+        const clipRegionTranslation = Vector.of(clipRegionFeature.geometry.p1);
+        const renderedClipRegion = translateRectangle(clipRegionTranslation, clipRegion);
+        const resizedClipRegion = resizeRectangle(transform, renderedClipRegion, clipRegionResizeInfo, mousePosition);
+        if (resizedClipRegion == null) {
+          return;
+        }
+        const boundedRect = boundRectangleWithin(resizedClipRegion, clipRegionFeature.geometry);
+        const newClipRegion = translateRectangle(clipRegionTranslation.scalarMultiply(-1), boundedRect);
+        dispatchers.model.setClipRegion({
+          featureIds: [clipRegionFeature.id],
+          value: newClipRegion,
+        });
         dispatchers.grid.stopResizeClipRegion();
+        break;
+      case MouseMode.DragClipRegion:
+        dispatchers.grid.setMouseMode(Grid.Types.MouseMode.None);
+        break;
     }
-  }, [dispatchers, mouseMode, features, mousePosition, mouseDragOrigin, transform]);
+  }, [dispatchers, mouseMode, features, mousePosition, mouseDragOrigin, transform, clipRegionFeature, clipRegionResizeInfo]);
 
   const onMouseMoveResizeFeature = React.useCallback((mousePosition: Vector) => {
-    if (resizeInfo == null || featureToResize == null) {
+    if (resizeInfo == null || featureToResize == null || featureToResize.type != 'basic-asset') {
       return;
     }
-    const resizedGeometry = resizeGeometry(transform, featureToResize.geometry, resizeInfo, mousePosition);
+    const resizedGeometry = resizeRectangle(transform, featureToResize.geometry, resizeInfo, mousePosition);
     if (resizedGeometry == null || geometryEquals(resizedFeature?.geometry, resizedGeometry)) {
       return;
     }
@@ -339,7 +359,7 @@ export const SvgRoot = React.memo(function SvgRoot({
     }
     const translation = Vector.of(clipRegionFeature.geometry.p1);
     const renderedClipRegion = translateRectangle(translation, clipRegion);
-    const resizedGeometry = resizeGeometry(transform, renderedClipRegion, clipRegionResizeInfo, mousePosition) as Model.Types.Rectangle;
+    const resizedGeometry = resizeRectangle(transform, renderedClipRegion, clipRegionResizeInfo, mousePosition) as Model.Types.Rectangle;
     const resizedClipRegion = resizedGeometry != null ? translateRectangle(translation.scalarMultiply(-1), resizedGeometry) : undefined;
     if (resizedClipRegion == null || geometryEquals(clipRegion, resizedClipRegion)) {
       return;

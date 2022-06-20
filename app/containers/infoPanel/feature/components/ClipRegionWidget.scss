@@ -1,0 +1,19 @@
+@import '@blueprintjs/core/lib/scss/variables.scss';
+
+.clip-region-widget {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .spacer {
+    flex: 1;
+  }
+
+  .clip-region-size {
+    margin-right: 20px;
+  }
+
+  button {
+    margin-left: 5px;
+  }
+}

@@ -1,11 +1,10 @@
 import { Transform, Vector, Coordinate } from "../../math/Vector";
 import { Model } from "./ModelTypes";
-import { visitGeometry } from "./ModelVisitors";
 import { Grid } from "../grid/GridTypes";
 import { rectEquals } from "./ModelUtils";
 import { rectifyRectangle } from "../../math/RectifyGeometry";
 
-export function resizeRectangleGeometry(
+export function resizeRectangleWithInfo(
   rectangle: Model.Types.Rectangle,
   resizeInfo: Grid.Types.ResizeInfo,
   newCoordinate: Coordinate,
@@ -52,29 +51,15 @@ export function resizeRectangleGeometry(
   }
   return newRectangle;
 }
-
-function resizePathGeometry(
-  path: Model.Types.Path,
-  resizeInfo: Grid.Types.ResizeInfo,
-  newCoordinates: Coordinate,
-): Model.Types.Path | null {
-  return null;
-}
-
-export function resizeGeometry(
+export function resizeRectangle(
   transform: Transform,
-  geometry: Model.Types.Geometry,
+  rectangle: Model.Types.Rectangle,
   resizeInfo: Grid.Types.ResizeInfo,
   mousePosition: Vector,
-): Model.Types.Geometry | null {
-  const snapsToGrid = !!geometry.snapToGrid;
+): Model.Types.Rectangle | null {
+  const snapsToGrid = !!rectangle.snapToGrid;
   const mouseCoordinate = transform.applyV(mousePosition);
   const snappedCoordinate = snapsToGrid ? mouseCoordinate.round().getCoordinate() : mouseCoordinate.getCoordinate();
 
-  const newGeometry = visitGeometry<Model.Types.Geometry | null>({
-    visitPath: (path) => resizePathGeometry(path, resizeInfo, snappedCoordinate),
-    visitRectangle: (rectangle) => resizeRectangleGeometry(rectangle, resizeInfo, snappedCoordinate),
-  }, geometry);
-
-  return newGeometry;
+  return resizeRectangleWithInfo(rectangle, resizeInfo, snappedCoordinate);
 }
