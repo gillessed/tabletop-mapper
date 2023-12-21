@@ -1,39 +1,37 @@
-import { Colors } from '@blueprintjs/core';
+import * as classNames from 'classnames';
 import * as React from 'react';
 import { useSelector } from 'react-redux';
 import { useDispatchers } from '../../DispatcherContextProvider';
-import { Transform, Vector, Coordinate } from '../../math/Vector';
-import { Grid } from '../../redux/grid/GridTypes';
-import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
-import { doesGeometryContain, getHoveredFeatures } from '../../redux/model/FeatureIntersection';
-import { Model } from '../../redux/model/ModelTypes';
-import { addCoordinateToPartialGeometry } from '../../redux/model/PartialGeometry';
-import { MouseButtons } from '../../utils/mouse';
-import { generateRandomString } from '../../utils/randomId';
-import { FeatureResizeShadows } from './features/shadows/FeatureResizeShadows';
-import { FeatureOutlines } from './features/FeatureOutlines';
-import { FeaturePartialGeometries } from './features/partials/FeaturePartialGeometries';
-import { Features } from './features/Features';
-import { GridLines } from './grid/GridLines';
-import { getFeatureTranslation, translateRectangle } from '../../redux/model/FeatureTranslation';
-import { getHighestFeatureId } from '../../redux/model/ModelTree';
-import * as classNames from 'classnames';
-import "./SvgRoot.scss";
-import { AssetDropShadow } from './features/shadows/AssetDropShadow';
-import { Asset } from '../../redux/asset/AssetTypes';
-import { getBoundingBox, getGeometryForBasicAssetFeature } from '../../redux/model/ModelUtils';
-import { ControlPointsOverlay } from './features/ControlPointsOverlay';
-import { getControlPoints, getHoveredControlPoint, getRectangleControlPoints } from '../../redux/model/ControlPoints';
-import { resizeRectangle } from '../../redux/model/Resize';
-import { compact } from '../../utils/array';
-import { FeatureDragShadows } from './features/shadows/FeatureDragShadows';
-import { useWorker } from '../../redux/utils/workers';
-import { selectAndExpandNodesWorker } from '../../redux/layertree/LayerTreeWorkers';
+import { boundRectangleWithin } from '../../math/BoundRectangle';
 import { geometryEquals } from '../../math/CompareGeometry';
 import { expandRectangle } from '../../math/ExpandGeometry';
-import { ClipRegionOverlay } from './features/overlay/ClipRegionOverlay';
 import { rectifyRectangle } from '../../math/RectifyGeometry';
-import { boundRectangleWithin } from '../../math/BoundRectangle';
+import { Coordinate, Transform, Vector } from '../../math/Vector';
+import { Asset } from '../../redux/asset/AssetTypes';
+import { Grid } from '../../redux/grid/GridTypes';
+import { LayerTree } from '../../redux/layertree/LayerTreeTypes';
+import { selectAndExpandNodesWorker } from '../../redux/layertree/LayerTreeWorkers';
+import { getControlPoints, getHoveredControlPoint, getRectangleControlPoints } from '../../redux/model/ControlPoints';
+import { doesGeometryContain, getHoveredFeatures } from '../../redux/model/FeatureIntersection';
+import { getFeatureTranslation, translateRectangle } from '../../redux/model/FeatureTranslation';
+import { getHighestFeatureId } from '../../redux/model/ModelTree';
+import { Model } from '../../redux/model/ModelTypes';
+import { getBoundingBox, getGeometryForBasicAssetFeature } from '../../redux/model/ModelUtils';
+import { addCoordinateToPartialGeometry } from '../../redux/model/PartialGeometry';
+import { resizeRectangle } from '../../redux/model/Resize';
+import { useWorker } from '../../redux/utils/workers';
+import { MouseButtons } from '../../utils/mouse';
+import { generateRandomString } from '../../utils/randomId';
+import { ControlPointsOverlay } from './features/ControlPointsOverlay';
+import { FeatureOutlines } from './features/FeatureOutlines';
+import { Features } from './features/Features';
+import { ClipRegionOverlay } from './features/overlay/ClipRegionOverlay';
+import { FeaturePartialGeometries } from './features/partials/FeaturePartialGeometries';
+import { AssetDropShadow } from './features/shadows/AssetDropShadow';
+import { FeatureDragShadows } from './features/shadows/FeatureDragShadows';
+import { FeatureResizeShadows } from './features/shadows/FeatureResizeShadows';
+import { GridLines } from './grid/GridLines';
+import "./SvgRoot.scss";
 
 type MouseMode = Grid.Types.MouseMode;
 const MouseMode = Grid.Types.MouseMode;
@@ -168,6 +166,9 @@ export const SvgRoot = React.memo(function SvgRoot({
   }, [dispatchers, features, transform, selectedFeatureIds, selectAndExpandNodes]);
 
   const clipRegionFeature = React.useMemo(() => {
+    if (editingFeatureClipRegion == null) {
+      return null;
+    } 
     const feature = features.byId[editingFeatureClipRegion];
     if (feature != null && feature.type === 'basic-asset') {
       return feature;
@@ -191,7 +192,7 @@ export const SvgRoot = React.memo(function SvgRoot({
     const renderedClipRegion = translateRectangle({ x: rectified.p1.x, y: rectified.p1.y }, clipRegion);
     const controlPoints = getRectangleControlPoints(transform, clipRegionFeature.id, renderedClipRegion);
     const hoveredControlPoint = getHoveredControlPoint(controlPoints, coordinate);
-    if (hoveredControlPoint != null) {
+    if (hoveredControlPoint != null && editingFeatureClipRegion != null) {
       if (hoveredControlPoint.type !== 'rectangle') {
         return;
       }
@@ -225,7 +226,7 @@ export const SvgRoot = React.memo(function SvgRoot({
         break;
       case MouseMode.DrawRectangle:
       case MouseMode.DrawPath:
-        if (editingFeatureClipRegion != null) {
+        if (editingFeatureClipRegion != null || partialGeometry == null) {
           break;
         }
         const rounded = transform.applyV(newMousePosition).round().getCoordinate();
@@ -271,6 +272,9 @@ export const SvgRoot = React.memo(function SvgRoot({
         dispatchers.grid.setMouseMode(MouseMode.None);
         break;
       case MouseMode.TransformFeatures:
+        if (mousePosition == null || mouseDragOrigin == null) {
+          return;
+        }
         const selectedFeatures = selectedFeatureIds.map((id) => features.byId[id]);
         const translation = getFeatureTranslation(
           mousePosition,
@@ -288,7 +292,7 @@ export const SvgRoot = React.memo(function SvgRoot({
         }
         break;
       case MouseMode.DragAsset:
-        if (draggingAsset != null) {
+        if (draggingAsset != null && assetDropId != null && mousePosition != null) {
           const geometry = getGeometryForBasicAssetFeature(draggingAsset, transform, mousePosition)
           const newAssetFeature: Model.Types.BasicAssetFeature = {
             id: generateRandomString(),
@@ -306,7 +310,7 @@ export const SvgRoot = React.memo(function SvgRoot({
         }
         break;
       case MouseMode.ResizeRectangle:
-        if (resizeInfo == null || featureToResize == null || featureToResize.type != 'basic-asset') {
+        if (resizeInfo == null || featureToResize == null || featureToResize.type != 'basic-asset' || mousePosition == null) {
           return;
         }
         const resizedGeometry = resizeRectangle(transform, featureToResize.geometry, resizeInfo, mousePosition);
@@ -317,7 +321,7 @@ export const SvgRoot = React.memo(function SvgRoot({
         break;
       case MouseMode.ResizeClipRegion:
         const clipRegion = clipRegionFeature?.clipRegion
-        if (clipRegion == null || clipRegionResizeInfo == null) {
+        if (clipRegionFeature == null || clipRegion == null || clipRegionResizeInfo == null || mousePosition == null) {
           return;
         }
         const clipRegionTranslation = Vector.of(clipRegionFeature.geometry.p1);
@@ -341,7 +345,7 @@ export const SvgRoot = React.memo(function SvgRoot({
   }, [dispatchers, mouseMode, features, mousePosition, mouseDragOrigin, transform, clipRegionFeature, clipRegionResizeInfo]);
 
   const onMouseMoveResizeFeature = React.useCallback((mousePosition: Vector) => {
-    if (resizeInfo == null || featureToResize == null || featureToResize.type != 'basic-asset') {
+    if (resizeInfo == null || featureToResize.type != 'basic-asset') {
       return;
     }
     const resizedGeometry = resizeRectangle(transform, featureToResize.geometry, resizeInfo, mousePosition);
@@ -353,6 +357,9 @@ export const SvgRoot = React.memo(function SvgRoot({
   }, [resizeInfo, featureToResize, resizedFeature]);
 
   const onMouseMoveResizeClipRegion = React.useCallback((mousePosition: Vector) => {
+    if (clipRegionFeature == null) {
+      return null;
+    }
     const { clipRegion } = clipRegionFeature;
     if (clipRegionResizeInfo == null || clipRegion == null) {
       return;

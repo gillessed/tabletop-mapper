@@ -1,7 +1,7 @@
 import { Model } from "../redux/model/ModelTypes";
 import { coordinateEquals } from "./Vector";
 
-export function geometryEquals(g1: Model.Types.Geometry, g2: Model.Types.Geometry): boolean {
+export function geometryEquals(g1?: Model.Types.Geometry, g2?: Model.Types.Geometry): boolean {
   if (g1 == null || g2 == null) {
     return false;
   } else if (g1.type === "rectangle" && g2.type === "rectangle") {

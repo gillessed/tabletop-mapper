@@ -9,14 +9,14 @@ import { SelectionOutlineColor } from './FeatureOutlines';
 import { compact } from '../../../utils/array';
 import { ControlPointsComponent } from './ControlPointsComponent';
 
-export const ControlPointsOverlay = () => {
+export const ControlPointsOverlay = React.memo(function ControlPointsOverlay() {
   const selection = useSelector(LayerTree.Selectors.getSelectedNodes);
   const featureIndex = useSelector(Model.Selectors.getFeatures);
   const transform = useSelector(Grid.Selectors.getTransform);
   const features = compact(selection.map((featureId) => featureIndex.byId[featureId]));
   const controlPoints = getControlPoints(transform, features);
   const editingFeatureClipRegion = useSelector(Grid.Selectors.getEditingFeatureClipRegion);
-  if (editingFeatureClipRegion) {
+  if (editingFeatureClipRegion || controlPoints.length === 0) {
     return null;
   }
 
@@ -26,4 +26,4 @@ export const ControlPointsOverlay = () => {
       strokeColor={SelectionOutlineColor}
     />
   );
-};
+});

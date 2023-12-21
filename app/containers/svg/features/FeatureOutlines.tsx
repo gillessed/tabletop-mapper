@@ -12,7 +12,7 @@ import { SvgRectOutline } from './components/SvgRectOutline';
 export const SelectionOutlineColor = Colors.ORANGE3;
 export const HoverOutlineColor = Colors.COBALT3;
 
-export const FeatureOutlines = function Features() {
+export const FeatureOutlines = React.memo(function FeatureOutlines() {
   const features = useSelector(Model.Selectors.getFeatures);
   const layers = useSelector(Model.Selectors.getLayers);
   const selectedNodes = useSelector(LayerTree.Selectors.getSelectedNodes);
@@ -36,6 +36,7 @@ export const FeatureOutlines = function Features() {
     const hovered = hoveredFeatureIds.indexOf(feature.id) >= 0;
     return (
       <SvgRectOutline
+        key={feature.id}
         geometry={outline}
         transform={transform}
         color={SelectionOutlineColor}
@@ -72,4 +73,4 @@ export const FeatureOutlines = function Features() {
       </g>
     </g>
   );
-};
+});

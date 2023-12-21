@@ -210,7 +210,7 @@ export namespace Model {
     export const get = (state: ReduxState): Types.State => getStateFromUndoable(getUndoable(state));
     export const getLayers = (state: ReduxState) => get(state).layers;
     export const getFeatures = (state: ReduxState) => get(state).features;
-    export const getFeatureById = (featureId: string) => (state: ReduxState) => get(state).features.byId[featureId];
+    export const getFeatureById = (featureId: string | undefined) => (state: ReduxState) => get(state).features.byId[featureId ?? ""];
     export const getSettings = (state: ReduxState) => get(state).settings;
   }
 }

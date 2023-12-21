@@ -15,11 +15,11 @@ export const ControlPointsComponent = React.memo(({
 }: ControlPointsComponentProps) => {
   const transform = useSelector(Grid.Selectors.getTransform);
   const strokeWidth = transform.applyScalar(1);
-  const controlPointSvgs = [];
+  const controlPointSvgs: React.ReactNode[] = [];
   for (const controlPoint of controlPoints) {
     const { p1, p2 } = controlPoint.rectangle;
     controlPointSvgs.push(<rect
-      id={controlPoint.id}
+      key={controlPoint.id}
       x={p1.x}
       y={p1.y}
       width={p2.x - p1.x}
@@ -30,5 +30,5 @@ export const ControlPointsComponent = React.memo(({
       cursor={controlPoint.cursor}
     />);
   }
-  return <g>{controlPointSvgs}</g>;
+  return <g id="3">{controlPointSvgs}</g>;
 });

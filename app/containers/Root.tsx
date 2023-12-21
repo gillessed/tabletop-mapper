@@ -9,6 +9,7 @@ import { AssetManager } from './assetManager/AssetManager';
 import { useDispatchers } from '../DispatcherContextProvider';
 import { GridDialog } from './gridDialog/GridDialog';
 import { Grid } from '../redux/grid/GridTypes';
+import { ExportDialog } from './exportDialog/ExportDialog';
 
 export const Root = function Root() {
   const dispatchers = useDispatchers();
@@ -19,7 +20,7 @@ export const Root = function Root() {
       dispatchers.grid.stopDraggingAsset();
     }
   }, [dispatchers]);
-  let appView = undefined;
+  let appView: React.ReactNode | undefined;
   switch (currentView) {
     case "Blank":
       appView = <div className='blank-container' />
@@ -41,6 +42,7 @@ export const Root = function Root() {
       {appView}
       <ProjectDialog />
       <GridDialog />
+      <ExportDialog />
     </div>
   );
 };

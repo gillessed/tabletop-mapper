@@ -7,7 +7,7 @@ import { Model } from '../../../../redux/model/ModelTypes';
 import { Feature } from '../Feature';
 import { getGeometryForBasicAssetFeature } from '../../../../redux/model/ModelUtils';
 
-export const AssetDropShadow = () => {
+export const AssetDropShadow = React.memo(function AssetDropShadow() {
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
   const assetDropId = useSelector(Grid.Selectors.getAssetDropId);
   const mousePosition = useSelector(Grid.Selectors.getMousePosition);
@@ -43,4 +43,4 @@ export const AssetDropShadow = () => {
       feature={assetFeature}
     />
   )
-};
+});

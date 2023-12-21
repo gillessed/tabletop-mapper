@@ -10,7 +10,7 @@ import { SvgRectOutline } from '../components/SvgRectOutline';
 import { Feature } from '../Feature';
 import { SelectionOutlineColor } from '../FeatureOutlines';
 
-export const FeatureDragShadows = function FeatureDragShadows() {
+export const FeatureDragShadows = React.memo(function FeatureDragShadows() {
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
   const selectedFeatureIds = useSelector(LayerTree.Selectors.getSelectedFeatureIds);
   const mousePosition = useSelector(Grid.Selectors.getMousePosition);
@@ -38,7 +38,7 @@ export const FeatureDragShadows = function FeatureDragShadows() {
     selectedFeatures.map((feature) => feature.geometry),
   );
 
-  const renderedItems = [];
+  const renderedItems: React.ReactNode[] = [];
   const featureOutlines: { [key: string]: Model.Types.Rectangle } = {};
   for (const feature of selectedFeatures) {
     const translatedFeature = translateFeature(feature, translation);
@@ -67,4 +67,4 @@ export const FeatureDragShadows = function FeatureDragShadows() {
       {renderedItems}
     </g>
   )
-};
+});

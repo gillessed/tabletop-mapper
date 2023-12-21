@@ -11,6 +11,8 @@ import { canRedo, canUndo } from "./redux/undo/UndoState";
 enum KeyCodes {
   A = "KeyA",
   C = "KeyC",
+  E = "KeyE",
+  M = "KeyM",
   O = "KeyO",
   S = "KeyS",
   V = "KeyV",
@@ -52,7 +54,7 @@ export function registerKeyboardShortcuts(store: Store<ReduxState>, platformInfo
         return;
       }
       if (isMeta(event)) {
-        if (event.code === KeyCodes.O && isMeta(event)) {
+        if (event.code === KeyCodes.O) {
           store.dispatch(Navigation.Actions.setProjectDialogOpen.create(true));
           return;
         }
@@ -60,7 +62,7 @@ export function registerKeyboardShortcuts(store: Store<ReduxState>, platformInfo
           store.dispatch(Project.Actions.saveProject.create());
           return;
         }
-        if (event.code === KeyCodes.A && event.shiftKey) {
+        if (event.code === KeyCodes.M) {
           event.preventDefault();
           store.dispatch(Navigation.DispatchActions.setCurrentView.create('AssetManager'));
           return;
@@ -79,6 +81,10 @@ export function registerKeyboardShortcuts(store: Store<ReduxState>, platformInfo
         }
         if (event.code === KeyCodes.V) {
           pasteClipboardWorker(store);
+          return;
+        }
+        if (event.code === KeyCodes.E) {
+          store.dispatch(Navigation.Actions.setExportDialogOpen.create(true));
           return;
         }
       }

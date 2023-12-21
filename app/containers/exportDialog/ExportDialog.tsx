@@ -4,20 +4,20 @@ import { useSelector } from 'react-redux';
 import { useDispatchers } from '../../DispatcherContextProvider';
 import { Navigation } from '../../redux/navigation/NavigationTypes';
 import { Dialog } from '../dialog/Dialog';
-import { GridSettingsForm } from './GridSettingsForm';
+import { MapExportForm } from './MapExportForm';
 
-export const GridDialog = React.memo(function GridDialog() {
-  const isGridDialogOpen = useSelector(Navigation.Selectors.isGridDialogOpen);
+export const ExportDialog = React.memo(function ExportDialog() {
+  const isExportDialogOpen = useSelector(Navigation.Selectors.isExportDialogOpen);
   const dispatchers = useDispatchers();
   const closeDialog = React.useCallback(() => {
-    dispatchers.navigation.setGridDialogOpen(false);
+    dispatchers.navigation.setExportDialogOpen(false);
   }, [dispatchers]);
-  const content = <GridSettingsForm/>;
+  const content = <MapExportForm/>;
   return (
     <Dialog
-      isOpen={isGridDialogOpen}
-      icon={IconNames.GRID}
-      title='Grid Dialog'
+      isOpen={isExportDialogOpen}
+      icon={IconNames.EXPORT}
+      title='Export Map'
       content={content}
       closeIcon={IconNames.CROSS}
       onClose={closeDialog}

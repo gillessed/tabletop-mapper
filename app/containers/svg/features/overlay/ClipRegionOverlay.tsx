@@ -20,16 +20,16 @@ export interface ClipRegionOverlayProps {
   height: number;
 }
 
-export const ClipRegionOverlay = React.memo(({
+export const ClipRegionOverlay = React.memo(function ClipRegionOverlay({
   width,
   height,
-}: ClipRegionOverlayProps) => {
+}: ClipRegionOverlayProps) {
   const editingFeatureId = useSelector(Grid.Selectors.getEditingFeatureClipRegion);
   const editingFeature = useSelector(Model.Selectors.getFeatureById(editingFeatureId));
   const transform = useSelector(Grid.Selectors.getTransform);
   const resizedClipRegion = useSelector(Grid.Selectors.getResizedClipRegion);
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
-  if (editingFeature == null || editingFeature.type != 'basic-asset') {
+  if (editingFeatureId == null || editingFeature == null || editingFeature.type != 'basic-asset' || editingFeature.clipRegion == null) {
     return null;
   }
   const { clipRegion, geometry } = editingFeature;

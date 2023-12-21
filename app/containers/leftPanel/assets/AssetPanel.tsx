@@ -72,7 +72,7 @@ export function AssetPanel() {
           label: asset.name,
           icon: (
             <Popover
-              position={Position.LEFT}
+              position={Position.TOP}
               interactionKind={PopoverInteractionKind.HOVER}
               content={popoverPreview}
             >

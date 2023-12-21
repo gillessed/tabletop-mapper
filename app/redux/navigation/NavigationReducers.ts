@@ -5,6 +5,7 @@ const InitialState: Navigation.Types.State = {
   currentView: "Blank",
   isProjectDialogOpen: true,
   isGridDialogOpen: false,
+  isExportDialogOpen: false
 };
 
 const setCurrentViewReducer = (
@@ -28,14 +29,19 @@ const setGridDialogOpenReducer = (
   return { ...state, isGridDialogOpen: open };
 }
 
-const closeDialogsReducer = (
+const setExportDialogOpenReducer = (
   state: Navigation.Types.State,
   open: boolean,
 ): Navigation.Types.State => {
+  return { ...state, isExportDialogOpen: open };
+}
+
+const closeDialogsReducer = (state: Navigation.Types.State): Navigation.Types.State => {
   return {
     ...state,
     isProjectDialogOpen: false,
     isGridDialogOpen: false,
+    isExportDialogOpen: false,
   };
 }
 
@@ -43,6 +49,7 @@ export const navigationReducer: Reducer<Navigation.Types.State> = newTypedReduce
   .handlePayload(Navigation.Actions.setCurrentView.type, setCurrentViewReducer)
   .handlePayload(Navigation.Actions.setProjectDialogOpen.type, setProjectDialogOpenReducer)
   .handlePayload(Navigation.Actions.setGridDialogOpen.type, setGridDialogOpenReducer)
+  .handlePayload(Navigation.Actions.setExportDialogOpen.type, setExportDialogOpenReducer)
   .handlePayload(Navigation.Actions.closeDialogs.type, closeDialogsReducer)
   .handleDefault((state = InitialState) => state)
   .build();

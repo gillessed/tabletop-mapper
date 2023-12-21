@@ -1,20 +1,16 @@
-import { Button, Classes, ControlGroup, InputGroup, Intent, NonIdealState, Tooltip } from '@blueprintjs/core';
+import { Button, ControlGroup, InputGroup, Intent, Tooltip } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import * as React from 'react';
-import { useSelector } from 'react-redux';
 import { useDispatchers } from '../../DispatcherContextProvider';
 import { Ipc } from '../../ipc/ipcCommands';
 import { ipcInvoke } from '../../ipc/ipcInvoke';
-import { Asset } from '../../redux/asset/AssetTypes';
 import { ImageExtensions } from '../../utils/filer';
-import './AssetSearch.scss';
 import { AssetPackGrid } from './assetPackGrid/AssetPackGrid';
+import './AssetSearch.scss';
 
 export const NoPack = 'No Pack';
 
 export function AssetSearch() {
-  const assetIndex = useSelector(Asset.Selectors.getAssetIndex);
-  const assetPackIndex = useSelector(Asset.Selectors.getAssetPackIndex);
   const dispatchers = useDispatchers();
   const [filter, setFilter] = React.useState<string>('');
   const onChangeAssetFilter = React.useCallback((e: React.FormEvent) => {

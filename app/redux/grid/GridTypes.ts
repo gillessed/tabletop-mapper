@@ -57,7 +57,7 @@ export namespace Grid {
     setTransform: createActionWrapper<Transform>('grid::setTransform'),
     setMouseMode: createActionWrapper<Types.MouseMode>('grid::setMouseMode'),
     startDraw: createActionWrapper<Model.Types.GeometryType>('grid::startDraw'),
-    updatePartialGeometry: createActionWrapper<Partial<Model.Types.Geometry>>('grid::updatePartialGeometry'),
+    updatePartialGeometry: createActionWrapper<Partial<Model.Types.Geometry> | undefined>('grid::updatePartialGeometry'),
     setMouseDragOrigin: createActionWrapper<Coordinate | undefined>('grid::setMouseDragOrigin'),
     startDraggingAsset: createActionWrapper<string>('grid::startDraggingAsset'),
     stopDraggingAsset: createActionWrapper<void>('grid::stopDraggingAsset'),

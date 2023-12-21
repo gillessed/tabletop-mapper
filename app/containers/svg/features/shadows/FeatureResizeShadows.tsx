@@ -6,10 +6,11 @@ import { SvgRectOutline } from '../components/SvgRectOutline';
 import { Feature } from '../Feature';
 import { SelectionOutlineColor } from '../FeatureOutlines';
 
-export const FeatureResizeShadows = function FeatureDragShadows() {
+export const FeatureResizeShadows = React.memo(function FeatureResizeShadows() {
   const resizedFeature = useSelector(Grid.Selectors.getResizedFeature);
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
   const transform = useSelector(Grid.Selectors.getTransform);
+
 
   const isResizing = mouseMode === Grid.Types.MouseMode.ResizeRectangle || mouseMode === Grid.Types.MouseMode.ResizePath;
   if (!isResizing || resizedFeature == null) {
@@ -28,4 +29,4 @@ export const FeatureResizeShadows = function FeatureDragShadows() {
       />
     </g>
   )
-};
+});

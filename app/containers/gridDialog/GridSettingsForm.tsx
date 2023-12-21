@@ -1,4 +1,4 @@
-import { NumericInput, Popover, PopoverInteractionKind, Switch } from '@blueprintjs/core';
+import { Classes, NumericInput, Popover, PopoverInteractionKind, Switch } from '@blueprintjs/core';
 import * as React from 'react';
 import { ColorResult, SketchPicker } from 'react-color';
 import { useSelector } from 'react-redux';
@@ -62,6 +62,7 @@ export function GridSettingsForm() {
       <div className='settings-item'>
         <div className='title'>Major Grid Axis</div>
         <NumericInput
+          className={Classes.DARK}
           value={majorAxisStep}
           onValueChange={setMajorAxis}
         />

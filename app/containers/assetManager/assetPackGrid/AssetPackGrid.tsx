@@ -1,12 +1,11 @@
-import * as React from 'react';
-import { Asset } from '../../../redux/asset/AssetTypes';
-import './AssetPackGrid.scss';
-import { AssetPackGridItem } from './AssetPackGridItem';
-import { range } from '../../../utils/array';
-import { useSelector } from 'react-redux';
 import { NonIdealState } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
-import { string } from 'prop-types';
+import * as React from 'react';
+import { useSelector } from 'react-redux';
+import { Asset } from '../../../redux/asset/AssetTypes';
+import { range } from '../../../utils/array';
+import './AssetPackGrid.scss';
+import { AssetPackGridItem } from './AssetPackGridItem';
 
 export namespace AssetPackGrid {
   export interface Props {
@@ -23,13 +22,12 @@ export const AssetPackGrid = React.memo(function AssetGrid({
   filter,
 }: AssetPackGrid.Props) {
   const assetPackIndex = useSelector(Asset.Selectors.getAssetPackIndex);
-  const [selection, setSelection] = React.useState<Set<string>>(new Set());
-  const [lastClicked, setLastClicked] = React.useState<{ assetId: string, assetIndex: number } | null>(null);
+  const lowerCaseFilter = filter.toLocaleLowerCase();
   const assets = React.useMemo(() => {
     let allItems: Asset.Types.AssetPack[] = [];
     for (const assetPackId of assetPackIndex.all) {
       const assetPack = assetPackIndex.byId[assetPackId];
-      if (filter.length === 0 || assetPack.name.indexOf(filter) >= 0) {
+      if (lowerCaseFilter.length === 0 || assetPack.name.toLocaleLowerCase().indexOf(lowerCaseFilter) >= 0) {
         allItems.push(assetPack);
       }
     }
@@ -37,18 +35,7 @@ export const AssetPackGrid = React.memo(function AssetGrid({
       return a1.name.localeCompare(a2.name);
     });
     return allItems;
-  }, [filter, assetPackIndex]);
-
-  const handleRowClick = React.useCallback((event: MouseEvent, assetId: string, assetIndex: number) => {
-    if (event.ctrlKey) {
-      setSelection(new Set([...selection, assetId]));
-    } else if (event.shiftKey) {
-      
-    } else {
-      setSelection(new Set(assetId));
-    }
-    setLastClicked({ assetId, assetIndex });
-  }, [selection, setSelection]);
+  }, [lowerCaseFilter, assetPackIndex]);
 
   const hasAssetPacks = assetPackIndex.all.length > 0;
   const foundAssets = assets.length > 0;

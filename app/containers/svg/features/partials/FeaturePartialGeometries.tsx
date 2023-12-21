@@ -8,7 +8,7 @@ import { visitGeometry } from '../../../../redux/model/ModelVisitors';
 import { PathPartial } from './PathPartial';
 import { RectanglePartial } from './RectanglePartial';
 
-export const FeaturePartialGeometries = () => {
+export const FeaturePartialGeometries = React.memo(function FeaturePartialGeometries() {
   const partialGeometry = useSelector(Grid.Selectors.getPartialGeometry);
   const mousePosition = useSelector(Grid.Selectors.getMousePosition);
   const transform = useSelector(Grid.Selectors.getTransform);
@@ -18,6 +18,9 @@ export const FeaturePartialGeometries = () => {
   }
 
   function getMousePoint(snapToGrid?: boolean) {
+    if (mousePosition == null) {
+      return;
+    }
     const mouseGridCoordinates = transform.applyV(mousePosition).getCoordinate();
     const roundedMouseGridCoordinates = transform.applyV(mousePosition).round().getCoordinate();
     return snapToGrid ? roundedMouseGridCoordinates : mouseGridCoordinates;
@@ -51,4 +54,4 @@ export const FeaturePartialGeometries = () => {
     visitRectangle: renderRectangle,
     visitPath: renderPath,
   }, partialGeometry as Model.Types.Geometry);
-};
+});

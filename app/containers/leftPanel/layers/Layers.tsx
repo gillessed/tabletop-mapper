@@ -24,7 +24,7 @@ interface NodeContext {
   layerIndex: Indexable<Model.Types.Layer>;
   featureIndex: Indexable<Model.Types.Feature>;
   mouseMode: Grid.Types.MouseMode;
-  treeHover: ReparentTarget;
+  treeHover: ReparentTarget | null;
   validReparent: boolean;
   selectionCoverSet: Set<string>;
 }
@@ -162,7 +162,8 @@ export function Layers() {
     }
     setTreeHover(null);
     setIsMouseDown(false);
-  }, [selection, lastClicked, dispatchers, layerIndex, featureIndex, setIsMouseDown, treeHover]);
+    dispatchers.grid.setMouseMode(Grid.Types.MouseMode.None);
+  }, [selection, dispatchers, setIsMouseDown, treeHover, setTreeHover]);
 
   const onNodeExpand = React.useCallback((node: LayerNode) => {
     expandNodes([`${node.id}`]);
@@ -177,6 +178,9 @@ export function Layers() {
     }
     const isLayer = layerIndex.byId[nodeId] != null;
     const element = treeRef.current.getNodeContentElement(nodeId);
+    if (element == null) {
+      return;
+    }
     const totalHeight = element.clientHeight;
     const mouseYAlongElement = e.pageY - element.getBoundingClientRect().top;
     const mouseRatio = mouseYAlongElement / totalHeight;
@@ -193,6 +197,9 @@ export function Layers() {
   }, [setTreeHover, treeRef, layerIndex]);
   const onMouseMove = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
     const nodeId = getTreeMouseDownTarget('layer-tree-node', e);
+    if (nodeId == null) {
+      return;
+    }
     updateTreeHover(nodeId, e);
     if (isMouseDown && mouseMode !== Grid.Types.MouseMode.DragSelectionInTree) {
       dispatchers.grid.setMouseMode(Grid.Types.MouseMode.DragSelectionInTree);

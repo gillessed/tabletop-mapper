@@ -14,12 +14,17 @@ export function NavbarMainMenu() {
   const onOpenAssetManager = React.useCallback(() => {
     dispatchers.navigation.setCurrentView('AssetManager');
   }, [dispatchers]);
+  const onExport = React.useCallback(() => {
+    dispatchers.navigation.setExportDialogOpen(true);
+  }, [dispatchers]);
   return (
     <Menu>
-      <MenuItem text='Map Browser' icon={IconNames.FOLDER_OPEN} onClick={onClickMapBrowser} />
-      <MenuItem text='Save Map' icon={IconNames.FLOPPY_DISK} onClick={onClickSave} />
+      <MenuItem text='Map Browser' icon={IconNames.FOLDER_OPEN} onClick={onClickMapBrowser} label="Ctrl+O" />
+      <MenuItem text='Save Map' icon={IconNames.FLOPPY_DISK} onClick={onClickSave} label="Ctrl+S" />
       <MenuDivider />
-      <MenuItem text='Open Asset Manager' icon={IconNames.MEDIA} onClick={onOpenAssetManager} label="Ctrl+A"/>
+      <MenuItem text='Open Asset Manager' icon={IconNames.MEDIA} onClick={onOpenAssetManager} label="Ctrl+M" />
+      <MenuDivider />
+      <MenuItem text='Export Map' icon={IconNames.EXPORT} onClick={onExport} label="Ctrl+E" />
       <MenuDivider />
       <MenuItem text='Exit' icon={IconNames.LOG_OUT} />
     </Menu>
