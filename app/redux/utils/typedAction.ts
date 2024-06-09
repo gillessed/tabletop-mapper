@@ -1,16 +1,13 @@
-export interface Action {
-  type: string;
-  payload: any;
-  meta: ActionMetadata;
-}
+import { Action, UnknownAction } from "redux";
 
-export interface TypedAction<T> extends Action {
+export interface TypedAction<T> extends Action, UnknownAction {
   payload: T;
+  meta?: any;
 }
 
 export interface ActionWrapper<T> {
   type: ActionType<T>;
-  create: (payload: T, meta?: ActionMetadata) => TypedAction<T>;
+  create: (payload: T, meta?: any) => TypedAction<T>;
 }
 
 export type ActionType<T> = string & {
@@ -25,15 +22,22 @@ export function createActionType<T>(type: string): ActionType<T> {
   return type;
 }
 
-export function createAction<T, P extends T>(type: ActionType<T>, payload: P, meta?: ActionMetadata): TypedAction<T> {
-  return { type, payload, meta: meta ?? {} };
+export function createAction<T, P extends T>(
+  type: ActionType<T>,
+  payload: P,
+  meta?: any
+): TypedAction<T> {
+  return { type, payload, meta };
 }
 
 export function createPlaceholderAction<P>(payload: P): TypedAction<P> {
-  return { type: 'none', payload, meta: {} };
+  return { type: "none", payload };
 }
 
-export function isActionType<T>(action: Action, type: ActionType<T>): action is TypedAction<T> {
+export function isActionType<T>(
+  action: Action,
+  type: ActionType<T>
+): action is TypedAction<T> {
   return action.type === type;
 }
 
@@ -41,10 +45,12 @@ export interface TypedActionCreator<T> {
   (payload: T, meta?: any): TypedAction<T>;
 }
 
-export function createActionCreator<T>(type: ActionType<T>): (payload: T, meta?: ActionMetadata) => {
+export function createActionCreator<T>(type: ActionType<T>): (
+  payload: T,
+  meta?: any
+) => {
   type: string;
   payload: T;
-  meta: ActionMetadata;
 } {
   return (payload, meta) => createAction(type, payload, meta);
 }

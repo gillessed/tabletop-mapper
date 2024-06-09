@@ -1,5 +1,8 @@
-import { ReduxState } from "../AppReducer";
-import { ActionWrapper, createActionWrapper, TypedAction } from "../utils/typedAction";
+import {
+  ActionWrapper,
+  createActionWrapper,
+  TypedAction,
+} from "../utils/typedAction";
 import { newTypedReducer, Reducer } from "../utils/typedReducer";
 
 const DefaultStackSize = 50;
@@ -10,7 +13,7 @@ export interface UndoableType<S> {
     undo: ActionWrapper<void>;
     redo: ActionWrapper<void>;
     set: ActionWrapper<S>;
-  }
+  };
 }
 
 export interface Undoable<S> {
@@ -27,14 +30,8 @@ export interface UndoConfig<S> {
 
 export function undoable<S>(
   reducer: Reducer<S>,
-  {
-    denominator,
-    stackSize,
-    comparator,
-    initialState,
-  }: UndoConfig<S>,
+  { denominator, stackSize, comparator, initialState }: UndoConfig<S>
 ): UndoableType<S> {
-
   const undoAction = createActionWrapper<void>(`${denominator}::undo`);
   const redoAction = createActionWrapper<void>(`${denominator}::redo`);
   const setAction = createActionWrapper<S>(`${denominator}::set`);
@@ -47,7 +44,7 @@ export function undoable<S>(
       ...state,
       index: state.index - 1,
     };
-  }
+  };
 
   const redoReducer = (state: Undoable<S>): Undoable<S> => {
     if (state.index >= state.stateStack.length - 1) {
@@ -56,7 +53,7 @@ export function undoable<S>(
     return {
       ...state,
       index: state.index + 1,
-    }
+    };
   };
 
   const setReducer = (state: Undoable<S>, innerState: S): Undoable<S> => {
@@ -64,11 +61,11 @@ export function undoable<S>(
       index: 0,
       stateStack: [innerState],
     };
-  }
+  };
 
   const normalReducer = (
     undoState: Undoable<S>,
-    action: TypedAction<any>,
+    action: TypedAction<any>
   ): Undoable<S> => {
     if (undoState == null) {
       const newState = reducer(initialState, action);
@@ -102,7 +99,7 @@ export function undoable<S>(
         index: newIndex,
       };
     }
-  }
+  };
 
   const undoableReducer = newTypedReducer<Undoable<S>>()
     .handlePayload(undoAction.type, undoReducer)
@@ -118,17 +115,17 @@ export function undoable<S>(
       redo: redoAction,
       set: setAction,
     },
-  }
+  };
 }
 
 export const getStateFromUndoable = <S>(state: Undoable<S>): S => {
   return state.stateStack[state.index];
-}
+};
 
 export const canUndo = <S>(state: Undoable<S>): boolean => {
   return state.index > 0;
-}
+};
 
 export const canRedo = <S>(state: Undoable<S>): boolean => {
   return state.index < state.stateStack.length - 1;
-}
+};

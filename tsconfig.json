@@ -1,29 +1,24 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "es5",
-      "es6",
-      "dom"
-    ],
+    "target": "ES6",
+    "esModuleInterop": true,
     "experimentalDecorators": true,
-    "module": "commonjs",
+    "module": "ES2015",
     "noImplicitAny": true,
     "removeComments": true,
     "outDir": "build",
     "preserveConstEnums": true,
-    "sourceMap": true,
+    "skipLibCheck": true,
     "jsx": "react",
     "downlevelIteration": true,
-    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
   },
-  "exclude": [
-    "node_modules",
-    "semantic"
-  ],
   "include": [
-    "main.ts",
-    "ipc.ts",
-    "declarations.d.ts",
+    "app/**/*.ts",
+    "filer/**/*.ts",
+    "electron/**/*.ts",
   ]
 }

@@ -1,31 +1,32 @@
+import { Classes, Colors, Spinner, Toaster } from "@blueprintjs/core";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { applyMiddleware, createStore } from "redux";
 import { createLogger } from "redux-logger";
 import createSagaMiddleware from "redux-saga";
+import { FileCopier } from "../filer/fileCopier";
+import { Filer, setFilerSeparator } from "../filer/filer";
+import { AppConfigContextProvider } from "./AppConfigContextProvider";
+import { registerDebugCommands } from "./DebugCommands";
+import { DispatcherContextProvider } from "./DispatcherContextProvider";
+import { registerKeyboardShortcuts } from "./KeyboardShortcuts";
 import {
   AppConfigFiles,
   createNewAppConfig,
-  writeAppConfig,
   readAppConfig,
+  writeAppConfig,
 } from "./config/AppConfig";
 import { Root } from "./containers/Root";
-import { DispatcherContextProvider } from "./DispatcherContextProvider";
-import { AppReducer } from "./redux/AppReducer";
-import { appSaga, SagaContext } from "./redux/AppSaga";
+import { getIpc } from "./ipc/ipc";
+import { AppReducer, ReduxState } from "./redux/AppReducer";
+import { SagaContext, appSaga } from "./redux/AppSaga";
 import { dispatcherCreators } from "./redux/Dispatchers";
 import { loggerPredicate } from "./redux/Logger";
-import { AppConfigContextProvider } from "./AppConfigContextProvider";
-import { Toaster, Spinner, Colors, Classes, Intent } from "@blueprintjs/core";
 import { readAssetDataFile } from "./redux/asset/AssetDataFile";
 import { Asset } from "./redux/asset/AssetTypes";
-import { Filer, setFilerSeparator } from "./utils/filer";
-import { ipcInvoke, registerClientIpcHandlers } from "./ipc/ipcInvoke";
-import { Ipc } from "./ipc/ipcCommands";
 import "./scss/Scrollbar.scss";
-import { registerKeyboardShortcuts } from "./KeyboardShortcuts";
-import { registerDebugCommands } from "./DebugCommands";
+import { createRoot } from "react-dom/client";
 
 const AppVersion = "0.1.0";
 
@@ -52,9 +53,14 @@ function LoadingScreen() {
 }
 
 async function initialize() {
-  ReactDOM.render(<LoadingScreen />, document.getElementById("content"));
+  const rootNode = document.getElementById("content");
+  if (rootNode == null) {
+    throw Error("Root node missing?");
+  }
+  const root = createRoot(rootNode);
+  root.render(<LoadingScreen />);
 
-  const platformInfo = await ipcInvoke(Ipc.GetPlatformInfo);
+  const platformInfo = await getIpc().platformInfo();
   console.log("platform info ", platformInfo);
   const { appDirPath, separatorChar } = platformInfo;
   setFilerSeparator(separatorChar);
@@ -85,11 +91,10 @@ async function initialize() {
     predicate: loggerPredicate,
   });
 
-  const store = createStore(
-    AppReducer,
-    applyMiddleware(logger, sagaMiddleware)
+  const store = createStore<ReduxState, any>(
+    AppReducer as any,
+    applyMiddleware(logger as any, sagaMiddleware)
   );
-  registerClientIpcHandlers(store);
   registerKeyboardShortcuts(store, platformInfo);
   registerDebugCommands(store);
 
@@ -99,8 +104,10 @@ async function initialize() {
   console.log("Initialized asset state", assets);
 
   const dispatchers = dispatcherCreators(store);
+  const fileCopier = new FileCopier();
   const appToaster = Toaster.create();
   const sagaContext: SagaContext = {
+    fileCopier,
     appConfig,
     appToaster,
   };
@@ -116,11 +123,11 @@ async function initialize() {
     </Provider>
   );
 
-  ReactDOM.render(providers as any, document.getElementById("content"));
+  root.render(providers);
 }
 
 try {
-  initialize();
+  window.onload = () => initialize();
 } catch (error) {
   console.error("Could not instantiate app", error);
 }

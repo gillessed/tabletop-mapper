@@ -1,16 +1,16 @@
-import { Colors } from '@blueprintjs/core';
-import * as React from 'react';
+import { Colors } from "@blueprintjs/core";
+import * as React from "react";
 import { useSelector } from "react-redux";
-import { CompoundSelectors } from '../../../redux/CompoundSelectors';
-import { Grid } from '../../../redux/grid/GridTypes';
-import { LayerTree } from '../../../redux/layertree/LayerTreeTypes';
-import { getOutlineForFeature } from '../../../redux/model/FeatureOutline';
-import { getHighestFeatureId } from '../../../redux/model/ModelTree';
-import { Model } from '../../../redux/model/ModelTypes';
-import { SvgRectOutline } from './components/SvgRectOutline';
+import { CompoundSelectors } from "../../../redux/CompoundSelectors";
+import { Grid } from "../../../redux/grid/GridTypes";
+import { LayerTree } from "../../../redux/layertree/LayerTreeTypes";
+import { getOutlineForFeature } from "../../../redux/model/FeatureOutline";
+import { getHighestFeatureId } from "../../../redux/model/ModelTree";
+import { Model } from "../../../redux/model/ModelTypes";
+import { SvgRectOutline } from "./components/SvgRectOutline";
 
 export const SelectionOutlineColor = Colors.ORANGE3;
-export const HoverOutlineColor = Colors.COBALT3;
+export const HoverOutlineColor = Colors.INDIGO3;
 
 export const FeatureOutlines = React.memo(function FeatureOutlines() {
   const features = useSelector(Model.Selectors.getFeatures);
@@ -18,7 +18,9 @@ export const FeatureOutlines = React.memo(function FeatureOutlines() {
   const selectedNodes = useSelector(LayerTree.Selectors.getSelectedNodes);
   const transform = useSelector(Grid.Selectors.getTransform);
   const mouseMode = useSelector(Grid.Selectors.getMouseMode);
-  const editingFeatureClipRegion = useSelector(Grid.Selectors.getEditingFeatureClipRegion);
+  const editingFeatureClipRegion = useSelector(
+    Grid.Selectors.getEditingFeatureClipRegion
+  );
 
   const selectedFeatures: Model.Types.Feature[] = [];
   for (const id of selectedNodes) {
@@ -27,9 +29,15 @@ export const FeatureOutlines = React.memo(function FeatureOutlines() {
       selectedFeatures.push(feature);
     }
   }
-  const hoveredFeatureIds = useSelector(CompoundSelectors.getHoveredFeaturesMemoized);
-  const hoveringSelectedFeature = selectedFeatures.find((feature) => hoveredFeatureIds.indexOf(feature.id) >= 0);
-  const resizing = mouseMode === Grid.Types.MouseMode.ResizePath || mouseMode === Grid.Types.MouseMode.ResizeRectangle;
+  const hoveredFeatureIds = useSelector(
+    CompoundSelectors.getHoveredFeaturesMemoized
+  );
+  const hoveringSelectedFeature = selectedFeatures.find(
+    (feature) => hoveredFeatureIds.indexOf(feature.id) >= 0
+  );
+  const resizing =
+    mouseMode === Grid.Types.MouseMode.ResizePath ||
+    mouseMode === Grid.Types.MouseMode.ResizeRectangle;
 
   const selectedFeatureOutlines = selectedFeatures.map((feature) => {
     const outline = getOutlineForFeature(feature);
@@ -40,20 +48,25 @@ export const FeatureOutlines = React.memo(function FeatureOutlines() {
         geometry={outline}
         transform={transform}
         color={SelectionOutlineColor}
-        hoverCrosshair={hovered && !resizing && editingFeatureClipRegion == null}
+        hoverCrosshair={
+          hovered && !resizing && editingFeatureClipRegion == null
+        }
       />
     );
   });
 
-  const renderHoverOutlines = (
+  const renderHoverOutlines =
     mouseMode === Grid.Types.MouseMode.None &&
     hoveredFeatureIds.length > 0 &&
     !hoveringSelectedFeature &&
-    editingFeatureClipRegion == null
-  );
+    editingFeatureClipRegion == null;
 
   function HoverOutline(): JSX.Element {
-    const highestFeatureId = getHighestFeatureId(features, layers, hoveredFeatureIds);
+    const highestFeatureId = getHighestFeatureId(
+      features,
+      layers,
+      hoveredFeatureIds
+    );
     const highestFeature = features.byId[highestFeatureId];
     const highestFeatureOutline = getOutlineForFeature(highestFeature);
     return (
@@ -66,9 +79,9 @@ export const FeatureOutlines = React.memo(function FeatureOutlines() {
   }
 
   return (
-    <g className='feature-outlines'>
-      <g className='selected-features'>{selectedFeatureOutlines}</g>
-      <g className='hovered-features'>
+    <g className="feature-outlines">
+      <g className="selected-features">{selectedFeatureOutlines}</g>
+      <g className="hovered-features">
         {renderHoverOutlines && <HoverOutline />}
       </g>
     </g>

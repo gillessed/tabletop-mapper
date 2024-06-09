@@ -1,12 +1,14 @@
 import { all, fork } from "redux-saga/effects";
 import { AppConfig } from "../config/AppConfig";
 import { projectSaga } from "./project/ProjectSaga";
-import { IToaster } from "@blueprintjs/core";
+import { Toaster } from "@blueprintjs/core";
 import { assetSaga } from "./asset/AssetSagas";
+import { FileCopier } from "../../filer/fileCopier";
 
 export interface SagaContext {
+  fileCopier: FileCopier;
   appConfig: AppConfig;
-  appToaster: IToaster;
+  appToaster: Toaster;
 }
 
 export function* appSaga(context: SagaContext) {

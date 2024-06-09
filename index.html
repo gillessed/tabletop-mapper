@@ -2,6 +2,7 @@
 <html>
 
 <head>
+  <meta charset="UTF-8">
   <title>Tabletop Mapper</title>
   <link href="./node_modules/normalize.css/normalize.css" rel="stylesheet" />
   <link href="./node_modules/@blueprintjs/core/lib/css/blueprint.css" rel="stylesheet" />
@@ -12,17 +13,16 @@
   <div id="content"></div>
 </body>
 
-<script>
-  window.$ = window.jQuery = require('./node_modules/jquery/dist/jquery.min');
-</script>
-
+<script src="./node_modules/jquery/dist/jquery.min.js"></script>
 <script type="text/javascript">
-  const _electronReq = require('electron');
-  window.ipcRenderer = _electronReq.ipcRenderer;
+  window.global = {}
+  process = {
+    env: {
+      BLUEPRINT_NAMESPACE: "bp3",
+    },
+  }
 </script>
 
-<script src="http://localhost:9010/webpack-dev-server.js"></script>
-<script src="http://localhost:9010/built/bundle.js"></script>
-
+<script src="./build/bundle.js" charset="utf-8"></script>
 
 </html>
