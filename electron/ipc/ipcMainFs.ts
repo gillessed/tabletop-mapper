@@ -85,12 +85,12 @@ export function registerIpcFsHandlers() {
     });
   });
 
-  ipcMainHandle(IpcChannels.fsReadFile, async (path: string) => {
-    return fs.promises.readFile(path, "utf-8");
+  ipcMainHandle(IpcChannels.fsReadFile, async ({ path, options }) => {
+    return fs.promises.readFile(path, options);
   });
 
-  ipcMainHandle(IpcChannels.fsWriteFile, async ({ path, data }) => {
-    return fs.promises.writeFile(path, data);
+  ipcMainHandle(IpcChannels.fsWriteFile, async ({ path, data, options }) => {
+    return fs.promises.writeFile(path, data, options);
   });
 
   ipcMainHandle(IpcChannels.fsGetHash, async ({ path, hashName }) => {

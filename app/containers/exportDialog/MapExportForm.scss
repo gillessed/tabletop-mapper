@@ -1,6 +1,27 @@
 @import '@blueprintjs/core/lib/scss/variables.scss';
 
 .map-export-form {
-  color: $light-gray1;
-  width: 400px;
+  color         : $light-gray1;
+  width         : 400px;
+  display       : flex;
+  flex-direction: column;
+  gap           : 10px;
+
+  .image-width {
+    display       : flex;
+    flex-direction: row;
+    align-items   : center;
+    gap           : 10px;
+  }
+
+  .export-path {
+    display       : flex;
+    flex-direction: row;
+    align-items   : center;
+    gap           : 10px;
+  }
+
+  .placeholder {
+    color: $gray3;
+  }
 }

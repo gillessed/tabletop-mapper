@@ -1,5 +1,6 @@
 import { checkNotNull } from "../utils/check";
 import { Filer } from "../../filer/filer";
+import { IpcPlatformInfo } from "../ipc/ipcChannels";
 
 export const AppConfigFiles = {
   appConfigFilename: "appConfig.json",
@@ -17,6 +18,7 @@ export interface SerializedAppConfig {
 }
 
 export interface AppConfig {
+  platformInfo: IpcPlatformInfo;
   appVersion: string;
   rootDir: Filer;
   assetDir: Filer;
@@ -32,9 +34,14 @@ function generateAssetFileGetter(assetDir: Filer) {
   };
 }
 
-export function createNewAppConfig(rootDir: Filer, version: string): AppConfig {
+export function createNewAppConfig(
+  platformInfo: IpcPlatformInfo,
+  rootDir: Filer,
+  version: string
+): AppConfig {
   const assetDir = rootDir.resolve(AppConfigFiles.assetDirname);
   return {
+    platformInfo,
     appVersion: version,
     rootDir: rootDir,
     assetDir,
@@ -44,11 +51,15 @@ export function createNewAppConfig(rootDir: Filer, version: string): AppConfig {
   };
 }
 
-export async function readAppConfig(configFile: Filer) {
+export async function readAppConfig(
+  platformInfo: IpcPlatformInfo,
+  configFile: Filer
+) {
   const contents = await configFile.readFile();
   const rawConfig: SerializedAppConfig = JSON.parse(contents);
   const assetDir = Filer.open(checkNotNull(rawConfig.assetDir, "assetDir"));
   const parsedConfig: AppConfig = {
+    platformInfo,
     appVersion: checkNotNull(rawConfig.appVersion, "appVersion"),
     rootDir: Filer.open(checkNotNull(rawConfig.rootDir, "appVersion")),
     assetDir,

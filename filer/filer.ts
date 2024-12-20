@@ -225,7 +225,10 @@ export class Filer {
   };
 
   public readFile = (): Promise<string> => {
-    return getIpc().fsReadFile(this.fullPath);
+    return getIpc().fsReadFile({
+      path: this.fullPath,
+      options: { encoding: "utf-8" },
+    });
   };
 
   public writeFile = async (data: string): Promise<void> => {

@@ -1,4 +1,6 @@
 import {
+  SaveDialogOptions,
+  SaveDialogReturnValue,
   type MessageBoxOptions,
   type MessageBoxReturnValue,
   type OpenDialogOptions,
@@ -6,6 +8,7 @@ import {
 } from "electron";
 import { IpcChannel } from "./ipcChannel";
 import { IpcError } from "./ipcError";
+import { ObjectEncodingOptions } from "fs";
 
 export interface IpcResizeImageArgs {
   filename: string;
@@ -21,9 +24,15 @@ export interface IpcCopyFileArgs {
   destination: string;
 }
 
+export interface IpcFsReadFileArgs {
+  path: string;
+  options?: ObjectEncodingOptions;
+}
+
 export interface IpcFsWriteFileArgs {
   path: string;
   data: string;
+  options?: ObjectEncodingOptions;
 }
 
 export interface IpcFsGetHashArgs {
@@ -34,6 +43,7 @@ export interface IpcFsGetHashArgs {
 export interface IpcPlatformInfo {
   separatorChar: string;
   appDirPath: string;
+  homeDir: string;
   os:
     | "aix"
     | "android"
@@ -59,6 +69,10 @@ export const IpcChannels = {
     OpenDialogOptions,
     OpenDialogReturnValue
   >,
+  showSaveDialog: { key: "show-save-dialog" } as IpcChannel<
+    SaveDialogOptions,
+    SaveDialogReturnValue
+  >,
   copyFile: { key: "copy-file" } as IpcChannel<IpcCopyFileArgs, void>,
   exec: { key: "exec" } as IpcChannel<string, void>,
   quit: { key: "quit" } as IpcChannel<void, void>,
@@ -70,7 +84,7 @@ export const IpcChannels = {
   fsMkdir: { key: "fs-mkdir" } as IpcChannel<string, void>,
   fsRmdir: { key: "fs-rmdir" } as IpcChannel<string, void>,
   fsUnlink: { key: "fs-unlink" } as IpcChannel<string, void | IpcError>,
-  fsReadFile: { key: "fs-read-file" } as IpcChannel<string, string>,
+  fsReadFile: { key: "fs-read-file" } as IpcChannel<IpcFsReadFileArgs, string>,
   fsWriteFile: { key: "fs-write-file" } as IpcChannel<IpcFsWriteFileArgs, void>,
   fsGetHash: { key: "fs-get-hash" } as IpcChannel<IpcFsGetHashArgs, string>,
 };

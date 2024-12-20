@@ -35,6 +35,8 @@ import { resizeRectangle } from "../../redux/model/Resize";
 import { useWorker } from "../../redux/utils/workers";
 import { MouseButtons } from "../../utils/mouse";
 import { generateRandomString } from "../../utils/randomId";
+import { SvgElementId } from "./SvgElementId";
+import "./SvgRoot.scss";
 import { ControlPointsOverlay } from "./features/ControlPointsOverlay";
 import { FeatureOutlines } from "./features/FeatureOutlines";
 import { Features } from "./features/Features";
@@ -44,7 +46,6 @@ import { AssetDropShadow } from "./features/shadows/AssetDropShadow";
 import { FeatureDragShadows } from "./features/shadows/FeatureDragShadows";
 import { FeatureResizeShadows } from "./features/shadows/FeatureResizeShadows";
 import { GridLines } from "./grid/GridLines";
-import "./SvgRoot.scss";
 
 type MouseMode = Grid.Types.MouseMode;
 const MouseMode = Grid.Types.MouseMode;
@@ -656,6 +657,7 @@ export const SvgRoot = React.memo(function SvgRoot({
 
   return (
     <svg
+      id={SvgElementId}
       className={canvasClasses}
       width={width}
       height={height}

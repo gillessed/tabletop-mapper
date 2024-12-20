@@ -71,13 +71,13 @@ async function initialize() {
   console.log("Checking for app config file");
   const appConfigExists = await appConfigFile.exists();
   if (!appConfigExists) {
-    const newAppConfig = createNewAppConfig(appDir, AppVersion);
+    const newAppConfig = createNewAppConfig(platformInfo, appDir, AppVersion);
     console.log("Writing blank app config file");
     await writeAppConfig(appConfigFile, newAppConfig);
   }
 
   console.log("Reading app config");
-  const appConfig = await readAppConfig(appConfigFile);
+  const appConfig = await readAppConfig(platformInfo, appConfigFile);
 
   console.log("Creating project and asset directories");
   await appConfig.projectsDir.mkdirP();

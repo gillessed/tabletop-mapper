@@ -49,19 +49,16 @@ export const BasicAssetFeature = React.memo(
     return (
       <g opacity={opacity}>
         <g transform={transformation}>
-          <clipPath id={clipPathId}>
-            {clipRegion == null && (
-              <rect x={p1.x} y={p1.y} width={width} height={height} />
-            )}
-            {clipRegion != null && (
+          {clipRegion != null && (
+            <clipPath id={clipPathId}>
               <rect
                 x={p1.x + clipRegion.p1.x}
                 y={p1.y + clipRegion.p1.y}
                 width={clipRegion.p2.x - clipRegion.p1.x}
                 height={clipRegion.p2.y - clipRegion.p1.y}
               />
-            )}
-          </clipPath>
+            </clipPath>
+          )}
           <image
             href={file.fullPath}
             x={p1.x}

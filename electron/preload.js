@@ -11,6 +11,11 @@ window.onload = () => {
     getAppPath: (arg) => ipcRenderer.invoke("get-app-path", arg),
     quit: (arg) => ipcRenderer.invoke("quit", arg),
 
+    //dialogs
+    showMessageBox: (arg) => ipcRenderer.invoke("show-message-box", arg),
+    showOpenDialog: (arg) => ipcRenderer.invoke("show-open-dialog", arg),
+    showSaveDialog: (arg) => ipcRenderer.invoke("show-save-dialog", arg),
+
     //fs
     fsExists: (arg) => ipcRenderer.invoke("fs-exists", arg),
     fsIsDir: (arg) => ipcRenderer.invoke("fs-isDir", arg),
